@@ -10,7 +10,7 @@ import { getRequestDataLoader } from '../../../middleware/dataloader';
 import { CID } from 'multiformats/cid';
 import * as Digest from 'multiformats/hashes/digest';
 import { storage } from '../../../storage';
-import { labelService } from '../../label-service';
+import { labelService } from '../../label';
 
 /**
  * Convert raw multihash hex string to proper CID
