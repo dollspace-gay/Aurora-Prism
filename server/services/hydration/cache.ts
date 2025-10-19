@@ -1,7 +1,7 @@
 import { CacheService } from '../cache';
 
 export class HydrationCache {
-  private readonly TTL = 1800; // 30 minutes (increased for small userbase)
+  private readonly TTL = 300; // 5 minutes (reduced to avoid stale profile data)
   private cache: CacheService;
 
   constructor() {
@@ -169,5 +169,50 @@ export class HydrationCache {
    */
   labelsKey(uri: string): string {
     return `labels:${uri}`;
+  }
+
+  /**
+   * Clear all hydration cache (useful after profile updates or new installs)
+   */
+  async clearAll(): Promise<void> {
+    const cacheService = this.cache as any;
+    if (!cacheService.redis || !cacheService.isInitialized) {
+      console.warn('[HYDRATION_CACHE] Redis not available, cannot clear cache');
+      return;
+    }
+
+    try {
+      // Use SCAN to find all hydration keys and delete them
+      const pattern = 'hydration:*';
+      const keys: string[] = [];
+      let cursor = '0';
+
+      do {
+        const result = await cacheService.redis.scan(
+          cursor,
+          'MATCH',
+          pattern,
+          'COUNT',
+          100
+        );
+        cursor = result[0];
+        keys.push(...result[1]);
+      } while (cursor !== '0');
+
+      if (keys.length > 0) {
+        console.log(`[HYDRATION_CACHE] Clearing ${keys.length} cached items`);
+        // Delete in batches of 100
+        for (let i = 0; i < keys.length; i += 100) {
+          const batch = keys.slice(i, i + 100);
+          await cacheService.redis.del(...batch);
+        }
+        console.log('[HYDRATION_CACHE] Cache cleared successfully');
+      } else {
+        console.log('[HYDRATION_CACHE] No cached items to clear');
+      }
+    } catch (error) {
+      console.error('[HYDRATION_CACHE] Error clearing cache:', error);
+      throw error;
+    }
   }
 }

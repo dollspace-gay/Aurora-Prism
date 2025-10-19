@@ -724,15 +724,11 @@ export class OptimizedHydrator {
     this.embedResolver.clearCache();
     this.requestCache.clear();
 
-    if (this.redis) {
-      try {
-        const keys = await this.redis.keys('hydration:*');
-        if (keys.length > 0) {
-          await this.redis.del(...keys);
-        }
-      } catch (error) {
-        console.error('[OPTIMIZED_HYDRATION] Cache clear error:', error);
-      }
+    // Use HydrationCache's clearAll method which uses SCAN instead of KEYS
+    try {
+      await this.cache.clearAll();
+    } catch (error) {
+      console.error('[OPTIMIZED_HYDRATION] Cache clear error:', error);
     }
   }
 

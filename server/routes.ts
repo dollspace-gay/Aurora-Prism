@@ -4394,6 +4394,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/cache/clear-hydration', async (_req, res) => {
+    try {
+      const { optimizedHydrator } = await import('./services/hydration/optimized-hydrator');
+      await optimizedHydrator.clearCache();
+
+      res.json({
+        success: true,
+        message: 'Hydration cache cleared successfully'
+      });
+    } catch (err) {
+      console.error('[CACHE] Error clearing hydration cache:', err);
+      res.status(500).json({ error: 'InternalServerError', message: 'Failed to clear hydration cache' });
+    }
+  });
+
   // Minimal dead-letter inspection endpoint (admin only in production)
   app.get('/api/redis/dead-letters', async (_req, res) => {
     try {
