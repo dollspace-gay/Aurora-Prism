@@ -9,6 +9,8 @@ import { dataLoaderHydrator } from '../../hydration/dataloader-hydrator';
 import { getRequestDataLoader } from '../../../middleware/dataloader';
 import { CID } from 'multiformats/cid';
 import * as Digest from 'multiformats/hashes/digest';
+import { storage } from '../../../storage';
+import { labelService } from '../../label-service';
 
 /**
  * Convert raw multihash hex string to proper CID
@@ -305,9 +307,6 @@ export async function serializePosts(
   viewerDid?: string,
   req?: Request
 ): Promise<any[]> {
-  const { storage } = await import('../../../storage');
-  const { labelService } = await import('../../../services/label-service');
-
   const useEnhancedHydration =
     process.env.ENHANCED_HYDRATION_ENABLED === 'true';
 
