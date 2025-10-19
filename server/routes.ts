@@ -3629,29 +3629,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Return empty preferences to unblock the client
     res.status(200).json({ preferences: [] });
   });
-  app.post('/xrpc/app.bsky.actor.putPreferences', (req, res) => {
-    try {
-      console.log('[PREFERENCES] POST preferences - accepting without persist');
-      console.log('[PREFERENCES] Body:', JSON.stringify(req.body).substring(0, 200));
-      // Accept but don't persist (preferences live on PDS)
-      // Return empty object (successful no-op)
-      res.status(200).json({});
-    } catch (error) {
-      console.error('[PREFERENCES] POST error:', error);
-      res.status(500).json({ error: 'InternalServerError', message: String(error) });
-    }
-  });
-  app.put('/xrpc/app.bsky.actor.putPreferences', (req, res) => {
-    try {
-      console.log('[PREFERENCES] PUT preferences - accepting without persist');
-      console.log('[PREFERENCES] Body:', JSON.stringify(req.body).substring(0, 200));
-      // Accept but don't persist (preferences live on PDS)
-      res.status(200).json({});
-    } catch (error) {
-      console.error('[PREFERENCES] PUT error:', error);
-      res.status(500).json({ error: 'InternalServerError', message: String(error) });
-    }
-  });
+  app.post('/xrpc/app.bsky.actor.putPreferences',
+    xrpcOrchestrator.putPreferences.bind(xrpcOrchestrator)
+  );
+  app.put('/xrpc/app.bsky.actor.putPreferences',
+    xrpcOrchestrator.putPreferences.bind(xrpcOrchestrator)
+  );
 
   // Graph endpoints
   app.get(
