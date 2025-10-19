@@ -1719,6 +1719,10 @@ export class EventProcessor {
       // Invalidate following list cache for the follower
       await cacheService.invalidateUserFollowing(followerDid);
 
+      // Trigger backfill of the followed user's posts (async, non-blocking)
+      // Only backfill for users who have logged in (have sessions)
+      this.triggerNewFollowBackfill(followerDid, followingDid);
+
       // Try to create notification if target user exists locally
       const followingUser = await this.storage.getUser(followingDid);
       if (followingUser) {
@@ -2009,6 +2013,66 @@ export class EventProcessor {
       .catch((error) => {
         smartConsole.error(
           `[EVENT_PROCESSOR] Failed to import feed generator discovery:`,
+          error
+        );
+      });
+  }
+
+  /**
+   * Trigger backfill of posts from a newly followed user
+   * Only backfills if the follower has ever logged in (has sessions)
+   */
+  private triggerNewFollowBackfill(
+    followerDid: string,
+    followingDid: string
+  ): void {
+    // Check if follower has ever logged in (async, non-blocking)
+    import('../../shared/schema')
+      .then(({ sessions }) => {
+        import('../db')
+          .then(({ db }) => {
+            db.query.sessions
+              .findFirst({
+                where: (s: any, { eq }: any) => eq(s.userDid, followerDid),
+              })
+              .then((session: any) => {
+                if (session) {
+                  // User has logged in, backfill the followed user's posts
+                  smartConsole.log(
+                    `[EVENT_PROCESSOR] Triggering post backfill for new follow: ${followerDid} -> ${followingDid}`
+                  );
+
+                  import('./auto-backfill-follows')
+                    .then(({ autoBackfillFollowsService }) => {
+                      autoBackfillFollowsService.backfillNewFollowPosts(
+                        followingDid
+                      );
+                    })
+                    .catch((error) => {
+                      smartConsole.error(
+                        `[EVENT_PROCESSOR] Failed to trigger follow backfill:`,
+                        error
+                      );
+                    });
+                }
+              })
+              .catch((error: any) => {
+                smartConsole.error(
+                  `[EVENT_PROCESSOR] Error checking session for follow backfill:`,
+                  error
+                );
+              });
+          })
+          .catch((error) => {
+            smartConsole.error(
+              `[EVENT_PROCESSOR] Failed to import db for follow backfill:`,
+              error
+            );
+          });
+      })
+      .catch((error) => {
+        smartConsole.error(
+          `[EVENT_PROCESSOR] Failed to import schema for follow backfill:`,
           error
         );
       });

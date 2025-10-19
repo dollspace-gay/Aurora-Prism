@@ -106,6 +106,9 @@ export class AutoBackfillFollowsService {
         // Step 2: Backfill profile info for all related users
         await this.backfillProfileInfo(userDid);
 
+        // Step 3: Backfill posts from all followed users
+        await this.backfillFollowedUsersPosts(userDid);
+
         // Update last backfill timestamp
         await db
           .insert(userSettings)
@@ -599,6 +602,259 @@ export class AutoBackfillFollowsService {
     } catch (error) {
       console.error(
         `[AUTO_BACKFILL_FOLLOWS] Error backfilling profiles:`,
+        error
+      );
+    }
+  }
+
+  /**
+   * Backfill posts from all users that this user follows
+   * Fetches complete timeline for each followed user
+   */
+  private async backfillFollowedUsersPosts(userDid: string): Promise<void> {
+    try {
+      console.log(
+        `[AUTO_BACKFILL_FOLLOWS] Starting posts backfill for followed users of ${userDid}`
+      );
+
+      // Get all users that this user follows
+      const followedUsers = await db.execute(
+        sql`
+          SELECT DISTINCT following_did as did
+          FROM ${follows}
+          WHERE follower_did = ${userDid}
+        `
+      );
+
+      const followedDids = followedUsers.rows.map((row: any) => row.did);
+
+      if (followedDids.length === 0) {
+        console.log(
+          `[AUTO_BACKFILL_FOLLOWS] User ${userDid} doesn't follow anyone yet`
+        );
+        return;
+      }
+
+      console.log(
+        `[AUTO_BACKFILL_FOLLOWS] Backfilling posts from ${followedDids.length} followed users`
+      );
+
+      const eventProcessor = new EventProcessor(storage);
+      eventProcessor.setSkipPdsFetching(true);
+      eventProcessor.setSkipDataCollectionCheck(true);
+
+      const { didResolver } = await import('./did-resolver');
+      let totalPostsFetched = 0;
+      let usersCompleted = 0;
+      let usersFailed = 0;
+
+      // Process each followed user
+      for (const followedDid of followedDids) {
+        try {
+          // Resolve their DID to find their PDS
+          const didDoc = await didResolver.resolveDID(followedDid);
+          if (!didDoc) {
+            usersFailed++;
+            continue;
+          }
+
+          const services = (didDoc as any).service || [];
+          const pdsService = services.find(
+            (s: any) =>
+              s.type === 'AtprotoPersonalDataServer' || s.id === '#atproto_pds'
+          );
+
+          if (!pdsService?.serviceEndpoint) {
+            usersFailed++;
+            continue;
+          }
+
+          const pdsAgent = new AtpAgent({
+            service: pdsService.serviceEndpoint,
+          });
+
+          // Fetch their posts
+          let postsFetched = 0;
+          let cursor: string | undefined;
+
+          do {
+            try {
+              const response = await pdsAgent.com.atproto.repo.listRecords({
+                repo: followedDid,
+                collection: 'app.bsky.feed.post',
+                limit: 100,
+                cursor: cursor,
+              });
+
+              // Process each post
+              for (const record of response.data.records) {
+                try {
+                  const createdAt =
+                    record.value?.createdAt || new Date().toISOString();
+
+                  await eventProcessor.processCommit({
+                    repo: followedDid,
+                    ops: [
+                      {
+                        action: 'create',
+                        path: `app.bsky.feed.post/${record.uri.split('/').pop()}`,
+                        cid: record.cid,
+                        record: record.value,
+                      },
+                    ],
+                    time: createdAt,
+                    rev: '',
+                  } as any);
+
+                  postsFetched++;
+                  totalPostsFetched++;
+                } catch (error: any) {
+                  // Silently skip individual post errors (e.g., duplicates)
+                  if (error?.code !== '23505') {
+                    console.error(
+                      `[AUTO_BACKFILL_FOLLOWS] Error processing post from ${followedDid}:`,
+                      error.message
+                    );
+                  }
+                }
+              }
+
+              cursor = response.data.cursor;
+            } catch (error: any) {
+              console.error(
+                `[AUTO_BACKFILL_FOLLOWS] Error listing posts for ${followedDid}:`,
+                error.message
+              );
+              break;
+            }
+          } while (cursor);
+
+          usersCompleted++;
+          console.log(
+            `[AUTO_BACKFILL_FOLLOWS] User ${usersCompleted}/${followedDids.length}: Fetched ${postsFetched} posts from ${followedDid}`
+          );
+        } catch (error: any) {
+          console.error(
+            `[AUTO_BACKFILL_FOLLOWS] Error backfilling posts for ${followedDid}:`,
+            error.message
+          );
+          usersFailed++;
+        }
+      }
+
+      console.log(
+        `[AUTO_BACKFILL_FOLLOWS] Posts backfill complete: ${totalPostsFetched} posts from ${usersCompleted} users (${usersFailed} failed)`
+      );
+    } catch (error) {
+      console.error(
+        `[AUTO_BACKFILL_FOLLOWS] Error in backfillFollowedUsersPosts:`,
+        error
+      );
+    }
+  }
+
+  /**
+   * Backfill posts from a single user (called when following someone new)
+   */
+  async backfillNewFollowPosts(followedDid: string): Promise<void> {
+    console.log(
+      `[AUTO_BACKFILL_FOLLOWS] Backfilling posts from newly followed user: ${followedDid}`
+    );
+
+    try {
+      const eventProcessor = new EventProcessor(storage);
+      eventProcessor.setSkipPdsFetching(true);
+      eventProcessor.setSkipDataCollectionCheck(true);
+
+      const { didResolver } = await import('./did-resolver');
+
+      // Resolve their DID to find their PDS
+      const didDoc = await didResolver.resolveDID(followedDid);
+      if (!didDoc) {
+        console.error(
+          `[AUTO_BACKFILL_FOLLOWS] Could not resolve DID ${followedDid}`
+        );
+        return;
+      }
+
+      const services = (didDoc as any).service || [];
+      const pdsService = services.find(
+        (s: any) =>
+          s.type === 'AtprotoPersonalDataServer' || s.id === '#atproto_pds'
+      );
+
+      if (!pdsService?.serviceEndpoint) {
+        console.error(
+          `[AUTO_BACKFILL_FOLLOWS] No PDS endpoint found for ${followedDid}`
+        );
+        return;
+      }
+
+      const pdsAgent = new AtpAgent({
+        service: pdsService.serviceEndpoint,
+      });
+
+      // Fetch their posts
+      let postsFetched = 0;
+      let cursor: string | undefined;
+
+      do {
+        try {
+          const response = await pdsAgent.com.atproto.repo.listRecords({
+            repo: followedDid,
+            collection: 'app.bsky.feed.post',
+            limit: 100,
+            cursor: cursor,
+          });
+
+          // Process each post
+          for (const record of response.data.records) {
+            try {
+              const createdAt =
+                record.value?.createdAt || new Date().toISOString();
+
+              await eventProcessor.processCommit({
+                repo: followedDid,
+                ops: [
+                  {
+                    action: 'create',
+                    path: `app.bsky.feed.post/${record.uri.split('/').pop()}`,
+                    cid: record.cid,
+                    record: record.value,
+                  },
+                ],
+                time: createdAt,
+                rev: '',
+              } as any);
+
+              postsFetched++;
+            } catch (error: any) {
+              // Silently skip duplicates
+              if (error?.code !== '23505') {
+                console.error(
+                  `[AUTO_BACKFILL_FOLLOWS] Error processing post from ${followedDid}:`,
+                  error.message
+                );
+              }
+            }
+          }
+
+          cursor = response.data.cursor;
+        } catch (error: any) {
+          console.error(
+            `[AUTO_BACKFILL_FOLLOWS] Error listing posts for ${followedDid}:`,
+            error.message
+          );
+          break;
+        }
+      } while (cursor);
+
+      console.log(
+        `[AUTO_BACKFILL_FOLLOWS] Fetched ${postsFetched} posts from newly followed user ${followedDid}`
+      );
+    } catch (error) {
+      console.error(
+        `[AUTO_BACKFILL_FOLLOWS] Error backfilling new follow posts:`,
         error
       );
     }
