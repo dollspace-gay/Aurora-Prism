@@ -198,6 +198,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `[FIREHOSE] Worker ${workerId}/${totalWorkers} - TypeScript firehose writer (firehose → Redis)`
     );
     firehoseClient.connect(workerId, totalWorkers);
+
+    // Connect to additional relay sources (blacksky.app, etc.)
+    const { initializeAdditionalRelays, additionalRelays } = require('./services/firehose');
+    initializeAdditionalRelays();
+
+    if (additionalRelays.length > 0) {
+      console.log(`[FIREHOSE] Connecting to ${additionalRelays.length} additional relay sources...`);
+      additionalRelays.forEach((relay: any, index: number) => {
+        relay.connect(workerId, totalWorkers);
+        console.log(`[FIREHOSE] Additional relay ${index + 1} connected`);
+      });
+    }
   } else if (!firehoseEnabled) {
     console.log(
       `[FIREHOSE] TypeScript firehose disabled (using Python firehose)`
@@ -3421,6 +3433,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'TypeScript backfill has been disabled. Please use the Python backfill service instead.',
       info: 'Set BACKFILL_DAYS environment variable and run the Python unified worker.',
     });
+  });
+
+  // On-demand PDS backfill endpoint
+  app.post('/api/admin/backfill/pds', async (req, res) => {
+    try {
+      const { did } = req.body;
+
+      if (!did || !did.startsWith('did:')) {
+        res.status(400).json({ error: 'Invalid DID provided' });
+        return;
+      }
+
+      const { onDemandBackfill } = require('./services/on-demand-backfill');
+
+      // Trigger backfill (non-blocking)
+      onDemandBackfill.backfillUser(did).catch((error: any) => {
+        console.error(`[API] On-demand backfill failed for ${did}:`, error);
+      });
+
+      res.json({
+        success: true,
+        message: `Backfill started for ${did}. Check logs for progress.`,
+      });
+    } catch (error) {
+      console.error('[API] Error triggering on-demand backfill:', error);
+      res.status(500).json({ error: 'Failed to trigger backfill' });
+    }
+  });
+
+  // Get on-demand backfill status
+  app.get('/api/admin/backfill/pds/status', async (_req, res) => {
+    try {
+      const { onDemandBackfill } = require('./services/on-demand-backfill');
+      const status = onDemandBackfill.getStatus();
+      res.json(status);
+    } catch (error) {
+      console.error('[API] Error getting backfill status:', error);
+      res.status(500).json({ error: 'Failed to get status' });
+    }
   });
 
   // XRPC API Endpoints

@@ -710,3 +710,23 @@ export class FirehoseClient {
 }
 
 export const firehoseClient = new FirehoseClient();
+
+// Additional relay sources for multi-relay support
+export const additionalRelays: FirehoseClient[] = [];
+
+// Initialize additional relay clients from environment variable
+export function initializeAdditionalRelays() {
+  const additionalRelayUrls = process.env.ADDITIONAL_RELAY_URLS?.split(',').map(url => url.trim()).filter(Boolean) || [];
+
+  if (additionalRelayUrls.length > 0) {
+    console.log(`[FIREHOSE] Initializing ${additionalRelayUrls.length} additional relay sources:`, additionalRelayUrls);
+
+    for (const relayUrl of additionalRelayUrls) {
+      const client = new FirehoseClient(relayUrl);
+      additionalRelays.push(client);
+      console.log(`[FIREHOSE] Additional relay registered: ${relayUrl}`);
+    }
+  }
+
+  return additionalRelays;
+}

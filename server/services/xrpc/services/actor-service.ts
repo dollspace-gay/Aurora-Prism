@@ -17,6 +17,7 @@ import {
   suggestedUsersUnspeccedSchema,
 } from '../schemas';
 import { xrpcApi } from '../../xrpc-api';
+import { onDemandBackfill } from '../../on-demand-backfill';
 
 /**
  * Get a single actor profile
@@ -30,6 +31,27 @@ export async function getProfile(req: Request, res: Response): Promise<void> {
     const profiles = await (xrpcApi as any)._getProfiles([params.actor], req);
 
     if (profiles.length === 0) {
+      // Profile not found - trigger on-demand backfill from their PDS
+      const actor = params.actor;
+
+      // Check if it's a DID (not a handle)
+      if (actor.startsWith('did:')) {
+        console.log(`[ON_DEMAND] Profile ${actor} not found, triggering backfill...`);
+
+        // Trigger backfill (non-blocking - don't wait for it)
+        onDemandBackfill.backfillUser(actor).catch(error => {
+          console.error(`[ON_DEMAND] Backfill failed for ${actor}:`, error);
+        });
+
+        // Return 404 with a helpful message
+        res.status(404).json({
+          error: 'ProfileNotFound',
+          message: 'Profile not found. Attempting to fetch from their PDS - try again in a few seconds.',
+        });
+        return;
+      }
+
+      // For handles, we'd need to resolve to DID first
       res.status(404).json({ error: 'Profile not found' });
       return;
     }
