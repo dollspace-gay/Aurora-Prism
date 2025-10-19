@@ -8,6 +8,7 @@ import { storage } from '../../../storage';
 import { requireAuthDid, getAuthenticatedDid } from '../utils/auth-helpers';
 import { handleError } from '../utils/error-handler';
 import { resolveActor } from '../utils/resolvers';
+import { serializePosts } from '../utils/serializers';
 import {
   getListSchema,
   getListsSchema,
@@ -16,7 +17,6 @@ import {
   getListMutesSchema,
   getListBlocksSchema,
 } from '../schemas';
-import { xrpcApi } from '../../xrpc-api';
 
 /**
  * Convert list avatar CID to CDN URL
@@ -415,7 +415,7 @@ export async function getListFeed(req: Request, res: Response): Promise<void> {
     // Use serializePosts for proper post hydration with viewer context
     // This handles: embeds, author profiles, viewer state (likes/reposts),
     // reply counts, repost counts, quote counts, labels, and thread context
-    const serialized = await (xrpcApi as any).serializePosts(
+    const serialized = await serializePosts(
       posts,
       viewerDid || undefined,
       req

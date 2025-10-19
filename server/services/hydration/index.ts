@@ -6,6 +6,7 @@ import { EmbedResolver } from './embed-resolver';
 import { LabelPropagator, Label } from './label-propagator';
 import { HydrationCache } from './cache';
 import { constellationIntegration } from '../constellation-integration';
+import { cacheService } from '../cache';
 
 export interface HydrationState {
   posts: Map<string, any>;
@@ -298,16 +299,60 @@ export class EnhancedHydrator {
 
   /**
    * Hydrate with caching
-   * Note: Simplified implementation - always performs full hydration for complete state
-   * TODO: Implement proper state caching that includes all hydrated data (actors, aggregations, etc.)
+   * Caches the full HydrationState including actors, aggregations, viewer states, embeds, and labels
    */
   async hydratePostsCached(
     postUris: string[],
     viewerDid?: string
   ): Promise<HydrationState> {
-    // For now, always do full hydration to ensure complete state with all maps populated
-    // Future optimization: Cache full HydrationState snapshots including actors, aggregations, etc.
-    return await this.hydratePosts(postUris, viewerDid);
+    if (postUris.length === 0) {
+      return this.emptyState();
+    }
+
+    // Create cache key from sorted post URIs and viewer
+    // Sort URIs to ensure consistent cache keys for the same set of posts
+    const sortedUris = [...postUris].sort();
+    const urisHash = sortedUris.join('|');
+    const viewerPart = viewerDid ? `viewer:${viewerDid}` : 'anon';
+    const cacheKey = `${urisHash}:${viewerPart}`;
+
+    // Try to get from cache
+    const cached = await cacheService.getHydrationState(cacheKey);
+    if (cached) {
+      console.log(`[HYDRATION] Cache hit for ${postUris.length} posts`);
+
+      // Restore viewerContext if it was cached
+      let viewerContext: ViewerContext | undefined;
+      if (viewerDid) {
+        viewerContext = await this.viewerBuilder.build(viewerDid);
+      }
+
+      return {
+        ...cached,
+        viewerContext,
+      };
+    }
+
+    console.log(`[HYDRATION] Cache miss for ${postUris.length} posts - performing full hydration`);
+
+    // Perform full hydration
+    const state = await this.hydratePosts(postUris, viewerDid);
+
+    // Cache the state (excluding viewerContext as it's built fresh each time)
+    const stateToCache = {
+      posts: state.posts,
+      actors: state.actors,
+      aggregations: state.aggregations,
+      viewerStates: state.viewerStates,
+      actorViewerStates: state.actorViewerStates,
+      embeds: state.embeds,
+      labels: state.labels,
+    };
+
+    // Cache with shorter TTL (180 seconds / 3 minutes) since hydration data can become stale
+    await cacheService.setHydrationState(cacheKey, stateToCache, 180);
+
+    return state;
   }
 
   /**
@@ -315,6 +360,8 @@ export class EnhancedHydrator {
    */
   async clearCache() {
     this.embedResolver.clearCache();
+    // Note: Full hydration state cache is managed by cacheService
+    // To clear all hydration states, you would need to clear Redis keys matching 'atproto:cache:hydration_state:*'
   }
 
   private emptyState(): HydrationState {

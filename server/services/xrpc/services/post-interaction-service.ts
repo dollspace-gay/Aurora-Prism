@@ -6,7 +6,7 @@
 import type { Request, Response } from 'express';
 import { storage } from '../../../storage';
 import { handleError } from '../utils/error-handler';
-import { maybeAvatar } from '../utils/serializers';
+import { maybeAvatar, serializePosts } from '../utils/serializers';
 import { getAuthenticatedDid, requireAuthDid } from '../utils/auth-helpers';
 import {
   getPostsSchema,
@@ -15,7 +15,6 @@ import {
   getQuotesSchema,
   getActorLikesSchema,
 } from '../schemas/timeline-schemas';
-import { xrpcApi } from '../../xrpc-api';
 
 /**
  * Get multiple posts by URIs
@@ -36,7 +35,7 @@ export async function getPosts(req: Request, res: Response): Promise<void> {
     }
 
     console.log(`[getPosts] Serializing ${posts.length} posts`);
-    const serializedPosts = await (xrpcApi as any).serializePosts(
+    const serializedPosts = await serializePosts(
       posts,
       viewerDid || undefined,
       req
@@ -503,7 +502,7 @@ export async function getQuotes(req: Request, res: Response): Promise<void> {
       params.limit,
       params.cursor
     );
-    const serialized = await (xrpcApi as any).serializePosts(
+    const serialized = await serializePosts(
       posts,
       viewerDid || undefined,
       req
@@ -609,7 +608,7 @@ export async function getActorLikes(
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
 
-    const serialized = await (xrpcApi as any).serializePosts(
+    const serialized = await serializePosts(
       postsWithLikes.map(({ post }) => post),
       viewerDid,
       req

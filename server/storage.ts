@@ -1108,14 +1108,14 @@ export class DatabaseStorage implements IStorage {
     const conditions = [eq(posts.authorDid, authorDid)];
 
     if (cursor) {
-      conditions.push(sql`${posts.indexedAt} < ${cursor}`);
+      conditions.push(sql`${posts.createdAt} < ${cursor}`);
     }
 
     return await db
       .select()
       .from(posts)
       .where(and(...conditions))
-      .orderBy(desc(posts.indexedAt))
+      .orderBy(desc(posts.createdAt))
       .limit(limit);
   }
 
@@ -1245,14 +1245,14 @@ export class DatabaseStorage implements IStorage {
     ];
 
     if (cursor) {
-      conditions.push(sql`${posts.indexedAt} < ${cursor}`);
+      conditions.push(sql`${posts.createdAt} < ${cursor}`);
     }
 
     return await db
       .select()
       .from(posts)
       .where(and(...conditions))
-      .orderBy(desc(posts.indexedAt))
+      .orderBy(desc(posts.createdAt))
       .limit(limit);
   }
 
@@ -2426,7 +2426,7 @@ export class DatabaseStorage implements IStorage {
       console.log(`[STORAGE_DEBUG] No follows, showing all posts`);
       const conditions = [];
       if (cursor) {
-        conditions.push(sql`${posts.indexedAt} < ${cursor}`);
+        conditions.push(sql`${posts.createdAt} < ${cursor}`);
       }
 
       // Filter out posts from users who have blocked the viewer
@@ -2438,7 +2438,7 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(posts)
         .where(conditions.length > 0 ? and(...conditions) : undefined)
-        .orderBy(desc(posts.indexedAt))
+        .orderBy(desc(posts.createdAt))
         .limit(limit);
 
       console.log(
@@ -2473,14 +2473,14 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (cursor) {
-      conditions.push(sql`${posts.indexedAt} < ${cursor}`);
+      conditions.push(sql`${posts.createdAt} < ${cursor}`);
     }
 
     const timelinePosts = await db
       .select()
       .from(posts)
       .where(and(...conditions))
-      .orderBy(desc(posts.indexedAt))
+      .orderBy(desc(posts.createdAt))
       .limit(limit);
 
     console.log(
@@ -3312,7 +3312,7 @@ export class DatabaseStorage implements IStorage {
     const conditions = [inArray(posts.authorDid, memberDids)];
 
     if (cursor) {
-      conditions.push(sql`${posts.indexedAt} < ${new Date(cursor)}`);
+      conditions.push(sql`${posts.createdAt} < ${new Date(cursor)}`);
     }
 
     // Fetch limit + 1 to determine if more results exist
@@ -3320,7 +3320,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(posts)
       .where(and(...conditions))
-      .orderBy(desc(posts.indexedAt))
+      .orderBy(desc(posts.createdAt))
       .limit(limit + 1);
 
     // Return only requested limit (endpoint will use length to determine cursor)

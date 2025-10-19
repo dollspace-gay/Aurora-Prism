@@ -33,5 +33,6 @@ export {
   maybeAvatar,
   maybeBanner,
   createAuthorViewerState,
+  serializePosts,
   serializePostsEnhanced,
 } from './serializers';

@@ -8,7 +8,7 @@ import { storage } from '../../../storage';
 import { requireAuthDid, getAuthenticatedDid } from '../utils/auth-helpers';
 import { handleError } from '../utils/error-handler';
 import { resolveActor } from '../utils/resolvers';
-import { maybeAvatar } from '../utils/serializers';
+import { maybeAvatar, serializePosts } from '../utils/serializers';
 import {
   getTimelineSchema,
   getAuthorFeedSchema,
@@ -20,7 +20,6 @@ import { getFeedSchema } from '../schemas/feed-generator-schemas';
 import { contentFilter } from '../../content-filter';
 import { feedAlgorithm } from '../../feed-algorithm';
 import { feedGeneratorClient } from '../../feed-generator-client';
-import { xrpcApi } from '../../xrpc-api';
 
 /**
  * Get authenticated user's timeline
@@ -64,24 +63,19 @@ export async function getTimeline(req: Request, res: Response): Promise<void> {
     const oldestPost =
       posts.length > 0
         ? posts.reduce((oldest, post) =>
-            post.indexedAt < oldest.indexedAt ? post : oldest
+            post.createdAt < oldest.createdAt ? post : oldest
           )
         : null;
 
-    // Use legacy API for complex post serialization
-    // TODO: Extract serializePosts to utils in future iteration
-    const serializedPosts = await (xrpcApi as any).serializePosts(
-      rankedPosts,
-      userDid,
-      req
-    );
+    // Serialize posts using the extracted utility function
+    const serializedPosts = await serializePosts(rankedPosts, userDid, req);
 
     // Filter out any null entries (defensive - shouldn't happen with handle.invalid fallback)
     const validPosts = serializedPosts.filter((post: any) => post !== null);
 
     // Ensure we always return a valid response structure
     const response = {
-      cursor: oldestPost ? oldestPost.indexedAt.toISOString() : undefined,
+      cursor: oldestPost ? oldestPost.createdAt.toISOString() : undefined,
       feed: validPosts.map((post: any) => ({ post })),
     };
 
@@ -208,12 +202,8 @@ export async function getAuthorFeed(
       }
     }
 
-    // Serialize posts with enhanced hydration (when flag is enabled)
-    const serializedPosts = await (xrpcApi as any).serializePosts(
-      filteredPosts,
-      viewerDid,
-      req
-    );
+    // Serialize posts using the extracted utility function
+    const serializedPosts = await serializePosts(filteredPosts, viewerDid, req);
     const postsByUri = new Map(serializedPosts.map((p: any) => [p.uri, p]));
 
     // Build feed with reposts and pinned posts
@@ -315,7 +305,7 @@ export async function getPostThread(
     }
 
     const postsToSerialize = [rootPost, ...replies];
-    const serializedPosts = await (xrpcApi as any).serializePosts(
+    const serializedPosts = await serializePosts(
       postsToSerialize,
       viewerDid || undefined,
       req
@@ -446,8 +436,8 @@ export async function getFeed(req: Request, res: Response): Promise<void> {
     const postUris = hydratedFeed.map(({ post }) => post.uri);
     const posts = await storage.getPosts(postUris);
 
-    // Use existing serializePosts infrastructure for complete post objects
-    const serializedPosts = await (xrpcApi as any).serializePosts(
+    // Use serializePosts utility for complete post objects
+    const serializedPosts = await serializePosts(
       posts,
       viewerDid || undefined,
       req
@@ -587,7 +577,7 @@ export async function getPostThreadV2(
 
     // 4. Serialize all posts
     const allPosts = threadItems.map((item) => item.post);
-    const serialized = await (xrpcApi as any).serializePosts(
+    const serialized = await serializePosts(
       allPosts,
       viewerDid || undefined,
       req

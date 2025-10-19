@@ -5,6 +5,7 @@ import {
   feedItems,
   postAggregations,
   users,
+  follows,
 } from '../../../shared/schema';
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import type {
@@ -127,22 +128,119 @@ router.post('/getAuthorFeed', async (req, res) => {
 
 /**
  * Get timeline (following feed)
+ * Returns posts from users that the actor follows
  */
 router.post('/getTimeline', async (req, res) => {
   try {
     const {
       actor,
-      limit: _limit = 50,
-      cursor: _cursor,
+      limit = 50,
+      cursor,
     } = req.body as GetTimelineRequest;
 
     if (!actor) {
       return res.status(400).json({ error: 'actor is required' });
     }
 
-    // TODO: Implement timeline logic
-    // This requires joining follows with feed_items
-    res.status(501).json({ error: 'Not implemented yet' });
+    const actualLimit = Math.min(limit, 100);
+
+    // Resolve actor to DID
+    const isDID = actor.startsWith('did:');
+    const user = isDID
+      ? await db.query.users.findFirst({ where: eq(users.did, actor) })
+      : await db.query.users.findFirst({ where: eq(users.handle, actor) });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Actor not found' });
+    }
+
+    // Get all users that the actor follows
+    const followsList = await db
+      .select({ followingDid: follows.followingDid })
+      .from(follows)
+      .where(eq(follows.followerDid, user.did));
+
+    const followingDids = followsList.map((f) => f.followingDid);
+
+    if (followingDids.length === 0) {
+      // No follows - return empty timeline
+      return res.json({
+        items: [],
+        cursor: undefined,
+      });
+    }
+
+    // Get feed items from followed users (posts and reposts by followed users)
+    const conditions = [
+      inArray(feedItems.originatorDid, followingDids),
+      cursor ? sql`${feedItems.sortAt} < ${cursor}` : undefined,
+    ].filter(Boolean);
+
+    const items = await db
+      .select({
+        uri: feedItems.uri,
+        postUri: feedItems.postUri,
+        originatorDid: feedItems.originatorDid,
+        type: feedItems.type,
+        sortAt: feedItems.sortAt,
+        cid: feedItems.cid,
+      })
+      .from(feedItems)
+      .where(conditions.length > 1 ? and(...conditions) : conditions[0])
+      .orderBy(desc(feedItems.sortAt))
+      .limit(actualLimit + 1);
+
+    const hasMore = items.length > actualLimit;
+    const feedItemsList = hasMore ? items.slice(0, actualLimit) : items;
+
+    // Get post data
+    const postUris = feedItemsList.map((item) => item.postUri);
+    const postsData = await db
+      .select()
+      .from(posts)
+      .innerJoin(postAggregations, eq(posts.uri, postAggregations.postUri))
+      .where(inArray(posts.uri, postUris));
+
+    const postsMap = new Map(
+      postsData.map((p) => [
+        p.posts.uri,
+        {
+          uri: p.posts.uri,
+          cid: p.posts.cid,
+          authorDid: p.posts.authorDid,
+          text: p.posts.text,
+          parentUri: p.posts.parentUri || undefined,
+          rootUri: p.posts.rootUri || undefined,
+          embed: p.posts.embed,
+          facets: p.posts.facets,
+          likeCount: p.post_aggregations.likeCount,
+          repostCount: p.post_aggregations.repostCount,
+          replyCount: p.post_aggregations.replyCount,
+          quoteCount: p.post_aggregations.quoteCount,
+          indexedAt: p.posts.indexedAt.toISOString(),
+          createdAt: p.posts.createdAt.toISOString(),
+        } as PostRecord,
+      ])
+    );
+
+    const feedItemRecords: FeedItemRecord[] = feedItemsList.map((item) => ({
+      uri: item.uri,
+      postUri: item.postUri,
+      originatorDid: item.originatorDid,
+      type: item.type as 'post' | 'repost',
+      sortAt: item.sortAt.toISOString(),
+      post: postsMap.get(item.postUri)!,
+      repostUri: item.type === 'repost' ? item.uri : undefined,
+    }));
+
+    const response: PaginatedResponse<FeedItemRecord> = {
+      items: feedItemRecords,
+      cursor: hasMore
+        ? feedItemsList[feedItemsList.length - 1].sortAt.toISOString()
+        : undefined,
+    };
+
+    res.json(response);
   } catch (error) {
     console.error('[DATA_PLANE] Error in getTimeline:', error);
     res.status(500).json({ error: 'Internal server error' });

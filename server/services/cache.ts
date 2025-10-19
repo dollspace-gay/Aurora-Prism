@@ -275,6 +275,79 @@ export class CacheService {
     }
   }
 
+  // Hydration State Caching
+  async getHydrationState(
+    cacheKey: string
+  ): Promise<{
+    posts: Map<string, any>;
+    actors: Map<string, any>;
+    aggregations: Map<string, any>;
+    viewerStates: Map<string, any>;
+    actorViewerStates: Map<string, any>;
+    embeds: Map<string, any>;
+    labels: Map<string, any[]>;
+  } | null> {
+    if (!this.redis || !this.isInitialized) return null;
+
+    try {
+      const key = this.getKey('hydration_state', cacheKey);
+      const data = await this.redis.get(key);
+      if (!data) return null;
+
+      const parsed = JSON.parse(data);
+
+      // Convert arrays back to Maps
+      return {
+        posts: new Map(parsed.posts || []),
+        actors: new Map(parsed.actors || []),
+        aggregations: new Map(parsed.aggregations || []),
+        viewerStates: new Map(parsed.viewerStates || []),
+        actorViewerStates: new Map(parsed.actorViewerStates || []),
+        embeds: new Map(parsed.embeds || []),
+        labels: new Map(parsed.labels || []),
+      };
+    } catch (error) {
+      console.error('[CACHE] Error getting hydration state:', error);
+      return null;
+    }
+  }
+
+  async setHydrationState(
+    cacheKey: string,
+    state: {
+      posts: Map<string, any>;
+      actors: Map<string, any>;
+      aggregations: Map<string, any>;
+      viewerStates: Map<string, any>;
+      actorViewerStates: Map<string, any>;
+      embeds: Map<string, any>;
+      labels: Map<string, any[]>;
+    },
+    ttl?: number
+  ): Promise<void> {
+    if (!this.redis || !this.isInitialized) return;
+
+    try {
+      const key = this.getKey('hydration_state', cacheKey);
+
+      // Convert Maps to arrays for serialization
+      const serializable = {
+        posts: Array.from(state.posts.entries()),
+        actors: Array.from(state.actors.entries()),
+        aggregations: Array.from(state.aggregations.entries()),
+        viewerStates: Array.from(state.viewerStates.entries()),
+        actorViewerStates: Array.from(state.actorViewerStates.entries()),
+        embeds: Array.from(state.embeds.entries()),
+        labels: Array.from(state.labels.entries()),
+      };
+
+      const expireTime = ttl || this.config.ttl;
+      await this.redis.setex(key, expireTime, JSON.stringify(serializable));
+    } catch (error) {
+      console.error('[CACHE] Error setting hydration state:', error);
+    }
+  }
+
   // Generic cache operations
   async get<T>(key: string): Promise<T | null> {
     if (!this.redis || !this.isInitialized) return null;
