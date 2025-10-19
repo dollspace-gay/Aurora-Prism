@@ -57,28 +57,17 @@ export class FeedGeneratorClient {
         Accept: 'application/json',
       };
 
-      // Forward viewer Authorization to feed generator when present, aligning with upstream behavior
+      // Forward viewer Authorization to feed generator when present
+      // This is OPTIONAL per AT Protocol spec - feed generators work without auth
       if (options?.viewerAuthorization) {
         headers['Authorization'] = options.viewerAuthorization;
         console.log(
           `[FeedGenClient] Forwarded viewer Authorization header to feedgen`
         );
-      } else if (params.feedGeneratorDid) {
-        try {
-          const serviceToken = appViewJWTService.signFeedGeneratorToken(
-            params.feedGeneratorDid
-          );
-          headers['Authorization'] = `Bearer ${serviceToken}`;
-          console.log(
-            `[FeedGenClient] Attached AppView service Authorization for ${params.feedGeneratorDid}`
-          );
-        } catch (err) {
-          console.warn(
-            `[FeedGenClient] Failed to attach AppView service token:`,
-            err
-          );
-        }
       }
+      // NOTE: We intentionally do NOT send AppView service auth tokens
+      // because feed generators are public endpoints and most don't expect/validate them
+      // This prevents the "DID syntax didn't validate" error from feed generators
 
       const response = await fetch(url.toString(), {
         method: 'GET',
