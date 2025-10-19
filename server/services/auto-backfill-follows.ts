@@ -673,9 +673,10 @@ export class AutoBackfillFollowsService {
             service: pdsService.serviceEndpoint,
           });
 
-          // Fetch their posts
+          // Fetch their posts (limit to 100 posts per user)
           let postsFetched = 0;
           let cursor: string | undefined;
+          const MAX_POSTS_PER_USER = 100;
 
           do {
             try {
@@ -688,6 +689,11 @@ export class AutoBackfillFollowsService {
 
               // Process each post
               for (const record of response.data.records) {
+                // Stop if we've reached the limit for this user
+                if (postsFetched >= MAX_POSTS_PER_USER) {
+                  break;
+                }
+
                 try {
                   const createdAt =
                     record.value?.createdAt || new Date().toISOString();
@@ -717,6 +723,11 @@ export class AutoBackfillFollowsService {
                     );
                   }
                 }
+              }
+
+              // Stop pagination if we've hit the limit
+              if (postsFetched >= MAX_POSTS_PER_USER) {
+                break;
               }
 
               cursor = response.data.cursor;
@@ -794,9 +805,10 @@ export class AutoBackfillFollowsService {
         service: pdsService.serviceEndpoint,
       });
 
-      // Fetch their posts
+      // Fetch their posts (limit to 100 posts)
       let postsFetched = 0;
       let cursor: string | undefined;
+      const MAX_POSTS_PER_USER = 100;
 
       do {
         try {
@@ -809,6 +821,11 @@ export class AutoBackfillFollowsService {
 
           // Process each post
           for (const record of response.data.records) {
+            // Stop if we've reached the limit
+            if (postsFetched >= MAX_POSTS_PER_USER) {
+              break;
+            }
+
             try {
               const createdAt =
                 record.value?.createdAt || new Date().toISOString();
@@ -837,6 +854,11 @@ export class AutoBackfillFollowsService {
                 );
               }
             }
+          }
+
+          // Stop pagination if we've hit the limit
+          if (postsFetched >= MAX_POSTS_PER_USER) {
+            break;
           }
 
           cursor = response.data.cursor;
