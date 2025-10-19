@@ -885,7 +885,12 @@ class EventProcessor:
                             
                             elif record_type == "app.bsky.actor.profile":
                                 await self.process_profile(conn, repo, record)
-                            
+
+                            elif record_type == "app.bsky.actor.status":
+                                # Actor status records (online/away/custom status)
+                                # For now just log - we don't store these
+                                logger.debug(f"Processed actor status: {uri}")
+
                             elif record_type == "app.bsky.graph.list":
                                 await self.process_list(conn, uri, cid, repo, record)
                             
