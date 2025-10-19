@@ -722,23 +722,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       const isAdmin = await adminAuthService.isAdmin(did);
 
-      // Trigger automatic backfill of liked posts in background (non-blocking)
-      import('./services/auto-backfill-likes').then(
-        ({ autoBackfillLikesService }) => {
-          autoBackfillLikesService.checkAndBackfill(did).catch((err) => {
-            console.error('[AUTO_BACKFILL_LIKES] Error:', err);
-          });
-        }
-      );
-
-      // Trigger automatic backfill of follows/followers and profiles in background (non-blocking)
-      import('./services/auto-backfill-follows').then(
-        ({ autoBackfillFollowsService }) => {
-          autoBackfillFollowsService.checkAndBackfill(did).catch((err) => {
-            console.error('[AUTO_BACKFILL_FOLLOWS] Error:', err);
-          });
-        }
-      );
+      // NOTE: Do NOT trigger backfill here - this is for admin panel login only.
+      // Backfill should only be triggered when users log in via client apps
+      // (XRPC createSession/refreshSession endpoints) or manually via backfill endpoints.
 
       // Create JWT token for frontend
       const token = authService.createSessionToken(did, did);
