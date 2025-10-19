@@ -57,7 +57,7 @@
     "@radix-ui/react-toggle-group": "^1.1.3",
     "@radix-ui/react-tooltip": "^1.2.0",
     "@skyware/firehose": "^0.5.2",
-    "@tanstack/react-query": "^5.60.5",
+    "@tanstack/react-query": "^5.90.2",
     "@types/jsonwebtoken": "^9.0.10",
     "cbor-x": "^1.6.0",
     "class-variance-authority": "^0.7.1",
