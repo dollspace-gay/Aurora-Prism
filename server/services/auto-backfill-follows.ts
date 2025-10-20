@@ -20,7 +20,34 @@ const MAX_FOLLOW_RECORDS_TO_CHECK = 500; // Don't paginate through more than 500
 // Track ongoing backfills to prevent duplicates
 const ongoingBackfills = new Set<string>();
 
+// Track ongoing new follow backfills to prevent duplicate cascading
+const ongoingNewFollowBackfills = new Set<string>();
+
+// Track recently backfilled users to prevent spam (DID -> timestamp)
+const recentlyBackfilledUsers = new Map<string, number>();
+const NEW_FOLLOW_BACKFILL_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour cooldown
+
 export class AutoBackfillFollowsService {
+  constructor() {
+    // Periodically clean up old entries from recentlyBackfilledUsers to prevent memory leaks
+    setInterval(() => {
+      const now = Date.now();
+      let cleaned = 0;
+      const entries = Array.from(recentlyBackfilledUsers.entries());
+      for (const [did, timestamp] of entries) {
+        if (now - timestamp > NEW_FOLLOW_BACKFILL_COOLDOWN_MS) {
+          recentlyBackfilledUsers.delete(did);
+          cleaned++;
+        }
+      }
+      if (cleaned > 0) {
+        console.log(
+          `[AUTO_BACKFILL_FOLLOWS] Cleaned ${cleaned} expired cooldown entries`
+        );
+      }
+    }, 60 * 60 * 1000); // Run every hour
+  }
+
   /**
    * Check if a user needs follows backfilled and trigger it if needed
    * Called automatically on login
@@ -768,9 +795,35 @@ export class AutoBackfillFollowsService {
    * Backfill posts from a single user (called when following someone new)
    */
   async backfillNewFollowPosts(followedDid: string): Promise<void> {
+    // Check if already backfilling this user
+    if (ongoingNewFollowBackfills.has(followedDid)) {
+      console.log(
+        `[AUTO_BACKFILL_FOLLOWS] Already backfilling posts for ${followedDid}, skipping duplicate request`
+      );
+      return;
+    }
+
+    // Check if recently backfilled (within cooldown period)
+    const lastBackfill = recentlyBackfilledUsers.get(followedDid);
+    if (lastBackfill) {
+      const timeSinceBackfill = Date.now() - lastBackfill;
+      if (timeSinceBackfill < NEW_FOLLOW_BACKFILL_COOLDOWN_MS) {
+        const minutesRemaining = Math.ceil(
+          (NEW_FOLLOW_BACKFILL_COOLDOWN_MS - timeSinceBackfill) / (60 * 1000)
+        );
+        console.log(
+          `[AUTO_BACKFILL_FOLLOWS] User ${followedDid} was backfilled ${Math.floor(timeSinceBackfill / 60000)} minutes ago, skipping (${minutesRemaining}m cooldown remaining)`
+        );
+        return;
+      }
+    }
+
     console.log(
       `[AUTO_BACKFILL_FOLLOWS] Backfilling posts from newly followed user: ${followedDid}`
     );
+
+    // Mark as ongoing
+    ongoingNewFollowBackfills.add(followedDid);
 
     try {
       const eventProcessor = new EventProcessor(storage);
@@ -874,11 +927,17 @@ export class AutoBackfillFollowsService {
       console.log(
         `[AUTO_BACKFILL_FOLLOWS] Fetched ${postsFetched} posts from newly followed user ${followedDid}`
       );
+
+      // Record timestamp of successful backfill
+      recentlyBackfilledUsers.set(followedDid, Date.now());
     } catch (error) {
       console.error(
         `[AUTO_BACKFILL_FOLLOWS] Error backfilling new follow posts:`,
         error
       );
+    } finally {
+      // Always remove from ongoing set
+      ongoingNewFollowBackfills.delete(followedDid);
     }
   }
 }
