@@ -616,8 +616,7 @@ export async function listActivitySubscriptions(
     }
 
     // Get full profile views for subscribed accounts
-    const { xrpcApi } = await import('../../xrpc-api');
-    const profiles = await (xrpcApi as any)._getProfiles(subjectDids, req);
+    const profiles = await getProfiles(subjectDids, req);
 
     res.json({
       subscriptions: profiles,
@@ -693,8 +692,7 @@ export async function putActivitySubscription(
     });
 
     // Get profile view for the subject
-    const { xrpcApi } = await import('../../xrpc-api');
-    const profiles = await (xrpcApi as any)._getProfiles([body.subject], req);
+    const profiles = await getProfiles([body.subject], req);
 
     res.json({
       subject: body.subject,

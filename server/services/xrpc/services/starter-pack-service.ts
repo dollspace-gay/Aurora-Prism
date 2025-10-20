@@ -16,7 +16,7 @@ import {
   getStarterPacksWithMembershipSchema,
   getOnboardingSuggestedStarterPacksSchema,
 } from '../schemas';
-import { xrpcApi } from '../../xrpc-api';
+import { getProfiles } from "../utils/profile-builder";
 
 /**
  * Get a single starter pack by URI
@@ -47,7 +47,7 @@ export async function getStarterPack(
     };
 
     // Use _getProfiles for complete creator profileViewBasic
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       [packData.creatorDid],
       req
     );
@@ -122,7 +122,7 @@ export async function getStarterPacks(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(packs.map((p) => p.creatorDid))];
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       creatorDids,
       req
     );
@@ -205,7 +205,7 @@ export async function getActorStarterPacks(
     }
 
     // Use _getProfiles for complete creator profileViewBasic (all packs have same creator)
-    const creatorProfiles = await (xrpcApi as any)._getProfiles([did], req);
+    const creatorProfiles = await getProfiles([did], req);
 
     if (creatorProfiles.length === 0) {
       res.status(500).json({
@@ -338,7 +338,7 @@ export async function getStarterPacksWithMembership(
     }
 
     // Use _getProfiles for both creator and actor profiles
-    const profiles = await (xrpcApi as any)._getProfiles(
+    const profiles = await getProfiles(
       [sessionDid, actorDid],
       req
     );
@@ -504,7 +504,7 @@ export async function getOnboardingSuggestedStarterPacks(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(starterPacks.map((p) => p.creatorDid))];
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       creatorDids,
       req
     );

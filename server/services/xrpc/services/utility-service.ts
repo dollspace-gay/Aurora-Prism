@@ -13,7 +13,7 @@ import {
   getJobStatusSchema,
   sendInteractionsSchema,
 } from '../schemas/utility-schemas';
-import { xrpcApi } from '../../xrpc-api';
+import { getProfiles } from "../utils/profile-builder";
 
 /**
  * Get labeler services for given DIDs
@@ -47,7 +47,7 @@ export async function getServices(req: Request, res: Response): Promise<void> {
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(services.map((s) => s.creatorDid))];
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       creatorDids,
       req
     );

@@ -19,7 +19,7 @@ import {
   queryLabelsSchema,
   createReportSchema,
 } from '../schemas';
-import { xrpcApi } from '../../xrpc-api';
+import { getProfiles } from "../utils/profile-builder";
 
 /**
  * Get blocked actors
@@ -47,7 +47,7 @@ export async function getBlocks(req: Request, res: Response): Promise<void> {
     const blockedDids = blocks.map((b) => b.blockedDid);
 
     // Use _getProfiles helper to build complete profileView objects
-    const profiles = await (xrpcApi as any)._getProfiles(blockedDids, req);
+    const profiles = await getProfiles(blockedDids, req);
 
     // Create a map of DID -> profile for quick lookup
     const profileMap = new Map(profiles.map((p: any) => [p.did, p]));

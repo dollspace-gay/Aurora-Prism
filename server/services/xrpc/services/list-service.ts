@@ -129,7 +129,7 @@ export async function getList(req: Request, res: Response): Promise<void> {
       );
 
     // Hydrate creator profile
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       [list.creatorDid],
       req
     );
@@ -148,7 +148,7 @@ export async function getList(req: Request, res: Response): Promise<void> {
     let subjects: any[] = [];
 
     if (subjectDids.length > 0) {
-      subjects = await (xrpcApi as any)._getProfiles(subjectDids, req);
+      subjects = await getProfiles(subjectDids, req);
     }
 
     // Create subject map for quick lookup
@@ -249,7 +249,7 @@ export async function getLists(req: Request, res: Response): Promise<void> {
     }
 
     // Hydrate creator profile for all lists (should be same creator)
-    const creatorProfiles = await (xrpcApi as any)._getProfiles([did], req);
+    const creatorProfiles = await getProfiles([did], req);
     const creator = creatorProfiles[0];
 
     if (!creator) {
@@ -493,7 +493,7 @@ export async function getListsWithMembership(
     };
 
     // Build creator ProfileView (will be same for all lists)
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       [sessionDid],
       req
     );
@@ -521,7 +521,7 @@ export async function getListsWithMembership(
     );
 
     // Get actor profile for listItem views
-    const actorProfiles = await (xrpcApi as any)._getProfiles([actorDid], req);
+    const actorProfiles = await getProfiles([actorDid], req);
     const actorProfile = actorProfiles[0];
 
     // Batch fetch list item counts
@@ -653,7 +653,7 @@ export async function getListMutes(req: Request, res: Response): Promise<void> {
     ];
 
     // Batch fetch all creator profiles
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       creatorDids,
       req
     );
@@ -758,7 +758,7 @@ export async function getListBlocks(
     ];
 
     // Batch fetch all creator profiles
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       creatorDids,
       req
     );

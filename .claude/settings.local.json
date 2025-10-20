@@ -4,7 +4,11 @@
       "Bash(node -e \"const {db} = require(''''./dist/server/db''''); db.execute(''''SELECT COUNT(*) as feed_count FROM feed_generators;'''').then(r => console.log(r.rows[0])).catch(e => console.error(e))\")",
       "Bash(node -e \"const data = require(''''fs'''').readFileSync(0, ''''utf-8''''); const json = JSON.parse(data); console.log(''''Service DID:'''', json.view.did); console.log(''''Service endpoint (from DID doc):'''', json.view.did)\")",
       "Bash(node -e \"const data = require(''''fs'''').readFileSync(0, ''''utf-8''''); const json = JSON.parse(data); const feedgenService = json.service?.find(s => s.id === ''''#bsky_fg''''); console.log(''''Feed Generator Endpoint:'''', feedgenService?.serviceEndpoint || ''''Not found'''')\")",
-      "Bash(node -e \"const data = require(''''fs'''').readFileSync(0, ''''utf-8''''); console.log(''''Response:'''', data.substring(0, 1000))\")"
+      "Bash(node -e \"const data = require(''''fs'''').readFileSync(0, ''''utf-8''''); console.log(''''Response:'''', data.substring(0, 1000))\")",
+      "Bash(for file in server/services/xrpc/services/{feed-generator,graph,list,moderation,notification,starter-pack,unspecced,utility}-service.ts)",
+      "Bash(do)",
+      "Bash(done)",
+      "Bash(find server -name \"*.ts\" -type f ! -path \"*/node_modules/*\" -exec grep -l \"xrpc-api\" {} ;)"
     ],
     "deny": [],
     "ask": []

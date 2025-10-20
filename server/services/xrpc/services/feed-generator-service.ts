@@ -17,7 +17,7 @@ import {
   getPopularFeedGeneratorsSchema,
   getSuggestedFeedsUnspeccedSchema,
 } from '../schemas';
-import { xrpcApi } from '../../xrpc-api';
+import { getProfiles } from "../utils/profile-builder";
 
 /**
  * Helper to serialize a feed generator view
@@ -93,7 +93,7 @@ export async function getFeedGenerator(
     };
 
     // Use _getProfiles for complete creator profileView
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       [generatorData.creatorDid],
       req
     );
@@ -150,7 +150,7 @@ export async function getFeedGenerators(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(generators.map((g) => g.creatorDid))];
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       creatorDids,
       req
     );
@@ -218,7 +218,7 @@ export async function getActorFeeds(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(generators.map((g) => g.creatorDid))];
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       creatorDids,
       req
     );
@@ -282,7 +282,7 @@ export async function getSuggestedFeeds(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(generators.map((g) => g.creatorDid))];
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       creatorDids,
       req
     );
@@ -394,7 +394,7 @@ export async function getPopularFeedGenerators(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(generators.map((g) => g.creatorDid))];
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       creatorDids,
       req
     );
@@ -457,7 +457,7 @@ export async function getSuggestedFeedsUnspecced(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(generators.map((g) => g.creatorDid))];
-    const creatorProfiles = await (xrpcApi as any)._getProfiles(
+    const creatorProfiles = await getProfiles(
       creatorDids,
       req
     );

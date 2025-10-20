@@ -14,7 +14,7 @@ import {
   getKnownFollowersSchema,
   getFollowsSchema,
 } from '../schemas';
-import { xrpcApi } from '../../xrpc-api';
+import { getProfiles } from "../utils/profile-builder";
 
 /**
  * Get relationships between an actor and other actors
@@ -78,7 +78,7 @@ export async function getKnownFollowers(
     // Build full profileView objects using _getProfiles helper
     const followerDids = followers.map((f) => f.did);
     const allDids = [actorDid, ...followerDids];
-    const profiles = await (xrpcApi as any)._getProfiles(allDids, req);
+    const profiles = await getProfiles(allDids, req);
 
     // Create a map of DID -> profile for quick lookup
     const profileMap = new Map(profiles.map((p: any) => [p.did, p]));

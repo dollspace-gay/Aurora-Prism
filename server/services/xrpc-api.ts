@@ -1,20 +1,22 @@
 /**
- * ⚠️ LEGACY FILE - BEING PHASED OUT
+ * ⚠️⚠️⚠️ DEPRECATED FILE - NO LONGER IN USE ⚠️⚠️⚠️
  *
  * This file is the old monolithic XRPC API implementation.
- * All endpoints have been extracted to modular services in server/services/xrpc/services/
+ * It has been FULLY REPLACED by modular services.
  *
- * Current Status:
- * - ✅ All 77 endpoints extracted to modular services
- * - ✅ Routes.ts now uses the new XRPCOrchestrator
- * - ⚠️ This file remains for legacy utility methods:
- *   - serializePosts() - Complex post serialization logic
- *   - _getProfiles() - Profile hydration logic
- *   - Cache management methods
+ * ✅ EXTRACTION COMPLETE:
+ * - All 77+ endpoints → server/services/xrpc/services/
+ * - serializePosts() → server/services/xrpc/utils/serializers.ts
+ * - _getProfiles() → server/services/xrpc/utils/profile-builder.ts
+ * - Auth helpers → server/services/xrpc/utils/auth-helpers.ts
+ * - Routes.ts → Uses XRPCOrchestrator (server/services/xrpc/index.ts)
  *
- * Future Work:
- * - Extract remaining utility methods to dedicated modules
- * - Eventually deprecate and remove this file
+ * ❌ NO FILES IMPORT THIS ANYMORE
+ * ❌ NO CODE REFERENCES THIS FILE
+ * ❌ SAFE TO DELETE
+ *
+ * Kept temporarily as a safety net. Can be deleted once confident all
+ * functionality works correctly with the new modular architecture.
  *
  * See: server/services/xrpc/index.ts for the new orchestrator
  */

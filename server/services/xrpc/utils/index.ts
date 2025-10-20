@@ -36,3 +36,6 @@ export {
   serializePosts,
   serializePostsEnhanced,
 } from './serializers';
+
+// Profile builder
+export { getProfiles, getAuthenticatedDid as getAuthenticatedDidFromRequest } from './profile-builder';

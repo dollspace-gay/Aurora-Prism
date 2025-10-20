@@ -7,7 +7,7 @@ import type { Request, Response } from 'express';
 import { storage } from '../../../storage';
 import { handleError } from '../utils/error-handler';
 import { getTrendsSchema, unspeccedNoParamsSchema } from '../schemas';
-import { xrpcApi } from '../../xrpc-api';
+import { getProfiles } from "../utils/profile-builder";
 
 /**
  * Get tagged suggestions (unspecced)
@@ -140,7 +140,7 @@ export async function getTrends(req: Request, res: Response): Promise<void> {
         // Hydrate user profiles
         const actors =
           userDids.length > 0
-            ? await (xrpcApi as any)._getProfiles(userDids, req)
+            ? await getProfiles(userDids, req)
             : [];
 
         return {

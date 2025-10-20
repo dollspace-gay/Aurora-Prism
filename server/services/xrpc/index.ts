@@ -10,7 +10,6 @@
  */
 
 import type { Request, Response } from 'express';
-import { xrpcApi } from '../xrpc-api';
 
 // Import extracted services
 import * as bookmarkService from './services/bookmark-service';
@@ -37,7 +36,6 @@ import * as postInteractionService from './services/post-interaction-service';
  */
 export class XRPCOrchestrator {
   // Original instance for fallback to non-extracted endpoints
-  private legacy = xrpcApi;
 
   // ============================================================================
   // EXTRACTED SERVICES (Phase 3)
@@ -386,9 +384,6 @@ export class XRPCOrchestrator {
   // ============================================================================
 
   // Public utility method (still delegated to legacy for cache access)
-  invalidatePreferencesCache(userDid: string): void {
-    return this.legacy.invalidatePreferencesCache(userDid);
-  }
 }
 
 // Export singleton instance
