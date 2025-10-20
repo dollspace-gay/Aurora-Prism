@@ -16,7 +16,7 @@ import {
   getSuggestedFollowsByActorSchema,
   suggestedUsersUnspeccedSchema,
 } from '../schemas';
-import { getProfiles } from "../utils/profile-builder";
+import { getProfiles as buildProfiles } from "../utils/profile-builder";
 import { onDemandBackfill } from '../../on-demand-backfill';
 
 /**
@@ -28,7 +28,7 @@ export async function getProfile(req: Request, res: Response): Promise<void> {
     const params = getProfileSchema.parse(req.query);
 
     // Use legacy API's _getProfiles helper for complex profile serialization
-    const profiles = await getProfiles([params.actor], req);
+    const profiles = await buildProfiles([params.actor], req);
 
     if (profiles.length === 0) {
       // Profile not found - trigger on-demand backfill from their PDS
@@ -76,7 +76,7 @@ export async function getProfiles(req: Request, res: Response): Promise<void> {
     const params = getProfilesSchema.parse(req.query);
 
     // Use legacy API's _getProfiles helper for complex profile serialization
-    const profiles = await getProfiles(params.actors, req);
+    const profiles = await buildProfiles(params.actors, req);
 
     res.json({ profiles });
   } catch (error) {
@@ -108,7 +108,7 @@ export async function getSuggestions(
     const userDids = users.map((u) => u.did);
 
     // Use the full _getProfiles helper to build complete profileView objects
-    const actors = await getProfiles(userDids, req);
+    const actors = await buildProfiles(userDids, req);
 
     // Build response with optional cursor and recId
     const response: {
@@ -161,7 +161,7 @@ export async function getSuggestedFollowsByActor(
 
     // Build full profileView objects using _getProfiles helper
     const suggestionDids = suggestions.map((u) => u.did);
-    const profiles = await getProfiles(suggestionDids, req);
+    const profiles = await buildProfiles(suggestionDids, req);
 
     // Generate recId for recommendation tracking (snowflake-like ID)
     // Using timestamp + random component for uniqueness
@@ -201,7 +201,7 @@ export async function getSuggestedUsersUnspecced(
     const userDids = users.map((u) => u.did);
 
     // Use the full _getProfiles helper to build complete profileView objects
-    const actors = await getProfiles(userDids, req);
+    const actors = await buildProfiles(userDids, req);
 
     res.json({ actors });
   } catch (error) {
