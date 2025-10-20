@@ -1650,6 +1650,28 @@ export class XRPCApi {
       return [];
     }
 
+    // Check which users exist in database
+    const existingUsers = await storage.getUsers(uniqueDids);
+    const existingDids = new Set(existingUsers.map(u => u.did));
+    const missingDids = uniqueDids.filter(did => !existingDids.has(did));
+
+    // Fetch missing users from their PDSes
+    if (missingDids.length > 0) {
+      console.log(`[XRPC] Fetching ${missingDids.length} missing user(s) from their PDSes`);
+
+      await Promise.all(
+        missingDids.map(async (did) => {
+          try {
+            const { pdsDataFetcher } = await import('./pds-data-fetcher');
+            await pdsDataFetcher.fetchUser(did);
+            console.log(`[XRPC] Successfully fetched user ${did} from their PDS`);
+          } catch (error) {
+            console.error(`[XRPC] Failed to fetch user ${did} from PDS:`, error);
+          }
+        })
+      );
+    }
+
     const [
       users,
       followersCounts,

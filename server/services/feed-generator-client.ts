@@ -83,13 +83,29 @@ export class FeedGeneratorClient {
       }
 
       const data = await response.json();
-      const skeleton = feedSkeletonResponseSchema.parse(data);
 
-      console.log(
-        `[FeedGenClient] Received ${skeleton.feed.length} posts from feed generator`
-      );
+      // Try to parse the response - if it fails, log the actual response for debugging
+      try {
+        const skeleton = feedSkeletonResponseSchema.parse(data);
 
-      return skeleton;
+        console.log(
+          `[FeedGenClient] Received ${skeleton.feed.length} posts from feed generator`
+        );
+
+        return skeleton;
+      } catch (parseError) {
+        console.error(
+          `[FeedGenClient] Invalid response format from feed generator ${serviceEndpoint}:`
+        );
+        console.error('[FeedGenClient] Response data:', JSON.stringify(data).substring(0, 500));
+        console.error('[FeedGenClient] Parse error:', parseError);
+
+        // Throw a more user-friendly error
+        throw new Error(
+          `Feed generator at ${serviceEndpoint} returned an invalid response format. ` +
+          `This may indicate the feed generator is out of date or misconfigured.`
+        );
+      }
     } catch (error) {
       console.error('[FeedGenClient] Error fetching skeleton:', error);
       throw error;

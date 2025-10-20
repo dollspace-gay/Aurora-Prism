@@ -1,32 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cat:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push)",
-      "Bash(npm run lint:*)",
-      "Bash(npm run check:*)",
-      "Bash(npm run lint:fix:*)",
-      "Bash(npm run db:generate:*)",
-      "Bash(npm run:*)",
-      "Bash(npm audit:*)",
-      "Bash(npm install)",
-      "Bash(curl:*)",
-      "Bash(npx tsc:*)",
-      "Bash(findstr:*)",
-      "Bash(yarn install)",
-      "Bash(node --version:*)",
-      "Bash(npm:*)",
-      "Bash(docker-compose restart:*)",
-      "Bash(echo \"# Bluesky Branding Removal Checklist\n\n## 1. App Icons & Images\n- assets/app-icons/*.png - App icons (replace with Aurora Prism branding)\n- assets/favicon.png - Browser favicon\n- assets/icon-android-*.png - Android icons\n- assets/default-avatar.png - Default avatar image\n\n## 2. App Metadata\n- app.json - App name, slug, description\n- package.json - App name and description\n\n## 3. Text References (276 occurrences)\n- Onboarding screens (src/screens/Onboarding/)\n- Signup screens (src/screens/Signup/)\n- Settings/About screens\n- Terms of Service / Privacy Policy references\n- Help text and tooltips\n- Error messages mentioning Bluesky\n\n## 4. URLs\n- bsky.app references (feed URLs, profile URLs)\n- bsky.social references\n- Links to Bluesky support/help\n\n## 5. Service Names\n- Bluesky Moderation Service references\n- Default feed generator names\n\nTotal: 276 text references found\")",
-      "Bash(psql \"$DATABASE_URL\" -c \"SELECT \n  (SELECT COUNT(*) FROM users) as users,\n  (SELECT COUNT(*) FROM posts) as posts,\n  (SELECT COUNT(*) FROM likes) as likes,\n  (SELECT COUNT(*) FROM reposts) as reposts,\n  (SELECT COUNT(*) FROM follows) as follows,\n  (SELECT COUNT(*) FROM blocks) as blocks;\")",
-      "Bash(dig +short TXT _atproto.spacelawshitpost.me)",
-      "Bash(python3 -m json.tool)",
-      "Bash(npx --yes @expo/cli export:web)",
-      "Bash(magick favicon.png -define icon:auto-resize=16,32,48 favicon.ico)",
-      "Bash(convert favicon.png -define icon:auto-resize=16,32,48 favicon.ico)",
-      "Bash(npx --yes @fiahfy/ico-cli -i assets/favicon.png -o assets/favicon.ico)"
+      "Bash(node -e \"const {db} = require(''''./dist/server/db''''); db.execute(''''SELECT COUNT(*) as feed_count FROM feed_generators;'''').then(r => console.log(r.rows[0])).catch(e => console.error(e))\")",
+      "Bash(node -e \"const data = require(''''fs'''').readFileSync(0, ''''utf-8''''); const json = JSON.parse(data); console.log(''''Service DID:'''', json.view.did); console.log(''''Service endpoint (from DID doc):'''', json.view.did)\")",
+      "Bash(node -e \"const data = require(''''fs'''').readFileSync(0, ''''utf-8''''); const json = JSON.parse(data); const feedgenService = json.service?.find(s => s.id === ''''#bsky_fg''''); console.log(''''Feed Generator Endpoint:'''', feedgenService?.serviceEndpoint || ''''Not found'''')\")",
+      "Bash(node -e \"const data = require(''''fs'''').readFileSync(0, ''''utf-8''''); console.log(''''Response:'''', data.substring(0, 1000))\")"
     ],
     "deny": [],
     "ask": []

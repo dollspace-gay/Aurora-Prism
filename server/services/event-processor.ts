@@ -2247,10 +2247,27 @@ export class EventProcessor {
   }
 
   // Guard against invalid or missing dates in upstream records
+  // Also prevents future-dated posts from appearing at the top of timelines
   private safeDate(value: string | Date | undefined): Date {
     if (!value) return new Date();
     const d = value instanceof Date ? value : new Date(value);
-    return isNaN(d.getTime()) ? new Date() : d;
+
+    // If date is invalid, return current time
+    if (isNaN(d.getTime())) return new Date();
+
+    const now = new Date();
+
+    // If date is in the future (with 5 minute grace period for clock skew),
+    // clamp it to current time to prevent timeline manipulation
+    const gracePeriod = 5 * 60 * 1000; // 5 minutes in milliseconds
+    if (d.getTime() > now.getTime() + gracePeriod) {
+      console.warn(
+        `[EVENT_PROCESSOR] Future-dated record detected (${d.toISOString()}), clamping to current time`
+      );
+      return now;
+    }
+
+    return d;
   }
 
   private async processDelete(uri: string, collection: string) {
