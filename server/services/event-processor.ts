@@ -19,10 +19,18 @@ import type {
   InsertFeedItem,
   InsertVerification,
 } from '@shared/schema';
-import { threadGates } from '@shared/schema';
+import {
+  threadGates,
+  posts,
+  postAggregations,
+  likes,
+  postViewerStates,
+  reposts,
+  feedItems,
+} from '@shared/schema';
 import { CID } from 'multiformats/cid';
 import * as Digest from 'multiformats/hashes/digest';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 function sanitizeText(text: string | undefined | null): string | undefined {
   if (!text) return undefined;
@@ -1199,24 +1207,27 @@ export class EventProcessor {
       indexedAt: this.safeDate(record.createdAt), // Use createdAt for indexedAt to preserve chronological order during backfills
     };
 
-    await this.storage.createPost(post);
+    // Create post and aggregation atomically in a transaction
+    await this.storage.transaction(async (tx) => {
+      await tx.insert(posts).values(post);
 
-    // Create post aggregation record
-    try {
-      await this.storage.createPostAggregation({
-        postUri: uri,
-        likeCount: 0,
-        repostCount: 0,
-        replyCount: 0,
-        bookmarkCount: 0,
-        quoteCount: 0,
-      });
-    } catch (error: any) {
-      // Ignore duplicate key errors (23505) - aggregation already exists
-      if (error?.code !== '23505') {
-        throw error;
+      // Create post aggregation record
+      try {
+        await tx.insert(postAggregations).values({
+          postUri: uri,
+          likeCount: 0,
+          repostCount: 0,
+          replyCount: 0,
+          bookmarkCount: 0,
+          quoteCount: 0,
+        });
+      } catch (error: any) {
+        // Ignore duplicate key errors (23505) - aggregation already exists
+        if (error?.code !== '23505') {
+          throw error;
+        }
       }
-    }
+    });
 
     // If this is a reply, increment the parent post's reply count and create thread context
     if (record.reply?.parent.uri) {
@@ -1406,26 +1417,32 @@ export class EventProcessor {
       createdAt: this.safeDate(record.createdAt),
     };
 
-    // Insert like directly - foreign key constraints removed for federated data
+    // Insert like, increment aggregation, and create viewer state atomically
     try {
-      await this.storage.createLike(like);
+      await this.storage.transaction(async (tx) => {
+        // Insert like
+        await tx.insert(likes).values(like);
 
-      // Increment post aggregation like count
-      await this.storage.incrementPostAggregation(postUri, 'likeCount', 1);
+        // Increment post aggregation like count
+        await tx
+          .update(postAggregations)
+          .set({ likeCount: sql`${postAggregations.likeCount} + 1` })
+          .where(eq(postAggregations.postUri, postUri));
 
-      // Create viewer state for the like
-      await this.storage.createPostViewerState({
-        postUri,
-        viewerDid: userDid,
-        likeUri: uri,
-        bookmarked: false,
-        threadMuted: false,
-        replyDisabled: false,
-        embeddingDisabled: false,
-        pinned: false,
+        // Create viewer state for the like
+        await tx.insert(postViewerStates).values({
+          postUri,
+          viewerDid: userDid,
+          likeUri: uri,
+          bookmarked: false,
+          threadMuted: false,
+          replyDisabled: false,
+          embeddingDisabled: false,
+          pinned: false,
+        });
       });
 
-      // Try to create notification if post exists locally
+      // Try to create notification if post exists locally (outside transaction)
       const post = await this.storage.getPost(postUri);
       if (post && post.authorDid !== userDid) {
         try {
@@ -1485,38 +1502,44 @@ export class EventProcessor {
       createdAt: this.safeDate(record.createdAt),
     };
 
-    // Insert repost directly - foreign key constraints removed for federated data
+    // Insert repost, increment aggregation, create viewer state and feed item atomically
     try {
-      await this.storage.createRepost(repost);
+      await this.storage.transaction(async (tx) => {
+        // Insert repost
+        await tx.insert(reposts).values(repost);
 
-      // Increment post aggregation repost count
-      await this.storage.incrementPostAggregation(postUri, 'repostCount', 1);
+        // Increment post aggregation repost count
+        await tx
+          .update(postAggregations)
+          .set({ repostCount: sql`${postAggregations.repostCount} + 1` })
+          .where(eq(postAggregations.postUri, postUri));
 
-      // Create or update viewer state for the repost
-      await this.storage.createPostViewerState({
-        postUri,
-        viewerDid: userDid,
-        repostUri: uri,
-        bookmarked: false,
-        threadMuted: false,
-        replyDisabled: false,
-        embeddingDisabled: false,
-        pinned: false,
+        // Create or update viewer state for the repost
+        await tx.insert(postViewerStates).values({
+          postUri,
+          viewerDid: userDid,
+          repostUri: uri,
+          bookmarked: false,
+          threadMuted: false,
+          replyDisabled: false,
+          embeddingDisabled: false,
+          pinned: false,
+        });
+
+        // Create feed item for the repost
+        const feedItem: InsertFeedItem = {
+          uri: uri,
+          postUri: postUri,
+          originatorDid: userDid,
+          type: 'repost',
+          sortAt: this.safeDate(record.createdAt),
+          cid: cid || uri, // Use CID if available, otherwise use URI
+          createdAt: this.safeDate(record.createdAt),
+        };
+        await tx.insert(feedItems).values(feedItem);
       });
 
-      // Create feed item for the repost
-      const feedItem: InsertFeedItem = {
-        uri: uri,
-        postUri: postUri,
-        originatorDid: userDid,
-        type: 'repost',
-        sortAt: this.safeDate(record.createdAt),
-        cid: cid || uri, // Use CID if available, otherwise use URI
-        createdAt: this.safeDate(record.createdAt),
-      };
-      await this.storage.createFeedItem(feedItem);
-
-      // Try to create notification if post exists locally
+      // Try to create notification if post exists locally (outside transaction)
       const post = await this.storage.getPost(postUri);
       if (post && post.authorDid !== userDid) {
         try {

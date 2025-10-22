@@ -85,6 +85,11 @@ export const posts = pgTable(
   (table) => ({
     authorIdx: index('idx_posts_author_did').on(table.authorDid),
     indexedAtIdx: index('idx_posts_indexed_at').on(table.indexedAt),
+    // Composite index for timeline queries (sort by createdAt DESC, filter by author)
+    createdAtAuthorIdx: index('idx_posts_created_at_author').on(
+      table.createdAt.desc(),
+      table.authorDid
+    ),
     parentIdx: index('idx_posts_parent_uri').on(table.parentUri),
     rootIdx: index('idx_posts_root_uri').on(table.rootUri),
     searchVectorIdx: index('idx_posts_search_vector').using(

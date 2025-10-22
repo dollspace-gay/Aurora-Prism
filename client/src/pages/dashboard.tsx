@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Sidebar } from '@/components/sidebar';
 import { MetricsCards } from '@/components/metrics-cards';
 import { SystemHealth } from '@/components/system-health';
@@ -86,6 +86,11 @@ export default function Dashboard() {
 
   const [events, setEvents] = useState<EventData[]>([]);
 
+  // Use ref to store event buffer to avoid closure issues and improve performance
+  const eventBufferRef = useRef<EventData[]>([]);
+  const MAX_EVENT_BUFFER = 100; // Maximum events to keep in memory
+  const DISPLAY_EVENT_COUNT = 10; // Number of events to display
+
   // Initial metrics fetch (SSE stream will update in real-time after connection)
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -102,15 +107,16 @@ export default function Dashboard() {
 
   // Real-time event stream via Server-Sent Events (SSE)
   useEffect(() => {
-    const recentEvents: EventData[] = [];
     let eventSource: EventSource | null = null;
 
     // Fetch initial events from API
     const fetchInitialEvents = async () => {
       try {
         const data = await api.get<EventData[]>('/api/events/recent');
-        recentEvents.push(...data);
-        setEvents([...data.slice(0, 10)]);
+        // Initialize buffer with recent events (limit to MAX_EVENT_BUFFER)
+        eventBufferRef.current = data.slice(0, MAX_EVENT_BUFFER);
+        // Display first DISPLAY_EVENT_COUNT events
+        setEvents(eventBufferRef.current.slice(0, DISPLAY_EVENT_COUNT));
       } catch (error) {
         console.error('[Dashboard] Failed to fetch initial events:', error);
       }
@@ -132,14 +138,16 @@ export default function Dashboard() {
           const message = JSON.parse(event.data);
 
           if (message.type === 'event' && message.data) {
-            // Add new event to the front
-            recentEvents.unshift(message.data);
-            // Keep only last 50 events
-            if (recentEvents.length > 50) {
-              recentEvents.pop();
+            // Add new event to the front of the buffer
+            eventBufferRef.current.unshift(message.data);
+
+            // Trim buffer to MAX_EVENT_BUFFER to prevent unbounded growth
+            if (eventBufferRef.current.length > MAX_EVENT_BUFFER) {
+              eventBufferRef.current = eventBufferRef.current.slice(0, MAX_EVENT_BUFFER);
             }
-            // Update UI with latest 10
-            setEvents([...recentEvents.slice(0, 10)]);
+
+            // Update UI with latest DISPLAY_EVENT_COUNT events
+            setEvents(eventBufferRef.current.slice(0, DISPLAY_EVENT_COUNT));
           } else if (message.type === 'metrics') {
             // Update metrics from SSE stream
             setMetrics(message.data);
@@ -164,6 +172,8 @@ export default function Dashboard() {
 
     return () => {
       if (eventSource) eventSource.close();
+      // Clear buffer on cleanup to free memory
+      eventBufferRef.current = [];
     };
   }, []);
 

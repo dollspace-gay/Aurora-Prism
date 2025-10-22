@@ -725,6 +725,18 @@ export class DatabaseStorage implements IStorage {
     }, 30000);
   }
 
+  /**
+   * Execute a function within a database transaction
+   * Ensures atomicity for multi-table operations
+   * @param fn Async function that receives a transaction object
+   * @returns Result of the transaction function
+   */
+  async transaction<T>(
+    fn: (tx: DbConnection) => Promise<T>
+  ): Promise<T> {
+    return await this.db.transaction(fn);
+  }
+
   async getUser(did: string): Promise<User | undefined> {
     const [user] = await this.db.select().from(users).where(eq(users.did, did));
     return user || undefined;
