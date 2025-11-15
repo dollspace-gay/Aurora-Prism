@@ -2630,7 +2630,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteExpiredSessions(): Promise<void> {
-    await this.db.delete(sessions).where(sql`${sessions.expiresAt} < NOW()`);
+    // Only delete sessions that expired 90+ days ago to preserve user protection in data pruning
+    // This ensures recently logged-in users remain protected from data pruning
+    await this.db
+      .delete(sessions)
+      .where(sql`${sessions.expiresAt} < NOW() - INTERVAL '90 days'`);
   }
 
   /**

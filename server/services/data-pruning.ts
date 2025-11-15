@@ -262,14 +262,15 @@ export class DataPruningService {
           batchHadDeletions = true;
         }
 
-        // Prune quotes with limit (exclude protected DIDs)
+        // Prune quotes with limit (exclude protected DIDs via JOIN with posts)
         const deletedQuotes = await db
           .delete(quotes)
           .where(
             sql`${quotes.uri} IN (
-            SELECT uri FROM ${quotes}
-            WHERE ${quotes.createdAt} < ${cutoffDate}
-            AND ${quotes.authorDid} NOT IN (${sql.join(
+            SELECT q.uri FROM ${quotes} q
+            JOIN ${posts} p ON q.post_uri = p.uri
+            WHERE q.created_at < ${cutoffDate}
+            AND p.author_did NOT IN (${sql.join(
               Array.from(protectedDids).map((did) => sql`${did}`),
               sql`, `
             )})
@@ -353,7 +354,7 @@ export class DataPruningService {
             sql`${feedItems.postUri} IN (
             SELECT post_uri FROM ${feedItems}
             WHERE ${feedItems.createdAt} < ${cutoffDate}
-            AND ${feedItems.authorDid} NOT IN (${sql.join(
+            AND ${feedItems.originatorDid} NOT IN (${sql.join(
               Array.from(protectedDids).map((did) => sql`${did}`),
               sql`, `
             )})
@@ -382,7 +383,7 @@ export class DataPruningService {
             LIMIT ${this.MAX_DELETION_PER_RUN}
           )`
           )
-          .returning({ uri: postAggregations.uri });
+          .returning({ postUri: postAggregations.postUri });
 
         if (deletedPostAggregations.length > 0) {
           totalStats.postAggregations += deletedPostAggregations.length;

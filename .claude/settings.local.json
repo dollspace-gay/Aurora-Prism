@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run check)"
+      "Bash(npm run check)",
+      "Bash(node update-schema-indexes.js:*)",
+      "Bash(node update-schema-indexes.cjs:*)",
+      "Bash(node update-remaining-indexes.cjs:*)",
+      "Bash(node add-pool-monitoring.cjs:*)",
+      "Bash(node update-bounded-maps.cjs:*)",
+      "Bash(node fix-pruning-bugs.cjs:*)"
     ],
     "deny": [],
     "ask": []

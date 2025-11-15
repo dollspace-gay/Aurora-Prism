@@ -96,6 +96,11 @@ export const posts = pgTable(
       'gin',
       table.searchVector
     ),
+    // Composite index for backfill operations processing posts sequentially
+    commitSeqTimeIdx: index('idx_posts_commit_seq_time').on(
+      table.commitSeq,
+      table.commitTime
+    ),
   })
 );
 
@@ -117,9 +122,10 @@ export const feedItems = pgTable(
     postIdx: index('idx_feed_items_post').on(table.postUri),
     sortAtIdx: index('idx_feed_items_sort_at').on(table.sortAt),
     typeIdx: index('idx_feed_items_type').on(table.type),
+    // Composite index for timeline queries - DESC order is critical for performance
     originatorSortIdx: index('idx_feed_items_originator_sort').on(
       table.originatorDid,
-      table.sortAt
+      table.sortAt.desc()
     ),
   })
 );
@@ -661,6 +667,11 @@ export const notifications = pgTable(
     recipientReadIdx: index('idx_notifications_recipient_read').on(
       table.recipientDid,
       table.isRead
+    ),
+    // Composite index for notification queries sorted by creation time
+    recipientCreatedIdx: index('idx_notifications_recipient_created').on(
+      table.recipientDid,
+      table.createdAt.desc()
     ),
     createdAtIdx: index('idx_notifications_created_at').on(table.createdAt),
     indexedAtIdx: index('idx_notifications_indexed_at').on(table.indexedAt),

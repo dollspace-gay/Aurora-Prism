@@ -7,6 +7,7 @@ import { Pool as NeonPool, neonConfig } from '@neondatabase/serverless';
 import { Pool as PgPool } from 'pg';
 import ws from 'ws';
 import * as schema from '@shared/schema';
+import { registerPool, logAllPoolStatus } from './pool-metrics';
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -45,35 +46,44 @@ export function createDbPool(
     neonConfig.webSocketConstructor = ws;
 
     const neonPool = new NeonPool({
+      // Statement timeout to prevent runaway queries (30 seconds default)
+      // Can be overridden per-transaction using SET LOCAL statement_timeout
+      options: { statement_timeout: parseInt(process.env.STATEMENT_TIMEOUT_MS || "30000") },
       connectionString: databaseUrl,
       max: poolSize,
       idleTimeoutMillis: 10000,
       connectionTimeoutMillis: 120000, // 2 minutes - increased for backfill scenarios
     });
 
+    poolInstances.set(label, neonPool);
+    registerPool(neonPool, label);
     return drizzle(neonPool, { schema });
   } else {
     const pgPool = new PgPool({
+      // Statement timeout to prevent runaway queries
+      statement_timeout: parseInt(process.env.STATEMENT_TIMEOUT_MS || "30000"),
       connectionString: databaseUrl,
       max: poolSize,
       idleTimeoutMillis: 10000,
       connectionTimeoutMillis: 120000, // 2 minutes - increased for backfill scenarios
     });
 
+    poolInstances.set(label, pgPool);
+    registerPool(pgPool, label);
     return drizzlePg(pgPool, { schema });
   }
 }
 
 // Main application pool size
 // Optimized defaults based on database type:
-//   - Neon serverless: 10 connections (respects connection limits while allowing good concurrency)
-//   - Self-hosted PostgreSQL: 20 connections (better performance for dedicated servers)
+//   - Neon serverless: 20 connections (increased from 10 for better concurrency)
+//   - Self-hosted PostgreSQL: 40 connections (increased from 20 for better performance)
 // Override via DB_POOL_SIZE env var
 // Note: Total connections (main + backfill + workers) must stay within database limits:
 //   - Neon Free: ~10 connections total
 //   - Neon Pro: ~100 connections total
 //   - Self-hosted: depends on max_connections setting (typically 100-200)
-const DEFAULT_DB_POOL_SIZE = isNeonDatabase ? 10 : 20;
+const DEFAULT_DB_POOL_SIZE = isNeonDatabase ? 20 : 40;
 const parsedPoolSize = parseInt(
   process.env.DB_POOL_SIZE || String(DEFAULT_DB_POOL_SIZE),
   10
@@ -99,3 +109,15 @@ export const pool = db as unknown;
 
 // Export main db connection
 export { db };
+
+// Start pool monitoring - log status every 60 seconds
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(() => {
+    logAllPoolStatus();
+  }, 60000);
+
+  // Log initial status after 5 seconds
+  setTimeout(() => {
+    logAllPoolStatus();
+  }, 5000);
+}

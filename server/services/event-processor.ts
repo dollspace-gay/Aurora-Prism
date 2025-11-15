@@ -31,7 +31,10 @@ import {
 import { CID } from 'multiformats/cid';
 import * as Digest from 'multiformats/hashes/digest';
 import { eq, sql } from 'drizzle-orm';
+import { withTransaction } from '../transaction-utils';
 
+import { BoundedArrayMap } from '../bounded-map';
+import { Semaphore } from '../semaphore';
 function sanitizeText(text: string | undefined | null): string | undefined {
   if (!text) return undefined;
   return text.replace(/\u0000/g, '');
@@ -228,14 +231,14 @@ interface PendingUserCreationOp {
 
 export class EventProcessor {
   private storage: IStorage;
-  private pendingOps: Map<string, PendingOp[]> = new Map();
-  private pendingOpIndex: Map<string, string> = new Map(); // opUri -> postUri
-  private pendingUserOps: Map<string, PendingUserOp[]> = new Map(); // userDid -> pending ops
-  private pendingUserOpIndex: Map<string, string> = new Map(); // opUri -> userDid
-  private pendingListItems: Map<string, PendingListItem[]> = new Map(); // listUri -> pending list items
-  private pendingListItemIndex: Map<string, string> = new Map(); // itemUri -> listUri
-  private pendingUserCreationOps: Map<string, PendingUserCreationOp[]> =
-    new Map(); // did -> ops
+  private pendingOps = new BoundedArrayMap<string, PendingOp>(10000, 100);
+  private pendingOpIndex: Map<string, string> = new BoundedArrayMap<string, PendingUserCreationOp>(5000, 100); // opUri -> postUri
+  private pendingUserOps = new BoundedArrayMap<string, PendingUserOp>(5000, 100); // userDid -> pending ops
+  private pendingUserOpIndex: Map<string, string> = new BoundedArrayMap<string, PendingUserCreationOp>(5000, 100); // opUri -> userDid
+  private pendingListItems = new BoundedArrayMap<string, PendingListItem>(5000, 100); // listUri -> pending list items
+  private pendingListItemIndex: Map<string, string> = new BoundedArrayMap<string, PendingUserCreationOp>(5000, 100); // itemUri -> listUri
+  private pendingUserCreationOps =
+    new BoundedArrayMap<string, PendingUserCreationOp>(5000, 100); // did -> ops
   private readonly TTL_MS = 24 * 60 * 60 * 1000; // 24 hour TTL for cleanup
   private totalPendingCount = 0; // Running counter for performance
   private totalPendingUserOps = 0; // Counter for pending user ops
@@ -266,7 +269,7 @@ export class EventProcessor {
 
   // Concurrent user creation limiting to prevent connection pool exhaustion
   private pendingUserCreations = new Map<string, Promise<boolean>>(); // did -> pending promise
-  private activeUserCreations = 0;
+  private userCreationSemaphore: Semaphore;
   // Limit concurrent user creations to avoid overwhelming DB pool
   // Set to 2x pool size to allow some queuing while preventing timeout
   private readonly MAX_CONCURRENT_USER_CREATIONS = parseInt(
@@ -274,6 +277,7 @@ export class EventProcessor {
   );
 
   constructor(storageInstance: IStorage = storage) {
+    this.userCreationSemaphore = new Semaphore(this.MAX_CONCURRENT_USER_CREATIONS);
     this.storage = storageInstance;
     this.startTTLSweeper();
     // Clear cache periodically to respect setting updates
@@ -452,16 +456,7 @@ export class EventProcessor {
   }
 
   private enqueuePendingUserCreationOp(did: string, repo: string, op: any) {
-    const queue = this.pendingUserCreationOps.get(did) || [];
-
-    const pendingOp: PendingUserCreationOp = {
-      repo,
-      op,
-      enqueuedAt: Date.now(),
-    };
-
-    queue.push(pendingOp);
-    this.pendingUserCreationOps.set(did, queue);
+    this.pendingUserCreationOps.add(did, pendingOp);
 
     this.totalPendingUserCreationOps++;
     this.metrics.pendingUserCreationOpsQueued++;
@@ -477,10 +472,7 @@ export class EventProcessor {
     }
 
     // Get or create queue for this post (no limits)
-    const queue = this.pendingOps.get(postUri) || [];
-
-    queue.push(op);
-    this.pendingOps.set(postUri, queue);
+    this.pendingOps.add(postUri, op);
 
     // Add to index
     this.pendingOpIndex.set(opUri, postUri);
@@ -704,7 +696,7 @@ export class EventProcessor {
       pendingUserOpsCount: this.totalPendingUserOps,
       pendingListItemsCount: this.totalPendingListItems,
       pendingUserCreationOpsCount: this.totalPendingUserCreationOps,
-      activeUserCreations: this.activeUserCreations,
+      activeUserCreations: this.userCreationSemaphore.getActive(),
       pendingUserCreationDeduplication: this.pendingUserCreations.size,
     };
   }
@@ -830,11 +822,8 @@ export class EventProcessor {
       if (!user) {
         // Wait if we're at the concurrent creation limit
         // This prevents overwhelming the database with too many concurrent user creations
-        while (this.activeUserCreations >= this.MAX_CONCURRENT_USER_CREATIONS) {
-          await new Promise((resolve) => setTimeout(resolve, 10)); // Wait 10ms before checking again
-        }
 
-        this.activeUserCreations++;
+        await this.userCreationSemaphore.acquire();
 
         try {
           // User doesn't exist - we need to create them
@@ -875,7 +864,7 @@ export class EventProcessor {
             }
           }
         } finally {
-          this.activeUserCreations--;
+          this.userCreationSemaphore.release();
         }
       } else if (!user.avatarUrl && !user.displayName) {
         // User exists but has no profile data - mark for fetching
@@ -1208,7 +1197,7 @@ export class EventProcessor {
     };
 
     // Create post and aggregation atomically in a transaction
-    await this.storage.transaction(async (tx) => {
+    await withTransaction(this.storage, async (tx) => {
       await tx.insert(posts).values(post);
 
       // Create post aggregation record
@@ -1419,7 +1408,7 @@ export class EventProcessor {
 
     // Insert like, increment aggregation, and create viewer state atomically
     try {
-      await this.storage.transaction(async (tx) => {
+      await withTransaction(this.storage, async (tx) => {
         // Insert like
         await tx.insert(likes).values(like);
 
@@ -1504,7 +1493,7 @@ export class EventProcessor {
 
     // Insert repost, increment aggregation, create viewer state and feed item atomically
     try {
-      await this.storage.transaction(async (tx) => {
+      await withTransaction(this.storage, async (tx) => {
         // Insert repost
         await tx.insert(reposts).values(repost);
 

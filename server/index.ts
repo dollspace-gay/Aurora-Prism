@@ -5,6 +5,7 @@ import { registerRoutes } from './routes';
 import { setupVite, serveStatic, log } from './vite';
 import { logCollector } from './services/log-collector';
 import { cacheService } from './services/cache';
+import { startBackgroundJobs } from './background-jobs';
 
 const app = express();
 
