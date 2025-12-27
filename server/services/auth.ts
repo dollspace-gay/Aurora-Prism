@@ -186,12 +186,14 @@ export class AuthService {
 
       // For PDS tokens (com.atproto.access scope), skip signature verification
       // The PDS already verified the user's credentials and tokens are short-lived
-      // This matches how Bluesky's official AppView works
+      // NOTE: In standard AT Protocol flow, PDS access tokens shouldn't reach AppViews directly.
+      // Clients talk to PDS, which proxies to AppView using service auth tokens.
+      // This code path may be hit by non-standard direct-to-AppView clients.
       const isPdsToken = payload.scope === 'com.atproto.access' || payload.scope === 'com.atproto.appPassPrivileged';
 
       if (isPdsToken) {
-        console.log(
-          `[AUTH] ✓ PDS token accepted for DID: ${userDid} (from PDS: ${signingDid}, scope: ${payload.scope})`
+        console.warn(
+          `[AUTH] ⚠️ PDS token received directly (unusual flow) - DID: ${userDid}, PDS: ${signingDid}, scope: ${payload.scope}, exp: ${payload.exp ? new Date(payload.exp * 1000).toISOString() : 'none'}`
         );
         return {
           did: userDid,
@@ -410,16 +412,9 @@ export class AuthService {
     // 2. Fallback to Bearer token for API clients
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      console.log(
-        `[AUTH] Extracted Bearer token from ${req.path}: ${token.substring(0, 20)}...`
-      );
-      return token;
+      return authHeader.substring(7);
     }
 
-    console.log(
-      `[AUTH] No token found in cookie or Authorization header for ${req.path}`
-    );
     return null;
   }
 }

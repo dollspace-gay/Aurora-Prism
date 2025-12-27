@@ -165,13 +165,9 @@ export class CSRFProtection {
 
     // Verify HMAC signature
     if (!this.verifyToken(cookieToken, cookieSignature)) {
-      console.warn('[CSRF] Invalid signature from request', {
+      console.warn('[CSRF] Invalid signature', {
         method: req.method,
         path: req.path,
-        tokenLength: cookieToken?.length,
-        signatureLength: cookieSignature?.length,
-        expectedSignature: this.signToken(cookieToken).substring(0, 8) + '...',
-        actualSignature: cookieSignature?.substring(0, 8) + '...',
       });
       return res.status(403).json({
         error: 'CSRF validation failed',
@@ -179,7 +175,7 @@ export class CSRFProtection {
       });
     }
 
-    console.log('[CSRF] Valid token for request', {
+    console.log('[CSRF] Valid token', {
       method: req.method,
       path: req.path,
     });
