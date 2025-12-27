@@ -33,7 +33,7 @@ import * as Digest from 'multiformats/hashes/digest';
 import { eq, sql } from 'drizzle-orm';
 import { withTransaction } from '../transaction-utils';
 
-import { BoundedArrayMap } from '../bounded-map';
+import { BoundedArrayMap, BoundedMap } from '../bounded-map';
 import { Semaphore } from '../semaphore';
 function sanitizeText(text: string | undefined | null): string | undefined {
   if (!text) return undefined;
@@ -232,11 +232,11 @@ interface PendingUserCreationOp {
 export class EventProcessor {
   private storage: IStorage;
   private pendingOps = new BoundedArrayMap<string, PendingOp>(10000, 100);
-  private pendingOpIndex: Map<string, string> = new BoundedArrayMap<string, PendingUserCreationOp>(5000, 100); // opUri -> postUri
+  private pendingOpIndex = new BoundedMap<string, string>(5000); // opUri -> postUri
   private pendingUserOps = new BoundedArrayMap<string, PendingUserOp>(5000, 100); // userDid -> pending ops
-  private pendingUserOpIndex: Map<string, string> = new BoundedArrayMap<string, PendingUserCreationOp>(5000, 100); // opUri -> userDid
+  private pendingUserOpIndex = new BoundedMap<string, string>(5000); // opUri -> userDid
   private pendingListItems = new BoundedArrayMap<string, PendingListItem>(5000, 100); // listUri -> pending list items
-  private pendingListItemIndex: Map<string, string> = new BoundedArrayMap<string, PendingUserCreationOp>(5000, 100); // itemUri -> listUri
+  private pendingListItemIndex = new BoundedMap<string, string>(5000); // itemUri -> listUri
   private pendingUserCreationOps =
     new BoundedArrayMap<string, PendingUserCreationOp>(5000, 100); // did -> ops
   private readonly TTL_MS = 24 * 60 * 60 * 1000; // 24 hour TTL for cleanup
@@ -456,6 +456,11 @@ export class EventProcessor {
   }
 
   private enqueuePendingUserCreationOp(did: string, repo: string, op: any) {
+    const pendingOp: PendingUserCreationOp = {
+      repo,
+      op,
+      enqueuedAt: Date.now(),
+    };
     this.pendingUserCreationOps.add(did, pendingOp);
 
     this.totalPendingUserCreationOps++;
