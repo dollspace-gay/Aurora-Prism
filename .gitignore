@@ -26,3 +26,6 @@ social-app/
 bluesky-web/
 bsky-client/
 nul
+.chainlink/daemon.log
+.chainlink/daemon.pid
+.chainlink/issues.db

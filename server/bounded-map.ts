@@ -8,14 +8,18 @@ export class BoundedMap<K, V> extends Map<K, V> {
   private accessOrder: K[] = []; // Track access order for LRU
 
   constructor(maxSize: number, entries?: readonly (readonly [K, V])[] | null) {
-    super(entries);
+    // Don't pass entries to super() - our overridden set() would be called
+    // before accessOrder is initialized (class fields init after super())
+    super();
     if (maxSize <= 0) {
       throw new Error('BoundedMap maxSize must be positive');
     }
     this.maxSize = maxSize;
+    // Now accessOrder is initialized, manually add entries
     if (entries) {
-      this.accessOrder = Array.from(entries).map(([key]) => key);
-      this.enforceLimit();
+      for (const [key, value] of entries) {
+        this.set(key, value);
+      }
     }
   }
 
