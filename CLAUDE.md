@@ -57,67 +57,76 @@ docker-compose up    # Start full stack (Redis + Postgres + App)
 | `FIREHOSE_ENABLED` | Toggle live ingestion |
 | `MAX_CONCURRENT_OPS` | Per-worker processing limit |
 
-## Issue Tracking with bd/beads
+## Issue Tracking with Chainlink
 
-This project uses `bd` (beads) for issue tracking - a lightweight tracker with first-class dependency support. Issues are stored locally and synced via git.
+This project uses `chainlink` for issue tracking - a simple, lean issue tracker CLI with dependency support, timers, and milestones.
 
 ### Quick Reference
 
 ```bash
 # View issues
-bd list                    # List all open issues
-bd list --all              # Include closed issues
-bd show <id>               # Show issue details
-bd status                  # Database overview
-bd ready                   # Show ready work (no blockers)
-bd blocked                 # Show blocked issues
+chainlink list             # List all open issues
+chainlink show <id>        # Show issue details
+chainlink ready            # Show issues ready to work on (no open blockers)
+chainlink blocked          # List blocked issues
+chainlink tree             # Show issues as a tree hierarchy
+chainlink next             # Suggest the next issue to work on
 
 # Create and manage
-bd create                  # Create new issue (opens editor)
-bd create -t "Title"       # Create with title
-bd update <id> -s open     # Update status (open/in-progress/closed)
-bd close <id>              # Close issue
-bd reopen <id>             # Reopen issue
+chainlink create           # Create a new issue
+chainlink subissue <parent> # Create a subissue under a parent
+chainlink update <id>      # Update an issue
+chainlink close <id>       # Close an issue
+chainlink reopen <id>      # Reopen a closed issue
+chainlink delete <id>      # Delete an issue
 
 # Dependencies
-bd dep add <id> <blocker>  # Add dependency (id is blocked by blocker)
-bd dep rm <id> <blocker>   # Remove dependency
-bd show <id>               # Shows dependencies in issue details
+chainlink block <id> <blocker>   # Mark issue as blocked by another
+chainlink unblock <id> <blocker> # Remove a blocking relationship
 
-# Labels and organization
-bd label add <id> <label>  # Add label
-bd label rm <id> <label>   # Remove label
-bd list -l bug             # Filter by label
+# Relations
+chainlink relate <id1> <id2>     # Link two related issues
+chainlink unrelate <id1> <id2>   # Remove a relation
+chainlink related <id>           # List related issues
+
+# Labels
+chainlink label <id> <label>     # Add a label to an issue
+chainlink unlabel <id> <label>   # Remove a label from an issue
 
 # Comments
-bd comment <id>            # Add comment (opens editor)
-bd comments <id>           # View comments
+chainlink comment <id>           # Add a comment to an issue
 
-# Search and filter
-bd search "query"          # Text search
-bd stale                   # Show stale issues
-bd count                   # Count matching issues
+# Search
+chainlink search "query"         # Search issues by text
 
-# Sync
-bd sync                    # Sync with git remote
-bd daemon start            # Start background sync daemon
-bd info                    # Show database and daemon info
+# Time tracking
+chainlink start <id>             # Start a timer for an issue
+chainlink stop                   # Stop the current timer
+chainlink timer                  # Show current timer status
+
+# Milestones
+chainlink milestone              # Milestone management
+
+# Import/Export
+chainlink export                 # Export issues to file
+chainlink import                 # Import issues from JSON file
 ```
 
 ### Workflow Tips
 
-- Use `bd ready` to see what you can work on next (no blockers)
-- Use `bd blocked` to identify what's waiting on other work
-- Run `bd sync` after making changes to share with collaborators
-- Use `bd prime` for AI-optimized context when working with Claude
+- Use `chainlink ready` to see what you can work on next (no blockers)
+- Use `chainlink blocked` to identify what's waiting on other work
+- Use `chainlink next` to get a suggestion for what to work on
+- Use `chainlink tree` to visualize issue hierarchy
+- Use `chainlink start <id>` to track time spent on issues
 
 ### When Working on Issues
 
-1. Check `bd ready` for available work
-2. Update status to in-progress: `bd update <id> -s in-progress`
+1. Check `chainlink ready` for available work
+2. Start timer: `chainlink start <id>`
 3. Reference issue ID in commits when relevant
-4. Close when done: `bd close <id>`
-5. Sync changes: `bd sync`
+4. Stop timer when done: `chainlink stop`
+5. Close when complete: `chainlink close <id>`
 
 ## API Endpoints
 
