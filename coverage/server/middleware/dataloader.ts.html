@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -135,27 +135,27 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Request, Response, NextFunction } from 'express';
 import {
@@ -176,33 +176,33 @@ declare global {
  * Middleware that creates a request-scoped DataLoader instance
  * This ensures each request gets its own DataLoader with fresh caches
  */
-export function <span class="fstat-no" title="function not covered" >dataLoaderMiddleware(</span>
+export function dataLoaderMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   // Create a new DataLoader instance for this request
-<span class="cstat-no" title="statement not covered" >  req.dataLoader = createDataLoader();</span>
+  req.dataLoader = createDataLoader();
 &nbsp;
   // Clean up after request completes
-<span class="cstat-no" title="statement not covered" >  res.on('finish', <span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
-<span class="cstat-no" title="statement not covered" >    if (req.dataLoader) {</span>
-<span class="cstat-no" title="statement not covered" >      req.dataLoader.clearAll();</span>
-<span class="cstat-no" title="statement not covered" >      req.dataLoader = undefined;</span>
+  res.on('finish', () =&gt; {
+    if (req.dataLoader) {
+      req.dataLoader.clearAll();
+      req.dataLoader = undefined;
     }
   });
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  next();</span>
+  next();
 }
 &nbsp;
 /**
  * Helper to get DataLoader from request or create a new one
  */
-export function <span class="fstat-no" title="function not covered" >getRequestDataLoader(r</span>eq: Request): HydrationDataLoader {
-<span class="cstat-no" title="statement not covered" >  if (!req.dataLoader) {</span>
-<span class="cstat-no" title="statement not covered" >    req.dataLoader = createDataLoader();</span>
+export function getRequestDataLoader(req: Request): HydrationDataLoader {
+  if (!req.dataLoader) {
+    req.dataLoader = createDataLoader();
   }
-<span class="cstat-no" title="statement not covered" >  return req.dataLoader;</span>
+  return req.dataLoader;
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -211,7 +211,7 @@ export function <span class="fstat-no" title="function not covered" >getRequestD
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-02T21:09:05.517Z
+                at 2026-01-02T21:17:33.532Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
