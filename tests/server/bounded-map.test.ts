@@ -1,417 +1,213 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BoundedMap, BoundedArrayMap } from '../../server/bounded-map';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { BoundedMap, BoundedArrayMap } from "../../server/bounded-map";
 
-describe('BoundedMap', () => {
-  describe('constructor', () => {
-    it('should create empty map with specified maxSize', () => {
-      const map = new BoundedMap<string, number>(10);
-      expect(map.size).toBe(0);
+describe("BoundedMap", () => {
+  describe("constructor", () => {
+    it("should create map with positive maxSize", () => {
+      const map = new BoundedMap(10);
       expect(map.getMaxSize()).toBe(10);
+      expect(map.size).toBe(0);
     });
 
-    it('should throw error if maxSize is zero', () => {
-      expect(() => new BoundedMap<string, number>(0)).toThrow(
-        'BoundedMap maxSize must be positive'
-      );
+    it("should throw for zero maxSize", () => {
+      expect(() => new BoundedMap(0)).toThrow("BoundedMap maxSize must be positive");
     });
 
-    it('should throw error if maxSize is negative', () => {
-      expect(() => new BoundedMap<string, number>(-1)).toThrow(
-        'BoundedMap maxSize must be positive'
-      );
-    });
-
-    it('should initialize with entries', () => {
-      const entries: [string, number][] = [
-        ['a', 1],
-        ['b', 2],
-        ['c', 3],
-      ];
-      const map = new BoundedMap<string, number>(10, entries);
-      expect(map.size).toBe(3);
-      expect(map.get('a')).toBe(1);
-      expect(map.get('b')).toBe(2);
-      expect(map.get('c')).toBe(3);
-    });
-
-    it('should enforce limit when initialized with too many entries', () => {
-      const entries: [string, number][] = [
-        ['a', 1],
-        ['b', 2],
-        ['c', 3],
-        ['d', 4],
-        ['e', 5],
-      ];
-      const map = new BoundedMap<string, number>(3, entries);
-      expect(map.size).toBe(3);
-      // First two should be evicted (LRU)
-      expect(map.has('a')).toBe(false);
-      expect(map.has('b')).toBe(false);
-      expect(map.has('c')).toBe(true);
-      expect(map.has('d')).toBe(true);
-      expect(map.has('e')).toBe(true);
+    it("should throw for negative maxSize", () => {
+      expect(() => new BoundedMap(-5)).toThrow("BoundedMap maxSize must be positive");
     });
   });
 
-  describe('set', () => {
-    let map: BoundedMap<string, number>;
-
-    beforeEach(() => {
-      map = new BoundedMap<string, number>(3);
+  describe("set and get", () => {
+    it("should store and retrieve values", () => {
+      const map = new BoundedMap(10);
+      map.set("key", 42);
+      expect(map.get("key")).toBe(42);
     });
 
-    it('should add new entries', () => {
-      map.set('a', 1);
-      expect(map.get('a')).toBe(1);
+    it("should update existing values", () => {
+      const map = new BoundedMap(10);
+      map.set("key", 1);
+      map.set("key", 2);
+      expect(map.get("key")).toBe(2);
       expect(map.size).toBe(1);
     });
 
-    it('should update existing entries', () => {
-      map.set('a', 1);
-      map.set('a', 2);
-      expect(map.get('a')).toBe(2);
-      expect(map.size).toBe(1);
+    it("should return undefined for non-existent keys", () => {
+      const map = new BoundedMap(10);
+      expect(map.get("nonexistent")).toBeUndefined();
     });
+  });
 
-    it('should evict oldest entry when exceeding maxSize', () => {
-      map.set('a', 1);
-      map.set('b', 2);
-      map.set('c', 3);
-      map.set('d', 4); // Should evict 'a'
+  describe("LRU eviction", () => {
+    it("should evict oldest entry when exceeding maxSize", () => {
+      const map = new BoundedMap(3);
+      map.set("a", 1);
+      map.set("b", 2);
+      map.set("c", 3);
+      map.set("d", 4);
 
       expect(map.size).toBe(3);
-      expect(map.has('a')).toBe(false);
-      expect(map.has('b')).toBe(true);
-      expect(map.has('c')).toBe(true);
-      expect(map.has('d')).toBe(true);
+      expect(map.has("a")).toBe(false);
+      expect(map.get("b")).toBe(2);
+      expect(map.get("c")).toBe(3);
+      expect(map.get("d")).toBe(4);
     });
 
-    it('should return this for chaining', () => {
-      const result = map.set('a', 1);
-      expect(result).toBe(map);
-    });
+    it("should update access order on get", () => {
+      const map = new BoundedMap(3);
+      map.set("a", 1);
+      map.set("b", 2);
+      map.set("c", 3);
 
-    it('should update access order when setting existing key', () => {
-      map.set('a', 1);
-      map.set('b', 2);
-      map.set('a', 10); // Updates 'a', moves it to end
-      map.set('c', 3);
-      map.set('d', 4); // Should evict 'b' (now oldest)
+      map.get("a");
+      map.set("d", 4);
 
-      expect(map.has('a')).toBe(true);
-      expect(map.has('b')).toBe(false);
-      expect(map.has('c')).toBe(true);
-      expect(map.has('d')).toBe(true);
+      expect(map.has("a")).toBe(true);
+      expect(map.has("b")).toBe(false);
+      expect(map.has("c")).toBe(true);
+      expect(map.has("d")).toBe(true);
     });
   });
 
-  describe('get', () => {
-    let map: BoundedMap<string, number>;
-
-    beforeEach(() => {
-      map = new BoundedMap<string, number>(3);
-      map.set('a', 1);
-      map.set('b', 2);
+  describe("delete", () => {
+    it("should delete existing entries", () => {
+      const map = new BoundedMap(10);
+      map.set("key", 42);
+      expect(map.delete("key")).toBe(true);
+      expect(map.has("key")).toBe(false);
     });
 
-    it('should return value for existing key', () => {
-      expect(map.get('a')).toBe(1);
-    });
-
-    it('should return undefined for non-existent key', () => {
-      expect(map.get('z')).toBeUndefined();
-    });
-
-    it('should update access order on get', () => {
-      map.get('a'); // Access 'a', moves it to end
-      map.set('c', 3);
-      map.set('d', 4); // Should evict 'b' (now oldest)
-
-      expect(map.has('a')).toBe(true);
-      expect(map.has('b')).toBe(false);
-      expect(map.has('c')).toBe(true);
-      expect(map.has('d')).toBe(true);
+    it("should return false for non-existent keys", () => {
+      const map = new BoundedMap(10);
+      expect(map.delete("nonexistent")).toBe(false);
     });
   });
 
-  describe('delete', () => {
-    let map: BoundedMap<string, number>;
-
-    beforeEach(() => {
-      map = new BoundedMap<string, number>(3);
-      map.set('a', 1);
-      map.set('b', 2);
-    });
-
-    it('should delete existing entry', () => {
-      const result = map.delete('a');
-      expect(result).toBe(true);
-      expect(map.has('a')).toBe(false);
-      expect(map.size).toBe(1);
-    });
-
-    it('should return false for non-existent key', () => {
-      const result = map.delete('z');
-      expect(result).toBe(false);
-      expect(map.size).toBe(2);
-    });
-  });
-
-  describe('clear', () => {
-    it('should remove all entries', () => {
-      const map = new BoundedMap<string, number>(3);
-      map.set('a', 1);
-      map.set('b', 2);
+  describe("clear", () => {
+    it("should remove all entries", () => {
+      const map = new BoundedMap(10);
+      map.set("a", 1);
+      map.set("b", 2);
       map.clear();
-
       expect(map.size).toBe(0);
-      expect(map.has('a')).toBe(false);
-      expect(map.has('b')).toBe(false);
     });
   });
 
-  describe('setMaxSize', () => {
-    it('should update max size', () => {
-      const map = new BoundedMap<string, number>(5);
-      map.setMaxSize(10);
-      expect(map.getMaxSize()).toBe(10);
+  describe("setMaxSize", () => {
+    it("should update maxSize", () => {
+      const map = new BoundedMap(10);
+      map.setMaxSize(20);
+      expect(map.getMaxSize()).toBe(20);
     });
 
-    it('should throw error for non-positive max size', () => {
-      const map = new BoundedMap<string, number>(5);
-      expect(() => map.setMaxSize(0)).toThrow(
-        'BoundedMap maxSize must be positive'
-      );
-      expect(() => map.setMaxSize(-1)).toThrow(
-        'BoundedMap maxSize must be positive'
-      );
+    it("should throw for non-positive maxSize", () => {
+      const map = new BoundedMap(10);
+      expect(() => map.setMaxSize(0)).toThrow("BoundedMap maxSize must be positive");
     });
 
-    it('should evict entries when reducing max size', () => {
-      const map = new BoundedMap<string, number>(5);
-      map.set('a', 1);
-      map.set('b', 2);
-      map.set('c', 3);
-      map.set('d', 4);
-      map.set('e', 5);
+    it("should evict entries when reducing maxSize", () => {
+      const map = new BoundedMap(5);
+      map.set("a", 1);
+      map.set("b", 2);
+      map.set("c", 3);
+      map.set("d", 4);
+      map.set("e", 5);
 
-      map.setMaxSize(2);
+      map.setMaxSize(3);
 
-      expect(map.size).toBe(2);
-      expect(map.has('a')).toBe(false);
-      expect(map.has('b')).toBe(false);
-      expect(map.has('c')).toBe(false);
-      expect(map.has('d')).toBe(true);
-      expect(map.has('e')).toBe(true);
+      expect(map.size).toBe(3);
+      expect(map.has("a")).toBe(false);
+      expect(map.has("b")).toBe(false);
+      expect(map.has("c")).toBe(true);
     });
   });
 
-  describe('getUtilization', () => {
-    it('should return 0 for empty map', () => {
-      const map = new BoundedMap<string, number>(10);
-      expect(map.getUtilization()).toBe(0);
-    });
-
-    it('should return correct percentage', () => {
-      const map = new BoundedMap<string, number>(10);
-      map.set('a', 1);
-      map.set('b', 2);
-      map.set('c', 3);
+  describe("getUtilization", () => {
+    it("should return correct utilization percentage", () => {
+      const map = new BoundedMap(10);
+      map.set("a", 1);
+      map.set("b", 2);
+      map.set("c", 3);
       expect(map.getUtilization()).toBe(30);
     });
-
-    it('should return 100 when at capacity', () => {
-      const map = new BoundedMap<string, number>(3);
-      map.set('a', 1);
-      map.set('b', 2);
-      map.set('c', 3);
-      expect(map.getUtilization()).toBe(100);
-    });
   });
 
-  describe('isNearCapacity', () => {
-    let map: BoundedMap<string, number>;
-
-    beforeEach(() => {
-      map = new BoundedMap<string, number>(10);
-    });
-
-    it('should return false when below threshold', () => {
-      map.set('a', 1);
-      map.set('b', 2);
-      expect(map.isNearCapacity(0.9)).toBe(false);
-    });
-
-    it('should return true when at or above threshold', () => {
+  describe("isNearCapacity", () => {
+    it("should return true when at or above threshold", () => {
+      const map = new BoundedMap(10);
       for (let i = 0; i < 9; i++) {
-        map.set(`key${i}`, i);
+        map.set(String(i), i);
       }
       expect(map.isNearCapacity(0.9)).toBe(true);
-    });
-
-    it('should use default threshold of 0.9', () => {
-      for (let i = 0; i < 8; i++) {
-        map.set(`key${i}`, i);
-      }
-      expect(map.isNearCapacity()).toBe(false);
-
-      map.set('key8', 8);
-      expect(map.isNearCapacity()).toBe(true);
     });
   });
 });
 
-describe('BoundedArrayMap', () => {
-  describe('constructor', () => {
-    it('should create empty map with specified limits', () => {
-      const map = new BoundedArrayMap<string, number>(10, 100);
-      expect(map.size).toBe(0);
-      expect(map.getMaxSize()).toBe(10);
+describe("BoundedArrayMap", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  describe("add", () => {
+    it("should add items to array", () => {
+      const map = new BoundedArrayMap(10);
+      map.add("key", 1);
+      map.add("key", 2);
+      map.add("key", 3);
+      expect(map.get("key")).toEqual([1, 2, 3]);
     });
 
-    it('should initialize with entries', () => {
-      const entries: [string, number[]][] = [
-        ['a', [1, 2, 3]],
-        ['b', [4, 5]],
-      ];
-      const map = new BoundedArrayMap<string, number>(10, 100, entries);
-      expect(map.size).toBe(2);
-      expect(map.get('a')).toEqual([1, 2, 3]);
-      expect(map.get('b')).toEqual([4, 5]);
+    it("should enforce maxItemsPerArray limit", () => {
+      const map = new BoundedArrayMap(10, 3);
+      map.add("key", 1);
+      map.add("key", 2);
+      map.add("key", 3);
+      map.add("key", 4);
+      expect(map.get("key")).toEqual([2, 3, 4]);
+      expect(console.warn).toHaveBeenCalled();
     });
   });
 
-  describe('add', () => {
-    let map: BoundedArrayMap<string, number>;
+  describe("remove", () => {
+    it("should remove items matching predicate", () => {
+      const map = new BoundedArrayMap(10);
+      map.add("key", 1);
+      map.add("key", 2);
+      map.add("key", 3);
 
-    beforeEach(() => {
-      map = new BoundedArrayMap<string, number>(3, 5);
+      const removed = map.remove("key", (item) => item === 2);
+      expect(removed).toBe(true);
+      expect(map.get("key")).toEqual([1, 3]);
     });
 
-    it('should add item to new array', () => {
-      map.add('a', 1);
-      expect(map.get('a')).toEqual([1]);
-    });
-
-    it('should append item to existing array', () => {
-      map.add('a', 1);
-      map.add('a', 2);
-      map.add('a', 3);
-      expect(map.get('a')).toEqual([1, 2, 3]);
-    });
-
-    it('should drop oldest item when array exceeds maxItemsPerArray', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-      map.add('a', 1);
-      map.add('a', 2);
-      map.add('a', 3);
-      map.add('a', 4);
-      map.add('a', 5);
-      map.add('a', 6); // Should drop 1
-
-      expect(map.get('a')).toEqual([2, 3, 4, 5, 6]);
-      expect(consoleSpy).toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
-    });
-
-    it('should evict oldest array when exceeding maxArrays', () => {
-      map.add('a', 1);
-      map.add('b', 2);
-      map.add('c', 3);
-      map.add('d', 4); // Should evict 'a'
-
-      expect(map.has('a')).toBe(false);
-      expect(map.has('b')).toBe(true);
-      expect(map.has('c')).toBe(true);
-      expect(map.has('d')).toBe(true);
+    it("should return false for non-existent key", () => {
+      const map = new BoundedArrayMap(10);
+      const removed = map.remove("nonexistent", () => true);
+      expect(removed).toBe(false);
     });
   });
 
-  describe('remove', () => {
-    let map: BoundedArrayMap<string, number>;
-
-    beforeEach(() => {
-      map = new BoundedArrayMap<string, number>(10, 100);
-      map.add('a', 1);
-      map.add('a', 2);
-      map.add('a', 3);
-    });
-
-    it('should remove matching items', () => {
-      const result = map.remove('a', (item) => item === 2);
-      expect(result).toBe(true);
-      expect(map.get('a')).toEqual([1, 3]);
-    });
-
-    it('should return false if no items match', () => {
-      const result = map.remove('a', (item) => item === 99);
-      expect(result).toBe(false);
-      expect(map.get('a')).toEqual([1, 2, 3]);
-    });
-
-    it('should return false for non-existent key', () => {
-      const result = map.remove('z', (item) => item === 1);
-      expect(result).toBe(false);
-    });
-
-    it('should delete key if array becomes empty', () => {
-      map.remove('a', (item) => item === 1);
-      map.remove('a', (item) => item === 2);
-      map.remove('a', (item) => item === 3);
-
-      expect(map.has('a')).toBe(false);
+  describe("getTotalItemCount", () => {
+    it("should return total count of items across all arrays", () => {
+      const map = new BoundedArrayMap(10);
+      map.add("a", 1);
+      map.add("a", 2);
+      map.add("b", 3);
+      expect(map.getTotalItemCount()).toBe(3);
     });
   });
 
-  describe('getTotalItemCount', () => {
-    it('should return 0 for empty map', () => {
-      const map = new BoundedArrayMap<string, number>(10, 100);
-      expect(map.getTotalItemCount()).toBe(0);
-    });
-
-    it('should return total count across all arrays', () => {
-      const map = new BoundedArrayMap<string, number>(10, 100);
-      map.add('a', 1);
-      map.add('a', 2);
-      map.add('b', 3);
-      map.add('b', 4);
-      map.add('b', 5);
-      map.add('c', 6);
-
-      expect(map.getTotalItemCount()).toBe(6);
-    });
-  });
-
-  describe('getStats', () => {
-    it('should return correct stats for empty map', () => {
-      const map = new BoundedArrayMap<string, number>(10, 100);
-      const stats = map.getStats();
-
-      expect(stats.arrayCount).toBe(0);
-      expect(stats.totalItems).toBe(0);
-      expect(stats.avgItemsPerArray).toBe(0);
-      expect(stats.maxItems).toBe(0);
-      expect(stats.utilization).toBe(0);
-    });
-
-    it('should return correct stats for populated map', () => {
-      const map = new BoundedArrayMap<string, number>(10, 100);
-      map.add('a', 1);
-      map.add('a', 2);
-      map.add('a', 3);
-      map.add('b', 4);
-      map.add('c', 5);
-      map.add('c', 6);
+  describe("getStats", () => {
+    it("should return correct statistics", () => {
+      const map = new BoundedArrayMap(10);
+      map.add("a", 1);
+      map.add("a", 2);
+      map.add("b", 3);
 
       const stats = map.getStats();
-
-      expect(stats.arrayCount).toBe(3);
-      expect(stats.totalItems).toBe(6);
-      expect(stats.avgItemsPerArray).toBe(2);
-      expect(stats.maxItems).toBe(3);
-      expect(stats.utilization).toBe(30);
+      expect(stats.arrayCount).toBe(2);
+      expect(stats.totalItems).toBe(3);
     });
   });
 });

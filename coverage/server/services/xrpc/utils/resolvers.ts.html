@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">7.33% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/109</span>
+                <span class='fraction'>8/109</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">3.44% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/58</span>
+                <span class='fraction'>2/58</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">16.66% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>1/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">7.33% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/109</span>
+                <span class='fraction'>8/109</span>
             </div>
         
             
@@ -405,27 +405,27 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -732,20 +732,20 @@ import { cacheManager } from './cache';
 /**
  * Resolve DID document from PLC directory
  */
-export async function <span class="fstat-no" title="function not covered" >resolveDidDocument(d</span>id: string): Promise&lt;unknown | null&gt; {
-<span class="cstat-no" title="statement not covered" >  try {</span>
+export async function resolveDidDocument(did: string): Promise&lt;unknown | null&gt; {
+  try {
     // Simple DID resolution - in production you'd use a proper DID resolver
-    const response = <span class="cstat-no" title="statement not covered" >await fetch(`https://plc.directory/${did}`);</span>
-<span class="cstat-no" title="statement not covered" >    if (response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >      return await response.json();</span>
+    const response = await fetch(`https://plc.directory/${did}`);
+    if (response.ok) {
+      return await response.json();
     }
-<span class="cstat-no" title="statement not covered" >    return null;</span>
+    return null;
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error(</span>
+    console.error(
       `[PREFERENCES] Error resolving DID document for ${did}:`,
       error
     );
-<span class="cstat-no" title="statement not covered" >    return null;</span>
+    return null;
   }
 }
 &nbsp;
@@ -753,7 +753,7 @@ export async function <span class="fstat-no" title="function not covered" >resol
  * Known PDS providers and their endpoints
  * Used as fallback when DID document resolution fails
  */
-const KNOWN_PDS_PROVIDERS: Record&lt;string, string&gt; = <span class="cstat-no" title="statement not covered" >{</span>
+const KNOWN_PDS_PROVIDERS: Record&lt;string, string&gt; = {
   'bsky.social': 'https://bsky.social',
   'bsky.app': 'https://bsky.social',
   'staging.bsky.dev': 'https://staging.bsky.dev',
@@ -1054,7 +1054,7 @@ export async function <span class="fstat-no" title="function not covered" >resol
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-02T21:17:33.532Z
+                at 2026-01-02T23:23:50.747Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

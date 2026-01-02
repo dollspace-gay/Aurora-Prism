@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -556,23 +556,23 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -834,24 +834,24 @@ export type ImageFormat =
  * Type guard utilities
  */
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >isRecord(v</span>alue: unknown): value is Record&lt;string, unknown&gt; {
-<span class="cstat-no" title="statement not covered" >  return typeof value === 'object' &amp;&amp; value !== null &amp;&amp; !Array.isArray(value);</span>
+export function isRecord(value: unknown): value is Record&lt;string, unknown&gt; {
+  return typeof value === 'object' &amp;&amp; value !== null &amp;&amp; !Array.isArray(value);
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >isString(v</span>alue: unknown): value is string {
-<span class="cstat-no" title="statement not covered" >  return typeof value === 'string';</span>
+export function isString(value: unknown): value is string {
+  return typeof value === 'string';
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >isNumber(v</span>alue: unknown): value is number {
-<span class="cstat-no" title="statement not covered" >  return typeof value === 'number';</span>
+export function isNumber(value: unknown): value is number {
+  return typeof value === 'number';
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >isBoolean(v</span>alue: unknown): value is boolean {
-<span class="cstat-no" title="statement not covered" >  return typeof value === 'boolean';</span>
+export function isBoolean(value: unknown): value is boolean {
+  return typeof value === 'boolean';
 }
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >isDefined&lt;T&gt;(v</span>alue: T | undefined | null): value is T {
-<span class="cstat-no" title="statement not covered" >  return value !== undefined &amp;&amp; value !== null;</span>
+export function isDefined&lt;T&gt;(value: T | undefined | null): value is T {
+  return value !== undefined &amp;&amp; value !== null;
 }
 &nbsp;
 /**
@@ -907,7 +907,7 @@ export type OptionalKeys&lt;T, K extends keyof T&gt; = Omit&lt;T, K&gt; &amp;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-02T21:17:33.653Z
+                at 2026-01-02T23:23:50.880Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

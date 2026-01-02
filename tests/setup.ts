@@ -1,5 +1,10 @@
 import { afterEach, vi } from 'vitest';
 
+// Set environment variables needed by modules that check them at import time
+if (!process.env.SESSION_SECRET) {
+  process.env.SESSION_SECRET = 'test-secret-key-for-testing-1234567890abcdef';
+}
+
 // Cleanup after each test
 afterEach(() => {
   vi.clearAllMocks();

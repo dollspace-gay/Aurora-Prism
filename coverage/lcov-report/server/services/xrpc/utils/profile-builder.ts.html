@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">7.62% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/118</span>
+                <span class='fraction'>9/118</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">4.04% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/99</span>
+                <span class='fraction'>4/99</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">4.76% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/21</span>
+                <span class='fraction'>1/21</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">8.33% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/108</span>
+                <span class='fraction'>9/108</span>
             </div>
         
             
@@ -404,35 +404,35 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -733,11 +733,11 @@ import { storage } from '../../../storage';
 import { transformBlobToCdnUrl } from './serializers';
 &nbsp;
 // Handle resolution cache (shared across all calls)
-const handleResolutionCache = <span class="cstat-no" title="statement not covered" >new Map&lt;string, { did: string; timestamp: number }&gt;();</span>
-const HANDLE_RESOLUTION_CACHE_TTL = <span class="cstat-no" title="statement not covered" >10 * 60 * 1000; // 10 minutes</span>
+const handleResolutionCache = new Map&lt;string, { did: string; timestamp: number }&gt;();
+const HANDLE_RESOLUTION_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 &nbsp;
 // Clean expired cache entries every minute
-<span class="cstat-no" title="statement not covered" >setInterval(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
+setInterval(<span class="fstat-no" title="function not covered" >() =&gt; {</span>
   const now = <span class="cstat-no" title="statement not covered" >Date.now();</span>
 <span class="cstat-no" title="statement not covered" >  for (const [handle, cached] of handleResolutionCache.entries()) {</span>
 <span class="cstat-no" title="statement not covered" >    if (now - cached.timestamp &gt; HANDLE_RESOLUTION_CACHE_TTL) {</span>
@@ -749,19 +749,19 @@ const HANDLE_RESOLUTION_CACHE_TTL = <span class="cstat-no" title="statement not 
 /**
  * Get authenticated DID from request
  */
-export async function <span class="fstat-no" title="function not covered" >getAuthenticatedDid(r</span>eq: Request): Promise&lt;string | null&gt; {
+export async function getAuthenticatedDid(req: Request): Promise&lt;string | null&gt; {
   // Check for DID in request (set by auth middleware)
-<span class="cstat-no" title="statement not covered" >  if ((req as any).auth?.did) {</span>
-<span class="cstat-no" title="statement not covered" >    return (req as any).auth.did;</span>
+  if ((req as any).auth?.did) {
+    return (req as any).auth.did;
   }
 &nbsp;
   // Fallback: check session (for backwards compatibility)
-  const session = (<span class="cstat-no" title="statement not covered" >req as any).session;</span>
-<span class="cstat-no" title="statement not covered" >  if (session?.did) {</span>
-<span class="cstat-no" title="statement not covered" >    return session.did;</span>
+  const session = (req as any).session;
+  if (session?.did) {
+    return session.did;
   }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return null;</span>
+  return null;
 }
 &nbsp;
 /**
@@ -1057,7 +1057,7 @@ export async function <span class="fstat-no" title="function not covered" >getPr
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-02T21:17:33.653Z
+                at 2026-01-02T23:23:50.880Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>
