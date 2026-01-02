@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -115,39 +115,39 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -161,39 +161,39 @@ import { api } from './api';
 type UnauthorizedBehavior = 'returnNull' | 'throw';
 &nbsp;
 export const getQueryFn =
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >  &lt;T&gt;(o</span>ptions?: { on401?: UnauthorizedBehavior }): QueryFunction&lt;T&gt; =&gt;</span>
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >  async ({</span> queryKey }) =&gt; {</span>
-    const url = <span class="cstat-no" title="statement not covered" >queryKey.join('/');</span>
-<span class="cstat-no" title="statement not covered" >    try {</span>
-      const data = <span class="cstat-no" title="statement not covered" >await api.get&lt;T&gt;(url);</span>
-<span class="cstat-no" title="statement not covered" >      return data;</span>
+  &lt;T&gt;(options?: { on401?: UnauthorizedBehavior }): QueryFunction&lt;T&gt; =&gt;
+  async ({ queryKey }) =&gt; {
+    const url = queryKey.join('/');
+    try {
+      const data = await api.get&lt;T&gt;(url);
+      return data;
     } catch (error: unknown) {
-      const err = <span class="cstat-no" title="statement not covered" >error as { response?: { status?: number } };</span>
-<span class="cstat-no" title="statement not covered" >      if (options?.on401 === 'returnNull' &amp;&amp; err.response?.status === 401) {</span>
-<span class="cstat-no" title="statement not covered" >        return null as T;</span>
+      const err = error as { response?: { status?: number } };
+      if (options?.on401 === 'returnNull' &amp;&amp; err.response?.status === 401) {
+        return null as T;
       }
       // Re-throw other errors to be handled by React Query
-<span class="cstat-no" title="statement not covered" >      throw error;</span>
+      throw error;
     }
   };
 &nbsp;
-export const queryClient = <span class="cstat-no" title="statement not covered" >new QueryClient({</span>
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: 'throw' }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
-      retry: <span class="fstat-no" title="function not covered" >(f</span>ailureCount, error: unknown) =&gt; {
-        const err = <span class="cstat-no" title="statement not covered" >error as { response?: { status?: number } };</span>
-<span class="cstat-no" title="statement not covered" >        if (</span>
+      retry: (failureCount, error: unknown) =&gt; {
+        const err = error as { response?: { status?: number } };
+        if (
           err.response?.status === 401 ||
           err.response?.status === 403 ||
           err.response?.status === 404
         ) {
-<span class="cstat-no" title="statement not covered" >          return false;</span>
+          return false;
         }
-<span class="cstat-no" title="statement not covered" >        return failureCount &lt; 2;</span>
+        return failureCount &lt; 2;
       },
     },
     mutations: {
@@ -208,7 +208,7 @@ export const queryClient = <span class="cstat-no" title="statement not covered" 
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-02T20:46:44.643Z
+                at 2026-01-02T21:05:03.934Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

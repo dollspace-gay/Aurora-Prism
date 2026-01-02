@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>12/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/16</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>12/12</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -134,39 +134,39 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">15x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">15x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -183,27 +183,27 @@ import { z } from 'zod';
  * Handle errors in XRPC endpoints
  * Provides appropriate HTTP status codes and error messages
  */
-export function <span class="fstat-no" title="function not covered" >handleError(</span>
+export function handleError(
   res: Response,
   error: unknown,
   context: string
 ): void {
-<span class="cstat-no" title="statement not covered" >  console.error(`[XRPC] Error in ${context}:`, error);</span>
+  console.error(`[XRPC] Error in ${context}:`, error);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  if (error instanceof z.ZodError) {</span>
-<span class="cstat-no" title="statement not covered" >    res.status(400).json({ error: 'InvalidRequest', message: error.errors });</span>
-<span class="cstat-no" title="statement not covered" >    return;</span>
+  if (error instanceof z.ZodError) {
+    res.status(400).json({ error: 'InvalidRequest', message: error.errors });
+    return;
   }
 &nbsp;
   // A simple check for a custom not found error or similar
-<span class="cstat-no" title="statement not covered" >  if (error instanceof Error &amp;&amp; error.message.includes('NotFound')) {</span>
-<span class="cstat-no" title="statement not covered" >    res.status(404).json({ error: 'NotFound', message: error.message });</span>
-<span class="cstat-no" title="statement not covered" >    return;</span>
+  if (error instanceof Error &amp;&amp; error.message.includes('NotFound')) {
+    res.status(404).json({ error: 'NotFound', message: error.message });
+    return;
   }
 &nbsp;
   // Handle network/fetch errors and upstream service failures
-<span class="cstat-no" title="statement not covered" >  if (error instanceof Error) {</span>
-<span class="cstat-no" title="statement not covered" >    if (</span>
+  if (error instanceof Error) {
+    if (
       error.message.includes('fetch') ||
       error.message.includes('network') ||
       error.message.includes('ECONNREFUSED') ||
@@ -211,16 +211,16 @@ export function <span class="fstat-no" title="function not covered" >handleError
       error.message.includes('upstream') ||
       error.message.toLowerCase().includes('unreachable')
     ) {
-<span class="cstat-no" title="statement not covered" >      res.status(502).json({</span>
+      res.status(502).json({
         error: 'UpstreamServiceUnavailable',
         message:
           'Upstream service is temporarily unavailable. Please try again later.',
       });
-<span class="cstat-no" title="statement not covered" >      return;</span>
+      return;
     }
   }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  res.status(500).json({</span>
+  res.status(500).json({
     error: 'InternalServerError',
     message: 'An internal error occurred',
   });
@@ -232,7 +232,7 @@ export function <span class="fstat-no" title="function not covered" >handleError
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-02T20:46:44.765Z
+                at 2026-01-02T21:05:04.055Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>
