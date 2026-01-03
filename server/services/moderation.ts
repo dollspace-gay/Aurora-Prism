@@ -1,5 +1,5 @@
-import { storage } from '../storage';
-import { labelService } from './label';
+import { storage as globalStorage, type IStorage } from '../storage';
+import { labelService as globalLabelService, type LabelService } from './label';
 import type {
   InsertModerationReport,
   ModerationReport,
@@ -10,6 +10,18 @@ import type {
 } from '@shared/schema';
 
 export class ModerationService {
+  private readonly storage: IStorage;
+  private readonly labelService: LabelService;
+
+  /**
+   * Create a ModerationService instance
+   * @param storage - Storage instance for persistence (defaults to global singleton)
+   * @param labelService - LabelService instance (defaults to global singleton)
+   */
+  constructor(storage?: IStorage, labelService?: LabelService) {
+    this.storage = storage ?? globalStorage;
+    this.labelService = labelService ?? globalLabelService;
+  }
   async createReport(params: {
     subject: string;
     subjectType: 'post' | 'account' | 'message';
@@ -32,7 +44,7 @@ export class ModerationService {
       status: 'pending',
     };
 
-    const createdReport = await storage.createModerationReport(report);
+    const createdReport = await this.storage.createModerationReport(report);
 
     await this.checkAutomatedEscalation(createdReport);
 
@@ -40,14 +52,14 @@ export class ModerationService {
   }
 
   async getReport(id: number): Promise<ModerationReport | undefined> {
-    return await storage.getModerationReport(id);
+    return await this.storage.getModerationReport(id);
   }
 
   async getReportsByStatus(
     status: string,
     limit?: number
   ): Promise<ModerationReport[]> {
-    return await storage.getModerationReportsByStatus(status, limit);
+    return await this.storage.getModerationReportsByStatus(status, limit);
   }
 
   async getPendingReports(limit = 50): Promise<ModerationReport[]> {
@@ -62,14 +74,14 @@ export class ModerationService {
     reportId: number,
     moderatorDid: string
   ): Promise<ModeratorAssignment> {
-    await storage.updateModerationReportStatus(reportId, 'under_review');
+    await this.storage.updateModerationReportStatus(reportId, 'under_review');
 
     const assignment: InsertModeratorAssignment = {
       reportId,
       moderatorDid,
     };
 
-    return await storage.assignModerator(assignment);
+    return await this.storage.assignModerator(assignment);
   }
 
   async takeAction(params: {
@@ -85,7 +97,7 @@ export class ModerationService {
     labelValue?: string;
     labelSrc?: string;
   }): Promise<ModerationAction> {
-    const report = await storage.getModerationReport(params.reportId);
+    const report = await this.storage.getModerationReport(params.reportId);
     if (!report) {
       throw new Error(`Report ${params.reportId} not found`);
     }
@@ -97,7 +109,7 @@ export class ModerationService {
       params.labelValue &&
       params.labelSrc
     ) {
-      const label = await labelService.applyLabel({
+      const label = await this.labelService.applyLabel({
         src: params.labelSrc,
         subject: report.subject,
         val: params.labelValue,
@@ -113,7 +125,7 @@ export class ModerationService {
       labelUri,
     };
 
-    const createdAction = await storage.createModerationAction(action);
+    const createdAction = await this.storage.createModerationAction(action);
 
     // Map action type to correct terminal status
     if (params.actionType !== 'escalated') {
@@ -124,15 +136,15 @@ export class ModerationService {
         account_suspended: 'resolved',
       };
       const newStatus = statusMap[params.actionType] || 'resolved';
-      await storage.updateModerationReportStatus(params.reportId, newStatus);
+      await this.storage.updateModerationReportStatus(params.reportId, newStatus);
     }
 
-    const assignments = await storage.getModeratorAssignmentsByReport(
+    const assignments = await this.storage.getModeratorAssignmentsByReport(
       params.reportId
     );
     for (const assignment of assignments) {
       if (!assignment.completedAt) {
-        await storage.completeModeratorAssignment(assignment.id);
+        await this.storage.completeModeratorAssignment(assignment.id);
       }
     }
 
@@ -157,7 +169,7 @@ export class ModerationService {
     moderatorDid: string,
     reason?: string
   ): Promise<ModerationAction> {
-    await storage.updateModerationReportStatus(reportId, 'under_review');
+    await this.storage.updateModerationReportStatus(reportId, 'under_review');
 
     return await this.takeAction({
       reportId,
@@ -172,9 +184,9 @@ export class ModerationService {
     actions: ModerationAction[];
     assignments: ModeratorAssignment[];
   }> {
-    const report = await storage.getModerationReport(reportId);
-    const actions = await storage.getModerationActionsByReport(reportId);
-    const assignments = await storage.getModeratorAssignmentsByReport(reportId);
+    const report = await this.storage.getModerationReport(reportId);
+    const actions = await this.storage.getModerationActionsByReport(reportId);
+    const assignments = await this.storage.getModeratorAssignmentsByReport(reportId);
 
     return { report, actions, assignments };
   }
@@ -183,13 +195,13 @@ export class ModerationService {
     activeAssignments: ModeratorAssignment[];
     totalActions: ModerationAction[];
   }> {
-    const activeAssignments = await storage.getModeratorAssignmentsByModerator(
+    const activeAssignments = await this.storage.getModeratorAssignmentsByModerator(
       moderatorDid,
       false, // Don't include completed
       100
     );
 
-    const totalActions = await storage.getModerationActionsByModerator(
+    const totalActions = await this.storage.getModerationActionsByModerator(
       moderatorDid,
       100
     );
@@ -200,7 +212,7 @@ export class ModerationService {
   private async checkAutomatedEscalation(
     report: ModerationReport
   ): Promise<void> {
-    const existingReports = await storage.getModerationReportsBySubject(
+    const existingReports = await this.storage.getModerationReportsBySubject(
       report.subject
     );
 
@@ -209,11 +221,11 @@ export class ModerationService {
     ).length;
 
     if (pendingOrReviewCount >= 3) {
-      await storage.updateModerationReportStatus(report.id, 'under_review');
+      await this.storage.updateModerationReportStatus(report.id, 'under_review');
 
       const spamLikeTypes = ['spam', 'violation'];
       if (spamLikeTypes.includes(report.reportType)) {
-        await labelService.applyLabel({
+        await this.labelService.applyLabel({
           src: 'did:plc:system',
           subject: report.subject,
           val: '!warn',
@@ -227,4 +239,20 @@ export class ModerationService {
   }
 }
 
+/**
+ * Global singleton instance (for backwards compatibility)
+ * @deprecated Prefer using createModerationService() with DI
+ */
 export const moderationService = new ModerationService();
+
+/**
+ * Factory function for creating ModerationService with dependency injection
+ * @param storage - Storage instance to use for persistence
+ * @param labelService - LabelService instance for applying labels
+ */
+export function createModerationService(
+  storage: IStorage,
+  labelService: LabelService
+): ModerationService {
+  return new ModerationService(storage, labelService);
+}

@@ -9,6 +9,9 @@ import ws from 'ws';
 import * as schema from '@shared/schema';
 import { registerPool, logAllPoolStatus } from './pool-metrics';
 
+// Track pool instances for cleanup
+const poolInstances = new Map<string, NeonPool | PgPool>();
+
 if (!process.env.DATABASE_URL) {
   throw new Error(
     'DATABASE_URL must be set. Did you forget to provision a database?'

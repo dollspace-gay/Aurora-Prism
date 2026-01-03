@@ -1,4 +1,4 @@
-import { storage } from '../storage';
+import { storage as globalStorage, type IStorage } from '../storage';
 import type {
   InsertLabel,
   Label,
@@ -8,8 +8,15 @@ import type {
 import { EventEmitter } from 'events';
 
 export class LabelService extends EventEmitter {
-  constructor() {
+  private readonly storage: IStorage;
+
+  /**
+   * Create a LabelService instance
+   * @param storage - Storage instance for persistence (defaults to global singleton)
+   */
+  constructor(storage?: IStorage) {
     super();
+    this.storage = storage ?? globalStorage;
   }
   async applyLabel(params: {
     src: string;
@@ -29,9 +36,9 @@ export class LabelService extends EventEmitter {
       createdAt: params.createdAt || new Date(),
     };
 
-    const createdLabel = await storage.createLabel(label);
+    const createdLabel = await this.storage.createLabel(label);
 
-    const event = await storage.createLabelEvent({
+    const event = await this.storage.createLabelEvent({
       labelUri: uri,
       action: 'created',
     });
@@ -54,14 +61,14 @@ export class LabelService extends EventEmitter {
   }
 
   async removeLabel(uri: string): Promise<void> {
-    const label = await storage.getLabel(uri);
+    const label = await this.storage.getLabel(uri);
 
-    const event = await storage.createLabelEvent({
+    const event = await this.storage.createLabelEvent({
       labelUri: uri,
       action: 'deleted',
     });
 
-    await storage.deleteLabel(uri);
+    await this.storage.deleteLabel(uri);
 
     // Emit label removed event for real-time broadcasting
     if (label) {
@@ -70,13 +77,13 @@ export class LabelService extends EventEmitter {
   }
 
   async getLabelsForSubject(subject: string): Promise<Label[]> {
-    return await storage.getLabelsForSubject(subject);
+    return await this.storage.getLabelsForSubject(subject);
   }
 
   async getLabelsForSubjects(
     subjects: string[]
   ): Promise<Map<string, Label[]>> {
-    const allLabels = await storage.getLabelsForSubjects(subjects);
+    const allLabels = await this.storage.getLabelsForSubjects(subjects);
     const labelMap = new Map<string, Label[]>();
 
     for (const label of allLabels) {
@@ -94,18 +101,18 @@ export class LabelService extends EventEmitter {
     values?: string[];
     limit?: number;
   }): Promise<Label[]> {
-    return await storage.queryLabels(params);
+    return await this.storage.queryLabels(params);
   }
 
   async getActiveLabelsForSubject(subject: string): Promise<Label[]> {
-    const labels = await storage.getLabelsForSubject(subject);
+    const labels = await this.storage.getLabelsForSubject(subject);
     return this.filterNegatedLabels(labels);
   }
 
   async getActiveLabelsForSubjects(
     subjects: string[]
   ): Promise<Map<string, Label[]>> {
-    const allLabels = await storage.getLabelsForSubjects(subjects);
+    const allLabels = await this.storage.getLabelsForSubjects(subjects);
     const labelMap = new Map<string, Label[]>();
 
     for (const label of allLabels) {
@@ -135,28 +142,28 @@ export class LabelService extends EventEmitter {
       localizedStrings: params.localizedStrings || {},
     };
 
-    return await storage.createLabelDefinition(definition);
+    return await this.storage.createLabelDefinition(definition);
   }
 
   async getLabelDefinition(
     value: string
   ): Promise<LabelDefinition | undefined> {
-    return await storage.getLabelDefinition(value);
+    return await this.storage.getLabelDefinition(value);
   }
 
   async getAllLabelDefinitions(): Promise<LabelDefinition[]> {
-    return await storage.getAllLabelDefinitions();
+    return await this.storage.getAllLabelDefinitions();
   }
 
   async updateLabelDefinition(
     value: string,
     data: Partial<InsertLabelDefinition>
   ): Promise<LabelDefinition | undefined> {
-    return await storage.updateLabelDefinition(value, data);
+    return await this.storage.updateLabelDefinition(value, data);
   }
 
   async getRecentLabelEvents(limit = 100, since?: Date) {
-    return await storage.getRecentLabelEvents(limit, since);
+    return await this.storage.getRecentLabelEvents(limit, since);
   }
 
   private filterNegatedLabels(labels: Label[]): Label[] {
@@ -178,4 +185,16 @@ export class LabelService extends EventEmitter {
   }
 }
 
+/**
+ * Global singleton instance (for backwards compatibility)
+ * @deprecated Prefer using createLabelService() with DI
+ */
 export const labelService = new LabelService();
+
+/**
+ * Factory function for creating LabelService with dependency injection
+ * @param storage - Storage instance to use for persistence
+ */
+export function createLabelService(storage: IStorage): LabelService {
+  return new LabelService(storage);
+}

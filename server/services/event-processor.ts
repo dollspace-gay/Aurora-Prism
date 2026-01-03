@@ -1,10 +1,17 @@
-import { storage, type IStorage } from '../storage';
-import { labelService } from './label';
-import { didResolver } from './did-resolver';
-import { pdsDataFetcher } from './pds-data-fetcher';
+import { storage as globalStorage, type IStorage } from '../storage';
+import { labelService as globalLabelService, type LabelService } from './label';
+import { didResolver as globalDidResolver } from './did-resolver';
+import { pdsDataFetcher as globalPdsDataFetcher } from './pds-data-fetcher';
 import { smartConsole } from './console-wrapper';
 import { sanitizeObject } from '../utils/sanitize';
-import { cacheService } from '../../data-plane/server/services/cache';
+import { cacheService as globalCacheService } from '../../data-plane/server/services/cache';
+
+// Type for DID resolver (until it's refactored for DI)
+type DidResolverType = typeof globalDidResolver;
+// Type for PDS data fetcher (until it's refactored for DI)
+type PdsDataFetcherType = typeof globalPdsDataFetcher;
+// Type for cache service (until it's refactored for DI)
+type CacheServiceType = typeof globalCacheService;
 import type {
   InsertPost,
   InsertLike,
@@ -229,8 +236,20 @@ interface PendingUserCreationOp {
   enqueuedAt: number;
 }
 
+export interface EventProcessorDependencies {
+  storage?: IStorage;
+  labelService?: LabelService;
+  didResolver?: DidResolverType;
+  pdsDataFetcher?: PdsDataFetcherType;
+  cacheService?: CacheServiceType;
+}
+
 export class EventProcessor {
   private storage: IStorage;
+  private labelService: LabelService;
+  private didResolver: DidResolverType;
+  private pdsDataFetcher: PdsDataFetcherType;
+  private cacheService: CacheServiceType;
   private pendingOps = new BoundedArrayMap<string, PendingOp>(10000, 100);
   private pendingOpIndex = new BoundedMap<string, string>(5000); // opUri -> postUri
   private pendingUserOps = new BoundedArrayMap<string, PendingUserOp>(5000, 100); // userDid -> pending ops
@@ -276,9 +295,17 @@ export class EventProcessor {
     process.env.MAX_CONCURRENT_USER_CREATIONS || '10'
   );
 
-  constructor(storageInstance: IStorage = storage) {
+  /**
+   * Create an EventProcessor instance
+   * @param deps - Dependencies (all optional, defaults to global singletons)
+   */
+  constructor(deps: EventProcessorDependencies = {}) {
     this.userCreationSemaphore = new Semaphore(this.MAX_CONCURRENT_USER_CREATIONS);
-    this.storage = storageInstance;
+    this.storage = deps.storage ?? globalStorage;
+    this.labelService = deps.labelService ?? globalLabelService;
+    this.didResolver = deps.didResolver ?? globalDidResolver;
+    this.pdsDataFetcher = deps.pdsDataFetcher ?? globalPdsDataFetcher;
+    this.cacheService = deps.cacheService ?? globalCacheService;
     this.startTTLSweeper();
     // Clear cache periodically to respect setting updates
     setInterval(() => this.dataCollectionCache.clear(), 5 * 60 * 1000); // Clear every 5 minutes
@@ -851,7 +878,7 @@ export class EventProcessor {
             // Mark user for profile fetching to get proper handle and avatar/banner data
             // Skip during bulk operations to avoid overwhelming the system
             if (!this.skipPdsFetching) {
-              pdsDataFetcher.markIncomplete('user', did);
+              this.pdsDataFetcher.markIncomplete('user', did);
             }
 
             // Batch logging: only log every 5000 user creations
@@ -875,7 +902,7 @@ export class EventProcessor {
         // User exists but has no profile data - mark for fetching
         // Skip during bulk operations to avoid overwhelming the system
         if (!this.skipPdsFetching) {
-          pdsDataFetcher.markIncomplete('user', did);
+          this.pdsDataFetcher.markIncomplete('user', did);
         }
       }
 
@@ -953,7 +980,7 @@ export class EventProcessor {
         }
       }
 
-      pdsDataFetcher.markIncomplete(type, did, uri, { action, constraint });
+      this.pdsDataFetcher.markIncomplete(type, did, uri, { action, constraint });
     } catch (error) {
       smartConsole.error(
         `[EVENT_PROCESSOR] Error marking incomplete entry:`,
@@ -1368,16 +1395,16 @@ export class EventProcessor {
     await this.flushPending(uri);
 
     // Invalidate caches for this post and affected threads
-    await cacheService.invalidatePost(uri);
-    await cacheService.invalidateThread(uri);
+    await this.cacheService.invalidatePost(uri);
+    await this.cacheService.invalidateThread(uri);
     if (record.reply?.parent.uri) {
-      await cacheService.invalidateThread(record.reply.parent.uri);
+      await this.cacheService.invalidateThread(record.reply.parent.uri);
     }
     if (
       record.reply?.root.uri &&
       record.reply.root.uri !== record.reply.parent.uri
     ) {
-      await cacheService.invalidateThread(record.reply.root.uri);
+      await this.cacheService.invalidateThread(record.reply.root.uri);
     }
   }
 
@@ -1643,7 +1670,7 @@ export class EventProcessor {
 
   private async processProfile(did: string, record: any) {
     // Resolve DID to get handle from DID document
-    const handle = await didResolver.resolveDIDToHandle(did);
+    const handle = await this.didResolver.resolveDIDToHandle(did);
 
     const existingUser = await this.storage.getUser(did);
 
@@ -1734,7 +1761,7 @@ export class EventProcessor {
       await this.storage.createFollow(follow);
 
       // Invalidate following list cache for the follower
-      await cacheService.invalidateUserFollowing(followerDid);
+      await this.cacheService.invalidateUserFollowing(followerDid);
 
       // Trigger backfill of the followed user's posts (async, non-blocking)
       // Only backfill for users who have logged in (have sessions)
@@ -1816,7 +1843,7 @@ export class EventProcessor {
       await this.storage.createBlock(block);
 
       // Invalidate viewer relationships cache for the blocker
-      await cacheService.invalidateViewerRelationships(blockerDid);
+      await this.cacheService.invalidateViewerRelationships(blockerDid);
     } catch (error: any) {
       // Ignore duplicate key errors (23505)
       if (error.code === '23505') {
@@ -1915,7 +1942,7 @@ export class EventProcessor {
       await this.storage.createListItem(listItem);
 
       // Invalidate list members cache for this list
-      await cacheService.invalidateListMembers(record.list);
+      await this.cacheService.invalidateListMembers(record.list);
     } catch (error: any) {
       // Fallback: if FK error still happens (race condition), queue it
       if (error.code === '23503') {
@@ -1931,7 +1958,7 @@ export class EventProcessor {
 
   private async processLabel(uri: string, src: string, record: any) {
     try {
-      await labelService.applyLabel({
+      await this.labelService.applyLabel({
         src,
         subject: record.uri || record.did,
         val: record.val,
@@ -2323,8 +2350,8 @@ export class EventProcessor {
         await this.storage.deleteFeedItem(uri); // Delete corresponding feed item
 
         // Invalidate post and thread caches
-        await cacheService.invalidatePost(uri);
-        await cacheService.invalidateThread(uri);
+        await this.cacheService.invalidatePost(uri);
+        await this.cacheService.invalidateThread(uri);
         break;
       case 'app.bsky.feed.like': {
         const like = await this.storage.getLike(uri);
@@ -2379,7 +2406,7 @@ export class EventProcessor {
             await this.storage.deleteFollow(uri, follow.followerDid);
 
             // Invalidate following list cache for the follower
-            await cacheService.invalidateUserFollowing(follow.followerDid);
+            await this.cacheService.invalidateUserFollowing(follow.followerDid);
           }
         } catch {
           // Fallback: extract followerDid from URI (at://did/collection/rkey)
@@ -2390,7 +2417,7 @@ export class EventProcessor {
               await this.storage.deleteFollow(uri, followerDid);
 
               // Invalidate following list cache for the follower
-              await cacheService.invalidateUserFollowing(followerDid);
+              await this.cacheService.invalidateUserFollowing(followerDid);
             } catch (deleteError: any) {
               smartConsole.error(
                 `[EVENT_PROCESSOR] Error deleting follow ${uri}:`,
@@ -2409,7 +2436,7 @@ export class EventProcessor {
 
         // Invalidate viewer relationships cache for the blocker
         if (blockerDid) {
-          await cacheService.invalidateViewerRelationships(blockerDid);
+          await this.cacheService.invalidateViewerRelationships(blockerDid);
         }
         break;
       }
@@ -2426,7 +2453,7 @@ export class EventProcessor {
 
         // Invalidate list members cache for this list
         if (listItem?.listUri) {
-          await cacheService.invalidateListMembers(listItem.listUri);
+          await this.cacheService.invalidateListMembers(listItem.listUri);
         }
         break;
       }
@@ -2440,7 +2467,7 @@ export class EventProcessor {
         await this.storage.deleteLabelerService(uri);
         break;
       case 'com.atproto.label.label':
-        await labelService.removeLabel(uri);
+        await this.labelService.removeLabel(uri);
         break;
       case 'app.bsky.feed.postgate':
         await this.storage.deletePostGate(uri);
@@ -2458,7 +2485,7 @@ export class EventProcessor {
           .where(eq(threadGates.postUri, postUri));
 
         // Invalidate thread gate cache for this post
-        await cacheService.invalidateThreadGate(postUri);
+        await this.cacheService.invalidateThreadGate(postUri);
 
         smartConsole.log(
           `[EVENT_PROCESSOR] Thread gate deleted for ${uri} (post: ${postUri})`
@@ -2550,7 +2577,7 @@ export class EventProcessor {
         });
 
       // Invalidate thread gate cache for this post
-      await cacheService.invalidateThreadGate(postUri);
+      await this.cacheService.invalidateThreadGate(postUri);
 
       smartConsole.log(
         `[EVENT_PROCESSOR] Thread gate processed: ${uri} for post ${postUri}`
@@ -2633,4 +2660,16 @@ export class EventProcessor {
   }
 }
 
+/**
+ * Global singleton instance (for backwards compatibility)
+ * @deprecated Prefer using createEventProcessor() with DI
+ */
 export const eventProcessor = new EventProcessor();
+
+/**
+ * Factory function for creating EventProcessor with dependency injection
+ * @param deps - Dependencies to inject
+ */
+export function createEventProcessor(deps: EventProcessorDependencies): EventProcessor {
+  return new EventProcessor(deps);
+}
