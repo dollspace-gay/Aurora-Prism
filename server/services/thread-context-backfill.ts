@@ -147,7 +147,7 @@ export class ThreadContextBackfillService {
 
     const bskyAgent = new AtpAgent({ service: BSKY_APPVIEW });
     const { didResolver } = await import('./did-resolver');
-    const eventProcessor = new EventProcessor(storage);
+    const eventProcessor = new EventProcessor({ storage });
     eventProcessor.setSkipPdsFetching(true);
     eventProcessor.setSkipDataCollectionCheck(true);
 

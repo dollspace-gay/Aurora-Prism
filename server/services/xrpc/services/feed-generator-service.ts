@@ -77,7 +77,8 @@ export async function getFeedGenerator(
 
     const generator = await storage.getFeedGenerator(params.feed);
     if (!generator) {
-      return res.status(404).json({ error: 'Feed generator not found' });
+      res.status(404).json({ error: 'Feed generator not found' });
+      return;
     }
 
     const generatorData = generator as {
@@ -96,10 +97,11 @@ export async function getFeedGenerator(
     const creatorProfiles = await getProfiles([generatorData.creatorDid], req);
 
     if (creatorProfiles.length === 0) {
-      return res.status(500).json({
+      res.status(500).json({
         error: 'Feed generator creator profile not available',
         message: 'Unable to load creator information',
       });
+      return;
     }
 
     const view = serializeFeedGeneratorView(
@@ -142,7 +144,8 @@ export async function getFeedGenerators(
     }[];
 
     if (generators.length === 0) {
-      return res.json({ feeds: [] });
+      res.json({ feeds: [] });
+      return;
     }
 
     // Batch fetch all creator profiles
@@ -207,7 +210,8 @@ export async function getActorFeeds(
     };
 
     if (generators.length === 0) {
-      return res.json({ cursor, feeds: [] });
+      res.json({ cursor, feeds: [] });
+      return;
     }
 
     // Batch fetch all creator profiles
@@ -268,7 +272,8 @@ export async function getSuggestedFeeds(
     };
 
     if (generators.length === 0) {
-      return res.json({ cursor, feeds: [] });
+      res.json({ cursor, feeds: [] });
+      return;
     }
 
     // Batch fetch all creator profiles
@@ -381,7 +386,8 @@ export async function getPopularFeedGenerators(
 
     if (generators.length === 0) {
       console.log(`[FEED_GEN] No generators found, returning empty array`);
-      return res.json({ cursor, feeds: [] });
+      res.json({ cursor, feeds: [] });
+      return;
     }
 
     // Batch fetch all creator profiles
@@ -441,7 +447,8 @@ export async function getSuggestedFeedsUnspecced(
     };
 
     if (generators.length === 0) {
-      return res.json({ feeds: [] });
+      res.json({ feeds: [] });
+      return;
     }
 
     // Batch fetch all creator profiles

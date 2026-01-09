@@ -372,9 +372,9 @@ export class DataPruningService {
         const deletedPostAggregations = await db
           .delete(postAggregations)
           .where(
-            sql`${postAggregations.uri} IN (
-            SELECT uri FROM ${postAggregations}
-            JOIN ${posts} ON ${postAggregations.uri} = ${posts.uri}
+            sql`${postAggregations.postUri} IN (
+            SELECT post_uri FROM ${postAggregations}
+            JOIN ${posts} ON ${postAggregations.postUri} = ${posts.uri}
             WHERE ${posts.createdAt} < ${cutoffDate}
             AND ${posts.authorDid} NOT IN (${sql.join(
               Array.from(protectedDids).map((did) => sql`${did}`),

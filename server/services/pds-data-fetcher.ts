@@ -131,6 +131,23 @@ export class PDSDataFetcher {
   }
 
   /**
+   * Fetch a user's profile from their PDS
+   * This queues the user for background fetching and returns immediately
+   */
+  async fetchUser(did: string): Promise<void> {
+    this.markIncomplete('user', did);
+    // Trigger immediate processing for this user
+    try {
+      const pdsEndpoint = await didResolver.resolveDIDToPDS(did);
+      if (pdsEndpoint) {
+        await this.fetchUserData(did, pdsEndpoint);
+      }
+    } catch (error) {
+      console.error(`[PDS_FETCHER] Failed to fetch user ${did}:`, error);
+    }
+  }
+
+  /**
    * Mark an entry as incomplete and needing data fetch
    */
   markIncomplete(

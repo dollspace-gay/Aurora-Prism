@@ -5,6 +5,9 @@
 
 import type { Request, Response } from 'express';
 import { storage } from '../../../storage';
+import { db } from '../../../db';
+import { posts } from '../../../../shared/schema';
+import { eq } from 'drizzle-orm';
 import { requireAuthDid, getAuthenticatedDid } from '../utils/auth-helpers';
 import { handleError } from '../utils/error-handler';
 import { resolveActor } from '../utils/resolvers';
@@ -146,12 +149,22 @@ export async function getAuthorFeed(
       params.filter
     );
 
-    let items = feedResult.items;
+    // Transform FeedItem[] to a workable structure
+    interface TimelineItem {
+      post: { uri: string; cid: string };
+      repost?: { uri: string };
+      authorPinned?: boolean;
+    }
+
+    let items: TimelineItem[] = feedResult.items.map((feedItem) => ({
+      post: { uri: feedItem.postUri, cid: feedItem.cid },
+      repost: feedItem.type === 'repost' ? { uri: feedItem.uri } : undefined,
+    }));
 
     // Handle pinned posts
     if (params.includePins && author.pinnedPost && !params.cursor) {
       const pinnedPost = author.pinnedPost as { uri: string; cid: string };
-      const pinnedItem = {
+      const pinnedItem: TimelineItem = {
         post: {
           uri: pinnedPost.uri,
           cid: pinnedPost.cid,
@@ -168,18 +181,18 @@ export async function getAuthorFeed(
     const postUris = items.map((item) => item.post.uri);
 
     // Fetch posts from storage for serialization
-    const posts = await storage.getPosts(postUris);
+    const fetchedPosts = await storage.getPosts(postUris);
 
     // Fetch reposts and reposter profiles for reason construction
     const repostUris = items
       .filter((item) => item.repost)
       .map((item) => item.repost!.uri);
 
-    const reposts = await Promise.all(
+    const repostRecords = await Promise.all(
       repostUris.map((uri) => storage.getRepost(uri))
     );
     const repostsByUri = new Map(
-      reposts.filter(Boolean).map((r) => [r!.uri, r!])
+      repostRecords.filter(Boolean).map((r) => [r!.uri, r!])
     );
 
     // Get all reposter DIDs for profile fetching
@@ -194,16 +207,16 @@ export async function getAuthorFeed(
     );
 
     // Apply content filtering if viewer is authenticated
-    let filteredPosts = posts;
+    let filteredPosts = fetchedPosts;
     if (viewerDid) {
       const settings = await storage.getUserSettings(viewerDid);
       if (settings) {
-        filteredPosts = contentFilter.filterPosts(posts, settings);
+        filteredPosts = contentFilter.filterPosts(fetchedPosts, settings);
       }
     }
 
     // Serialize posts using the extracted utility function
-    const serializedPosts = await serializePosts(filteredPosts, viewerDid, req);
+    const serializedPosts = await serializePosts(filteredPosts, viewerDid ?? undefined, req);
     const postsByUri = new Map(serializedPosts.map((p: any) => [p.uri, p]));
 
     // Build feed with reposts and pinned posts
@@ -444,7 +457,8 @@ export async function getFeed(req: Request, res: Response): Promise<void> {
     );
 
     if (hydratedFeed.length === 0) {
-      return res.json({ feed: [], cursor });
+      res.json({ feed: [], cursor });
+      return;
     }
 
     // Extract post URIs for batch fetching
@@ -463,7 +477,12 @@ export async function getFeed(req: Request, res: Response): Promise<void> {
 
     // Build feed with reasons and optional feedContext/reqId
     const feed = hydratedFeed
-      .map(({ post, reason, feedContext, reqId }) => {
+      .map((item) => {
+        const { post, reason } = item;
+        // feedContext and reqId are optional extensions not in base type
+        const feedContext = (item as any).feedContext;
+        const reqId = (item as any).reqId;
+
         const serializedPost = postsByUri.get(post.uri);
         if (!serializedPost) return null;
 
@@ -505,7 +524,8 @@ export async function getPostThreadV2(
     // Get the anchor post
     const anchorPost = await storage.getPost(params.anchor);
     if (!anchorPost) {
-      return res.status(404).json({ error: 'Post not found' });
+      res.status(404).json({ error: 'Post not found' });
+      return;
     }
 
     const threadItems: Array<{ post: any; depth: number }> = [];
@@ -516,7 +536,7 @@ export async function getPostThreadV2(
 
     // 1. Collect parent chain if above=true (depth will be negative)
     if (includeAbove && anchorPost.parentUri) {
-      let currentUri = anchorPost.parentUri;
+      let currentUri: string | null = anchorPost.parentUri;
       let depth = -1;
       const parentChain: Array<{ post: any; depth: number }> = [];
 
@@ -525,7 +545,7 @@ export async function getPostThreadV2(
         if (!parent) break;
 
         parentChain.unshift({ post: parent, depth });
-        currentUri = parent.parentUri || null;
+        currentUri = parent.parentUri ?? null;
         depth--;
       }
 
@@ -539,10 +559,10 @@ export async function getPostThreadV2(
     if (depthLimit > 0) {
       // Get all posts in the thread
       const rootUri = anchorPost.rootUri || anchorPost.uri;
-      const allThreadPosts = await storage.db
+      const allThreadPosts = await db
         .select()
-        .from(storage.schema.posts)
-        .where(storage.sql.eq(storage.schema.posts.rootUri, rootUri));
+        .from(posts)
+        .where(eq(posts.rootUri, rootUri));
 
       // Build parent-to-children map
       const replyMap = new Map<string, any[]>();

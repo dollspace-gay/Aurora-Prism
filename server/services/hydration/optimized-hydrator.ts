@@ -10,6 +10,11 @@ import {
   threadGates,
   postGates,
   feedGenerators,
+  type Post,
+  type User,
+  type PostViewerState,
+  type ThreadGate,
+  type PostGate,
 } from '../../../shared/schema';
 import { eq, inArray, and } from 'drizzle-orm';
 import { ViewerContextBuilder, ViewerContext } from './viewer-context';
@@ -210,19 +215,21 @@ export class OptimizedHydrator {
 
     const allResults = await Promise.all([...baseQueries, ...viewerQueries]);
 
-    // Destructure base results
-    const [
-      allPostsData,
-      actorsData,
-      aggregationsData,
-      viewerStatesData,
-      threadGatesData,
-      postGatesData,
-    ] = allResults;
+    // Destructure base results with proper type assertions
+    const allPostsData = allResults[0] as Post[];
+    const actorsData = allResults[1] as User[];
+    const aggregationsData = allResults[2] as Map<string, any>;
+    const viewerStatesData = allResults[3] as PostViewerState[];
+    const threadGatesData = allResults[4] as ThreadGate[];
+    const postGatesData = allResults[5] as PostGate[];
 
     // Extract viewer-specific results if present
-    const viewerPostStates = viewerDid ? allResults[6] : undefined;
-    const viewerActorStates = viewerDid ? allResults[7] : undefined;
+    const viewerPostStates = viewerDid
+      ? (allResults[6] as Map<string, any>)
+      : undefined;
+    const viewerActorStates = viewerDid
+      ? (allResults[7] as Map<string, any>)
+      : undefined;
 
     // Convert to maps
     const result: BatchedQueries = {
@@ -609,7 +616,7 @@ export class OptimizedHydrator {
           postState.embeds.set(uri, state.embeds.get(uri));
         }
         if (state.labels.has(uri)) {
-          postState.labels.set(uri, state.labels.get(uri));
+          postState.labels.set(uri, state.labels.get(uri)!);
         }
         if (state.threadGates.has(uri)) {
           postState.threadGates.set(uri, state.threadGates.get(uri));

@@ -9,9 +9,9 @@ import { queryClient } from './queryClient';
 
 // --- CSRF Token Management ---
 let csrfToken: string | null = null;
-let csrfTokenPromise: Promise<string> | null = null;
+let csrfTokenPromise: Promise<string | null> | null = null;
 
-async function fetchCSRFToken(): Promise<string> {
+async function fetchCSRFToken(): Promise<string | null> {
   // Return cached token if available
   if (csrfToken) return csrfToken;
 
@@ -51,14 +51,14 @@ async function fetchCSRFToken(): Promise<string> {
 
     // Clear the promise on error so we can retry
     csrfTokenPromise = null;
-    return '';
+    return null;
   })();
 
   return csrfTokenPromise;
 }
 
 // Force refresh CSRF token
-async function refreshCSRFToken(): Promise<string> {
+async function refreshCSRFToken(): Promise<string | null> {
   console.log('[CSRF] Forcing token refresh...');
   csrfToken = null;
   csrfTokenPromise = null;
@@ -136,7 +136,7 @@ const request = async <T = unknown>(
   }
 
   if (response.status === 204) {
-    return null;
+    return null as T;
   }
 
   return response.json();

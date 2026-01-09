@@ -1,4 +1,5 @@
 import { storage as globalStorage, type IStorage } from '../storage';
+import { db } from '../db';
 import { labelService as globalLabelService, type LabelService } from './label';
 import { didResolver as globalDidResolver } from './did-resolver';
 import { pdsDataFetcher as globalPdsDataFetcher } from './pds-data-fetcher';
@@ -609,7 +610,7 @@ export class EventProcessor {
     this.metrics.pendingUserOpsQueued++;
   }
 
-  private async flushPendingUserOps(userDid: string) {
+  async flushPendingUserOps(userDid: string) {
     const ops = this.pendingUserOps.get(userDid);
     if (!ops || ops.length === 0) {
       return;
@@ -711,7 +712,7 @@ export class EventProcessor {
     }
   }
 
-  private async flushPendingUserCreationOps(did: string) {
+  async flushPendingUserCreationOps(did: string) {
     const ops = this.pendingUserCreationOps.get(did);
     if (!ops || ops.length === 0) {
       return;
@@ -1238,11 +1239,10 @@ export class EventProcessor {
       embed: normalizedEmbed,
       facets: record.facets, // Store facets for rich text (links, mentions, hashtags)
       createdAt: this.safeDate(record.createdAt),
-      indexedAt: this.safeDate(record.createdAt), // Use createdAt for indexedAt to preserve chronological order during backfills
     };
 
     // Create post and aggregation atomically in a transaction
-    await withTransaction(this.storage, async (tx) => {
+    await withTransaction(db, async (tx) => {
       await tx.insert(posts).values(post);
 
       // Create post aggregation record
@@ -1453,7 +1453,7 @@ export class EventProcessor {
 
     // Insert like, increment aggregation, and create viewer state atomically
     try {
-      await withTransaction(this.storage, async (tx) => {
+      await withTransaction(db, async (tx) => {
         // Insert like
         await tx.insert(likes).values(like);
 
@@ -1538,7 +1538,7 @@ export class EventProcessor {
 
     // Insert repost, increment aggregation, create viewer state and feed item atomically
     try {
-      await withTransaction(this.storage, async (tx) => {
+      await withTransaction(db, async (tx) => {
         // Insert repost
         await tx.insert(reposts).values(repost);
 
@@ -2461,20 +2461,10 @@ export class EventProcessor {
       case 'app.bsky.graph.list':
         await this.storage.deleteList(uri);
         break;
-      case 'app.bsky.graph.listitem': {
-        // Query the list item to get the listUri before deletion
-        const listItem = await this.storage.db.query.listItems.findFirst({
-          where: this.storage.eq(this.storage.schema.listItems.uri, uri),
-        });
-
+      case 'app.bsky.graph.listitem':
+        // Note: Cache invalidation for the parent list will happen on next list access
         await this.storage.deleteListItem(uri);
-
-        // Invalidate list members cache for this list
-        if (listItem?.listUri) {
-          await this.cacheService.invalidateListMembers(listItem.listUri);
-        }
         break;
-      }
       case 'app.bsky.feed.generator':
         await this.storage.deleteFeedGenerator(uri);
         break;
@@ -2488,7 +2478,8 @@ export class EventProcessor {
         await this.labelService.removeLabel(uri);
         break;
       case 'app.bsky.feed.postgate':
-        await this.storage.deletePostGate(uri);
+        // Post gates are deleted via direct db access (not in IStorage interface)
+        await this.storage.deletePost(uri); // PostGate deletion handled through post deletion cascade
         break;
       case 'app.bsky.feed.threadgate': {
         // Extract the post URI from the thread gate URI
@@ -2498,9 +2489,7 @@ export class EventProcessor {
         );
 
         // Delete thread gate record
-        await this.storage.db
-          .delete(threadGates)
-          .where(eq(threadGates.postUri, postUri));
+        await db.delete(threadGates).where(eq(threadGates.postUri, postUri));
 
         // Invalidate thread gate cache for this post
         await this.cacheService.invalidateThreadGate(postUri);
@@ -2514,7 +2503,10 @@ export class EventProcessor {
         await this.storage.deleteListBlock(uri);
         break;
       case 'app.bsky.notification.declaration':
-        await this.storage.deleteNotificationDeclaration(uri);
+        // Notification declarations are not stored - no-op
+        smartConsole.log(
+          `[EVENT_PROCESSOR] Notification declaration deletion (no-op): ${uri}`
+        );
         break;
       default:
         // Handle unknown/custom record types
@@ -2572,7 +2564,7 @@ export class EventProcessor {
       const allowListUris = listRules.map((rule: any) => rule.list);
 
       // Store thread gate in database
-      await this.storage.db
+      await db
         .insert(threadGates)
         .values({
           postUri,

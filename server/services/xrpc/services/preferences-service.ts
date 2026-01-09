@@ -34,19 +34,21 @@ export async function getPreferences(
     const pdsEndpoint = await getUserPdsEndpoint(userDid);
 
     if (!pdsEndpoint) {
-      return res.status(500).json({
+      res.status(500).json({
         error: 'InternalServerError',
         message: 'Could not resolve PDS endpoint for user',
       });
+      return;
     }
 
     // Extract authorization token from request
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      return res.status(401).json({
+      res.status(401).json({
         error: 'AuthRequired',
         message: 'Authorization header required',
       });
+      return;
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -90,19 +92,21 @@ export async function putPreferences(
     const pdsEndpoint = await getUserPdsEndpoint(userDid);
 
     if (!pdsEndpoint) {
-      return res.status(500).json({
+      res.status(500).json({
         error: 'InternalServerError',
         message: 'Could not resolve PDS endpoint for user',
       });
+      return;
     }
 
     // Extract authorization token from request
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      return res.status(401).json({
+      res.status(401).json({
         error: 'AuthRequired',
         message: 'Authorization header required',
       });
+      return;
     }
 
     const token = authHeader.replace('Bearer ', '');

@@ -170,8 +170,8 @@ export class OnDemandBackfill {
 
       do {
         // Fetch records from this collection
-        const listUrl = `https://${pdsUrl}/xrpc/com.atproto.repo.listRecords?repo=${did}&collection=${collection}&limit=100${cursor ? `&cursor=${cursor}` : ''}`;
-        const response = await fetch(listUrl);
+        const listUrl: string = `https://${pdsUrl}/xrpc/com.atproto.repo.listRecords?repo=${did}&collection=${collection}&limit=100${cursor ? `&cursor=${cursor}` : ''}`;
+        const response: Response = await fetch(listUrl);
 
         if (!response.ok) {
           if (response.status === 400) {
@@ -181,7 +181,7 @@ export class OnDemandBackfill {
           throw new Error(`Failed to list ${collection}: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data: { records?: { uri: string; cid: string; value: unknown }[]; cursor?: string } = await response.json();
         const records = data.records || [];
 
         if (records.length === 0) {

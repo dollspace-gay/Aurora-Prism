@@ -89,7 +89,7 @@ export class Hydrator {
       }
 
       if (muting.some((m) => m.mutedDid === did)) {
-        state.muting = true;
+        (state as { muted?: boolean }).muted = true;
       }
 
       result.set(did, state);

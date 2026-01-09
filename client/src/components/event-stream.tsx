@@ -3,10 +3,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Event {
   type: string;
-  lexicon: string;
-  did: string;
-  action: string;
+  lexicon?: string;
+  did?: string;
+  action?: string;
   timestamp: string;
+  [key: string]: unknown;
 }
 
 interface EventStreamProps {

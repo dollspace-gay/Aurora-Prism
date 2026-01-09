@@ -21,7 +21,7 @@ async function backfillHandles() {
       LIMIT 1000;
     `);
 
-    const unresolved = result.rows;
+    const unresolved = result.rows as { did: string; handle: string }[];
     console.log(`✓ Found ${unresolved.length} users with unresolved handles`);
     console.log('');
 

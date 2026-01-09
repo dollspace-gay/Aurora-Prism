@@ -41,7 +41,8 @@ export async function getServices(req: Request, res: Response): Promise<void> {
     }[];
 
     if (services.length === 0) {
-      return res.json({ views: [] });
+      res.json({ views: [] });
+      return;
     }
 
     // Batch fetch all creator profiles

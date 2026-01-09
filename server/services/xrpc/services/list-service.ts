@@ -9,6 +9,7 @@ import { requireAuthDid, getAuthenticatedDid } from '../utils/auth-helpers';
 import { handleError } from '../utils/error-handler';
 import { resolveActor } from '../utils/resolvers';
 import { serializePosts } from '../utils/serializers';
+import { getProfiles } from '../utils/profile-builder';
 import {
   getListSchema,
   getListsSchema,

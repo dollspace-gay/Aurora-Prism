@@ -511,12 +511,14 @@ export async function requireAuth(
   }
 
   // Use the centralized session validation and refresh logic
-  const session = await validateAndRefreshSession(payload.sessionId);
-  if (!session) {
-    return res.status(401).json({ error: 'Session not found or has expired' });
+  if (payload.sessionId) {
+    const session = await validateAndRefreshSession(payload.sessionId);
+    if (!session) {
+      return res.status(401).json({ error: 'Session not found or has expired' });
+    }
   }
 
-  req.session = payload; // Attach original payload with DID and sessionID to the request
+  req.session = payload as SessionPayload; // Attach original payload with DID and sessionID to the request
   next();
 }
 

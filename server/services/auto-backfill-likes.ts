@@ -143,7 +143,7 @@ export class AutoBackfillLikesService {
         }
 
         const agent = new AtpAgent({ service: PDS_HOST });
-        const eventProcessor = new EventProcessor(storage);
+        const eventProcessor = new EventProcessor({ storage });
         eventProcessor.setSkipPdsFetching(true);
         eventProcessor.setSkipDataCollectionCheck(true);
 

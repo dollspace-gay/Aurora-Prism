@@ -172,7 +172,7 @@ export class AutoBackfillFollowsService {
    *         the actual follow records from each follower's PDS
    */
   private async backfillFollowRelationships(userDid: string): Promise<void> {
-    const eventProcessor = new EventProcessor(storage);
+    const eventProcessor = new EventProcessor({ storage });
     eventProcessor.setSkipPdsFetching(true);
     eventProcessor.setSkipDataCollectionCheck(true);
 
@@ -524,7 +524,7 @@ export class AutoBackfillFollowsService {
       );
 
       const agent = new AtpAgent({ service: PDS_HOST });
-      const eventProcessor = new EventProcessor(storage);
+      const eventProcessor = new EventProcessor({ storage });
       eventProcessor.setSkipPdsFetching(true);
       eventProcessor.setSkipDataCollectionCheck(true);
 
@@ -668,7 +668,7 @@ export class AutoBackfillFollowsService {
         `[AUTO_BACKFILL_FOLLOWS] Backfilling posts from ${followedDids.length} followed users`
       );
 
-      const eventProcessor = new EventProcessor(storage);
+      const eventProcessor = new EventProcessor({ storage });
       eventProcessor.setSkipPdsFetching(true);
       eventProcessor.setSkipDataCollectionCheck(true);
 
@@ -828,7 +828,7 @@ export class AutoBackfillFollowsService {
     ongoingNewFollowBackfills.add(followedDid);
 
     try {
-      const eventProcessor = new EventProcessor(storage);
+      const eventProcessor = new EventProcessor({ storage });
       eventProcessor.setSkipPdsFetching(true);
       eventProcessor.setSkipDataCollectionCheck(true);
 

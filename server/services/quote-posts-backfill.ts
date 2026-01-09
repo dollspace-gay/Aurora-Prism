@@ -150,7 +150,7 @@ export class QuotePostsBackfillService {
     if (quoteUris.length === 0) return 0;
 
     const { didResolver } = await import('./did-resolver');
-    const eventProcessor = new EventProcessor(storage);
+    const eventProcessor = new EventProcessor({ storage });
     eventProcessor.setSkipPdsFetching(true);
     eventProcessor.setSkipDataCollectionCheck(true);
 

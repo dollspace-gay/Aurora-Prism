@@ -147,7 +147,7 @@ export class AutoBackfillNotificationsService {
       let notificationsFetched = 0;
       const { EventProcessor } = await import('./event-processor');
       const { didResolver } = await import('./did-resolver');
-      const eventProcessor = new EventProcessor(storage);
+      const eventProcessor = new EventProcessor({ storage });
       eventProcessor.setSkipPdsFetching(true);
       eventProcessor.setSkipDataCollectionCheck(true);
 

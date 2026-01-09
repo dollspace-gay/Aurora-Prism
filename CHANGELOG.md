@@ -34,6 +34,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Worker process coordination
 
 ### Changed
+- Fix miscellaneous XRPC service type errors (15 errors across 8 files) (#37)
+- Fix client-side type errors (api.ts, dashboard.tsx - 5 errors) (#36)
+- Fix feed-generator-service.ts type errors (7 errors) (#35)
+- Fix post-interaction-service.ts type errors (7 errors) (#34)
+- Fix XRPC serializers.ts type errors (7 errors) (#33)
+- Fix repo-backfill.ts type errors (8 errors) (#32)
+- Fix storage.ts type errors (9 errors) (#31)
+- Fix event-processor.ts type errors (11 errors) (#30)
+- Fix timeline-service.ts type errors (19 errors) (#29)
+- Fix optimized-hydrator.ts type errors (48 errors) (#28)
 - Deleted deprecated `server/services/xrpc-api.ts` monolithic file (~1000+ lines)
 - Integrated `startBackgroundJobs()` into server startup
 - Fixed 32 unused variable warnings across codebase

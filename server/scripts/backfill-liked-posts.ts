@@ -6,6 +6,9 @@
 import { AtpAgent } from '@atproto/api';
 import { storage } from '../storage';
 import { EventProcessor } from '../services/event-processor';
+import { db } from '../db';
+import { likes, posts } from '../../shared/schema';
+import { sql, eq, isNull } from 'drizzle-orm';
 
 const BATCH_SIZE = 100;
 const CONCURRENT_FETCHES = 10;
@@ -15,17 +18,14 @@ async function backfillLikedPosts(userDid: string) {
   console.log(`[BACKFILL] Starting backfill of liked posts for ${userDid}`);
 
   // Get all post URIs from likes that don't have corresponding posts
-  const missingPosts = await storage.db.execute(
-    storage.sql`
-      SELECT DISTINCT l.post_uri
-      FROM ${storage.schema.likes} l
-      LEFT JOIN ${storage.schema.posts} p ON l.post_uri = p.uri
-      WHERE l.user_did = ${userDid} AND p.uri IS NULL
-      LIMIT 10000
-    `
-  );
+  const missingPosts = await db
+    .select({ postUri: likes.postUri })
+    .from(likes)
+    .leftJoin(posts, eq(likes.postUri, posts.uri))
+    .where(sql`${likes.userDid} = ${userDid} AND ${posts.uri} IS NULL`)
+    .limit(10000);
 
-  const missingPostUris = missingPosts.rows.map((row: any) => row.post_uri);
+  const missingPostUris = missingPosts.map((row) => row.postUri);
 
   console.log(
     `[BACKFILL] Found ${missingPostUris.length} liked posts that need to be fetched`
@@ -40,7 +40,7 @@ async function backfillLikedPosts(userDid: string) {
   const agent = new AtpAgent({ service: PDS_HOST });
 
   // Create event processor to process the fetched posts
-  const eventProcessor = new EventProcessor(storage);
+  const eventProcessor = new EventProcessor({ storage });
   eventProcessor.setSkipPdsFetching(true);
   eventProcessor.setSkipDataCollectionCheck(true);
 

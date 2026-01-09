@@ -1141,36 +1141,33 @@ export class DatabaseStorage implements IStorage {
 
     // Apply feed type filtering
     if (feedType === 'posts_no_replies') {
-      conditions.push(
-        and(eq(feedItems.type, 'post'), isNull(posts.parentUri)).or(
-          eq(feedItems.type, 'repost')
-        )
+      const condition = or(
+        and(eq(feedItems.type, 'post'), isNull(posts.parentUri)),
+        eq(feedItems.type, 'repost')
       );
+      if (condition) conditions.push(condition);
     } else if (feedType === 'posts_with_media') {
-      conditions.push(
-        and(
-          eq(feedItems.type, 'post'),
-          sql`${posts.embed} IS NOT NULL 
-            AND ${posts.embed}->>'$type' IN ('app.bsky.embed.images', 'app.bsky.embed.external')`
-        )
+      const condition = and(
+        eq(feedItems.type, 'post'),
+        sql`${posts.embed} IS NOT NULL
+          AND ${posts.embed}->>'$type' IN ('app.bsky.embed.images', 'app.bsky.embed.external')`
       );
+      if (condition) conditions.push(condition);
     } else if (feedType === 'posts_with_video') {
-      conditions.push(
-        and(
-          eq(feedItems.type, 'post'),
-          sql`${posts.embed} IS NOT NULL 
-            AND ${posts.embed}->>'$type' = 'app.bsky.embed.recordWithMedia'
-            AND ${posts.embed}->'media'->>'$type' = 'app.bsky.embed.video'`
-        )
+      const condition = and(
+        eq(feedItems.type, 'post'),
+        sql`${posts.embed} IS NOT NULL
+          AND ${posts.embed}->>'$type' = 'app.bsky.embed.recordWithMedia'
+          AND ${posts.embed}->'media'->>'$type' = 'app.bsky.embed.video'`
       );
+      if (condition) conditions.push(condition);
     } else if (feedType === 'posts_and_author_threads') {
-      conditions.push(
-        or(
-          eq(feedItems.type, 'repost'),
-          and(eq(feedItems.type, 'post'), isNull(posts.parentUri)),
-          sql`${posts.rootUri} LIKE ${`at://${actorDid}/%`}`
-        )
+      const condition = or(
+        eq(feedItems.type, 'repost'),
+        and(eq(feedItems.type, 'post'), isNull(posts.parentUri)),
+        sql`${posts.rootUri} LIKE ${`at://${actorDid}/%`}`
       );
+      if (condition) conditions.push(condition);
     }
 
     if (cursor) {
@@ -1187,15 +1184,10 @@ export class DatabaseStorage implements IStorage {
       .execute();
 
     // Filter out items where post doesn't exist (referenced posts not yet imported)
+    // Return the actual FeedItem records from the database
     const items: FeedItem[] = feedItemsData
       .filter((item) => item.posts !== null) // Only include items with existing posts
-      .map((item) => ({
-        post: { uri: item.feed_items.postUri, cid: item.feed_items.cid },
-        repost:
-          item.feed_items.type === 'repost'
-            ? { uri: item.feed_items.uri, cid: item.feed_items.cid }
-            : undefined,
-      }));
+      .map((item) => item.feed_items);
 
     const nextCursor =
       feedItemsData.length > 0
@@ -1964,7 +1956,7 @@ export class DatabaseStorage implements IStorage {
 
     // Get all lists that the muter has muted
     const mutedLists = await this.db
-      .select({ listUri: listMutes.listUri })
+      .select()
       .from(listMutes)
       .where(eq(listMutes.muterDid, muterDid));
 
@@ -1972,7 +1964,7 @@ export class DatabaseStorage implements IStorage {
 
     // Get list items for these lists to find which users are in them
     const listUris = mutedLists.map((ml) => ml.listUri);
-    const listItems = await this.db
+    const listItemsResult = await this.db
       .select({ listUri: listItems.listUri, subjectDid: listItems.subjectDid })
       .from(listItems)
       .where(inArray(listItems.listUri, listUris));
@@ -1981,7 +1973,7 @@ export class DatabaseStorage implements IStorage {
     const userToMute = new Map<string, ListMute>();
     const listUriToMute = new Map(mutedLists.map((ml) => [ml.listUri, ml]));
 
-    for (const item of listItems) {
+    for (const item of listItemsResult) {
       if (targetDids.includes(item.subjectDid)) {
         const mute = listUriToMute.get(item.listUri);
         if (mute) {
@@ -2044,7 +2036,7 @@ export class DatabaseStorage implements IStorage {
 
     // Get all lists that the blocker has blocked
     const blockedLists = await this.db
-      .select({ listUri: listBlocks.listUri })
+      .select()
       .from(listBlocks)
       .where(eq(listBlocks.blockerDid, blockerDid));
 
@@ -2052,7 +2044,7 @@ export class DatabaseStorage implements IStorage {
 
     // Get list items for these lists to find which users are in them
     const listUris = blockedLists.map((bl) => bl.listUri);
-    const listItems = await this.db
+    const listItemsResult = await this.db
       .select({ listUri: listItems.listUri, subjectDid: listItems.subjectDid })
       .from(listItems)
       .where(inArray(listItems.listUri, listUris));
@@ -2061,7 +2053,7 @@ export class DatabaseStorage implements IStorage {
     const userToBlock = new Map<string, ListBlock>();
     const listUriToBlock = new Map(blockedLists.map((bl) => [bl.listUri, bl]));
 
-    for (const item of listItems) {
+    for (const item of listItemsResult) {
       if (targetDids.includes(item.subjectDid)) {
         const block = listUriToBlock.get(item.listUri);
         if (block) {
@@ -2339,6 +2331,7 @@ export class DatabaseStorage implements IStorage {
         bannerUrl: row.banner_url,
         description: row.description,
         profileRecord: row.profile_record,
+        pinnedPost: row.pinned_post ?? null,
         searchVector: null,
         createdAt:
           row.created_at instanceof Date

@@ -574,7 +574,7 @@ export async function serializePosts(
             did: post.authorDid,
             handle: authorHandle,
             displayName: displayName,
-            pronouns: author?.pronouns,
+            pronouns: (author as { pronouns?: string } | undefined)?.pronouns,
             ...(avatarUrl &&
               typeof avatarUrl === 'string' &&
               avatarUrl.trim() !== '' && { avatar: avatarUrl }),
@@ -737,11 +737,11 @@ export async function serializePostsEnhanced(
           transformedEmbed.images = (
             embedData as { images?: unknown[] }
           ).images?.map((img: unknown) => ({
-            ...img,
+            ...(img as Record<string, unknown>),
             image: {
-              ...(img as { image: unknown }).image,
+              ...((img as { image: Record<string, unknown> }).image),
               ref: {
-                ...(img as { image: { ref: unknown } }).image.ref,
+                ...((img as { image: { ref: Record<string, unknown> } }).image.ref),
                 link: transformBlobToCdnUrl(
                   (img as { image: { ref: { $link: string } } }).image.ref
                     .$link,
@@ -756,7 +756,7 @@ export async function serializePostsEnhanced(
           (embedData as { $type: string }).$type === 'app.bsky.embed.external'
         ) {
           // Handle external embeds
-          const external = { ...(embedData as { external: unknown }).external };
+          const external = { ...((embedData as { external: Record<string, unknown> }).external) };
 
           // Only transform thumbnail if it exists and has a valid ref
           if (
@@ -775,11 +775,11 @@ export async function serializePostsEnhanced(
             );
             if (thumbUrl) {
               (external as { thumb: unknown }).thumb = {
-                ...(embedData as { external: { thumb: unknown } }).external
-                  .thumb,
+                ...((embedData as { external: { thumb: Record<string, unknown> } }).external
+                  .thumb),
                 ref: {
-                  ...(embedData as { external: { thumb: { ref: unknown } } })
-                    .external.thumb.ref,
+                  ...((embedData as { external: { thumb: { ref: Record<string, unknown> } } })
+                    .external.thumb.ref),
                   link: thumbUrl,
                 },
               };

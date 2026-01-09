@@ -155,10 +155,11 @@ export async function getSuggestedFollowsByActor(
 
     // Check if we have suggestions (not fallback)
     if (suggestions.length === 0) {
-      return res.json({
+      res.json({
         suggestions: [],
         isFallback: true,
       });
+      return;
     }
 
     // Build full profileView objects using _getProfiles helper

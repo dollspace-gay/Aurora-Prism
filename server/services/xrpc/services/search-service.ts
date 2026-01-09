@@ -73,7 +73,7 @@ export async function searchPosts(req: Request, res: Response): Promise<void> {
       viewerDid || undefined
     );
 
-    const serialized = await serializePosts(posts, viewerDid || undefined, req);
+    const serialized = await serializePosts(posts as any, viewerDid || undefined, req);
 
     res.json({ posts: serialized, cursor });
   } catch (error) {
@@ -110,7 +110,7 @@ export async function searchActors(req: Request, res: Response): Promise<void> {
     type ActorSearchResult = { did: string };
     const actorResults = actors as ActorSearchResult[];
     const dids = actorResults.map((a) => a.did);
-    const users: UserModel[] = await storage.getUsers(dids);
+    const users = await storage.getUsers(dids) as UserModel[];
     const userMap = new Map(users.map((u) => [u.did, u]));
 
     // Get viewer relationships if authenticated
@@ -245,20 +245,20 @@ export async function searchStarterPacks(
 ): Promise<void> {
   try {
     const params = searchStarterPacksSchema.parse(req.query);
-    const { starterPacks, cursor } = await storage.searchStarterPacks(
+    const { starterPacks, cursor } = await storage.searchStarterPacksByName(
       params.q,
       params.limit,
       params.cursor
     );
 
     res.json({
-      starterPacks: starterPacks.map((sp) => ({
-        uri: (sp as { uri: string }).uri,
-        cid: (sp as { cid: string }).cid,
-        creator: (sp as { creator: { did: string; handle: string } }).creator,
-        name: (sp as { name: string }).name,
-        description: (sp as { description?: string }).description,
-        createdAt: (sp as { createdAt: Date }).createdAt.toISOString(),
+      starterPacks: (starterPacks as any[]).map((sp) => ({
+        uri: sp.uri,
+        cid: sp.cid,
+        creator: sp.creator || { did: sp.creatorDid, handle: sp.creatorDid },
+        name: sp.name,
+        description: sp.description ?? undefined,
+        createdAt: sp.createdAt.toISOString(),
       })),
       cursor,
     });

@@ -30,7 +30,8 @@ export async function getStarterPack(
 
     const pack = await storage.getStarterPack(params.starterPack);
     if (!pack) {
-      return res.status(404).json({ error: 'Starter pack not found' });
+      res.status(404).json({ error: 'Starter pack not found' });
+      return;
     }
 
     const packData = pack as {
@@ -49,10 +50,11 @@ export async function getStarterPack(
     const creatorProfiles = await getProfiles([packData.creatorDid], req);
 
     if (creatorProfiles.length === 0) {
-      return res.status(500).json({
+      res.status(500).json({
         error: 'Starter pack creator profile not available',
         message: 'Unable to load creator information',
       });
+      return;
     }
 
     // Build starter pack view
@@ -113,7 +115,8 @@ export async function getStarterPacks(
     }[];
 
     if (packs.length === 0) {
-      return res.json({ starterPacks: [] });
+      res.json({ starterPacks: [] });
+      return;
     }
 
     // Batch fetch all creator profiles
@@ -489,7 +492,8 @@ export async function getOnboardingSuggestedStarterPacks(
     };
 
     if (starterPacks.length === 0) {
-      return res.json({ starterPacks: [] });
+      res.json({ starterPacks: [] });
+      return;
     }
 
     // Batch fetch all creator profiles

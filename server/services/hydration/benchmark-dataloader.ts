@@ -150,11 +150,11 @@ async function runBenchmarks() {
   // Test complex scenarios
   console.log('\n🔍 Testing Complex Scenarios...\n');
 
-  // Scenario 1: Thread with replies
+  // Scenario 1: Thread with replies (find posts that have replies by checking rootUri references)
   const threadPost = await db
     .select({ uri: posts.uri })
     .from(posts)
-    .where(sql`${posts.replyCount} > 10`)
+    .where(sql`${posts.rootUri} IS NOT NULL`)
     .limit(1);
 
   if (threadPost.length > 0) {

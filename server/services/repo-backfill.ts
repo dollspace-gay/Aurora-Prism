@@ -13,7 +13,7 @@ import { createHash } from 'crypto';
 // This ensures backfilled records are stored in the same database as the web view
 
 // Create dedicated event processor for repo backfill using main storage
-const repoEventProcessor = new EventProcessor(storage);
+const repoEventProcessor = new EventProcessor({ storage });
 
 // Create DID resolver for finding PDS endpoints
 const didResolver = new IdResolver();
@@ -315,11 +315,14 @@ export class RepoBackfillService {
       referencedDids.add(did); // Add the repo owner
 
       // First pass: collect all DIDs without processing records
-      for await (const { collection, record } of repo.walkRecords()) {
+      for await (const { collection, record: rawRecord } of repo.walkRecords()) {
         try {
+          // Cast to any since the ATProto repo library doesn't provide specific types
+          const record = rawRecord as any;
+
           // Check cutoff date if configured
-          if (this.cutoffDate && (record as any).createdAt) {
-            const recordDate = new Date((record as any).createdAt);
+          if (this.cutoffDate && record.createdAt) {
+            const recordDate = new Date(record.createdAt);
             if (recordDate < this.cutoffDate) {
               continue;
             }

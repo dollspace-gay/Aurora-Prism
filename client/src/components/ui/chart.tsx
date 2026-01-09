@@ -125,18 +125,6 @@ const ChartContainer = React.forwardRef<
 });
 ChartContainer.displayName = 'Chart';
 
-// Sanitize CSS values to prevent injection attacks
-function sanitizeCSSValue(value: string): string {
-  // Only allow safe CSS color formats: hex, rgb, hsl, named colors
-  const safeColorPattern =
-    /^(#[0-9a-f]{3,8}|rgba?\([^)]+\)|hsla?\([^)]+\)|[a-z]+)$/i;
-  if (!safeColorPattern.test(value)) {
-    console.warn(`[CHART] Blocked potentially unsafe CSS value: ${value}`);
-    return 'transparent'; // Safe fallback
-  }
-  return value;
-}
-
 function sanitizeCSSIdentifier(value: string): string {
   // Only allow alphanumeric and hyphens for CSS identifiers/selectors
   return value.replace(/[^a-z0-9-]/gi, '');

@@ -59,9 +59,9 @@ export interface PostAggregation {
 }
 
 /**
- * Post viewer state
+ * Post viewer state (database model)
  */
-export interface PostViewerState {
+export interface DbPostViewerState {
   postUri: string;
   viewerDid: string;
   likeUri?: string;
@@ -395,7 +395,7 @@ export interface HydrationState {
   posts: Map<string, HydratedPost>;
   actors: Map<string, HydratedActor>;
   aggregations: Map<string, PostAggregation>;
-  viewerStates: Map<string, PostViewerState>;
+  viewerStates: Map<string, DbPostViewerState>;
   actorViewerStates: Map<string, ActorViewerState>;
   labels: Map<string, LabelModel[]>;
   embeds: Map<string, Record<string, unknown>>;

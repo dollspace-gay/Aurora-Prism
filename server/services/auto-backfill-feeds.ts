@@ -148,7 +148,7 @@ export class AutoBackfillFeedsService {
       );
 
       const agent = new AtpAgent({ service: userPdsEndpoint });
-      const eventProcessor = new EventProcessor(storage);
+      const eventProcessor = new EventProcessor({ storage });
       eventProcessor.setSkipPdsFetching(true);
       eventProcessor.setSkipDataCollectionCheck(true);
 

@@ -1,15 +1,96 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createMockStorage } from '../helpers/test-database';
+
+// Create inline mock storage to avoid hoisting issues
+function createInlineMockStorage() {
+  const users = new Map();
+  const posts = new Map();
+  const likes = new Map();
+  const reposts = new Map();
+  const follows = new Map();
+
+  return {
+    getUser: vi.fn((did: string) => Promise.resolve(users.get(did))),
+    createUser: vi.fn((user: any) => {
+      users.set(user.did, user);
+      return Promise.resolve(user);
+    }),
+    getPost: vi.fn((uri: string) => Promise.resolve(posts.get(uri))),
+    createPost: vi.fn((post: any) => {
+      posts.set(post.uri, post);
+      return Promise.resolve(post);
+    }),
+    deletePost: vi.fn(),
+    createLike: vi.fn((like: any) => {
+      likes.set(like.uri, like);
+      return Promise.resolve(like);
+    }),
+    deleteLike: vi.fn(),
+    createRepost: vi.fn((repost: any) => {
+      reposts.set(repost.uri, repost);
+      return Promise.resolve(repost);
+    }),
+    deleteRepost: vi.fn(),
+    createFollow: vi.fn((follow: any) => {
+      follows.set(follow.uri, follow);
+      return Promise.resolve(follow);
+    }),
+    deleteFollow: vi.fn(),
+    createBlock: vi.fn(),
+    deleteBlock: vi.fn(),
+    createMute: vi.fn(),
+    deleteMute: vi.fn(),
+    createList: vi.fn(),
+    deleteList: vi.fn(),
+    deleteListItem: vi.fn(),
+    createFeedGenerator: vi.fn(),
+    deleteFeedGenerator: vi.fn(),
+    createStarterPack: vi.fn(),
+    deleteStarterPack: vi.fn(),
+    createLabelerService: vi.fn(),
+    deleteLabelerService: vi.fn(),
+    deleteListBlock: vi.fn(),
+    deleteGenericRecord: vi.fn(),
+    getListItems: vi.fn().mockResolvedValue([]),
+    _clear: () => {
+      users.clear();
+      posts.clear();
+      likes.clear();
+      reposts.clear();
+      follows.clear();
+    },
+  };
+}
 
 // Mock dependencies before importing event-processor
 vi.mock('../../server/db', () => ({
-  db: {},
+  db: {
+    delete: () => ({ where: () => Promise.resolve() }),
+    insert: () => ({
+      values: () => ({
+        onConflictDoUpdate: () => Promise.resolve(),
+        onConflictDoNothing: () => Promise.resolve(),
+      }),
+    }),
+    select: () => ({
+      from: () => ({
+        where: () => Promise.resolve([]),
+      }),
+    }),
+    transaction: (fn: any) =>
+      fn({
+        insert: () => ({
+          values: () => ({ onConflictDoNothing: () => Promise.resolve() }),
+        }),
+        update: () => ({
+          set: () => ({ where: () => Promise.resolve() }),
+        }),
+      }),
+  },
 }));
 
 vi.mock('../../server/storage', () => {
-  const mockStorage = createMockStorage();
   return {
-    storage: mockStorage,
+    storage: createInlineMockStorage(),
     IStorage: {},
   };
 });
@@ -377,7 +458,7 @@ describe('Event Processor Utility Functions', () => {
 });
 
 describe('EventProcessor Class', () => {
-  let mockStorage: ReturnType<typeof createMockStorage>;
+  let mockStorage: ReturnType<typeof createInlineMockStorage>;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -385,7 +466,7 @@ describe('EventProcessor Class', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    mockStorage = createMockStorage();
+    mockStorage = createInlineMockStorage();
   });
 
   afterEach(() => {

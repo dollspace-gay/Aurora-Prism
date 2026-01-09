@@ -135,7 +135,7 @@ export async function getFollows(req: Request, res: Response): Promise<void> {
         did: actorDid,
         handle: actor?.handle || actorDid,
         displayName: actor?.displayName || actor?.handle || actorDid,
-        ...maybeAvatar(actor?.avatarUrl, actor?.did, req),
+        ...maybeAvatar(actor?.avatarUrl, actor?.did ?? actorDid, req),
         indexedAt: actor?.indexedAt?.toISOString(),
         viewer: {
           muted: false,
@@ -228,7 +228,7 @@ export async function getFollowers(req: Request, res: Response): Promise<void> {
         did: actorDid,
         handle: actor?.handle || actorDid,
         displayName: actor?.displayName || actor?.handle || actorDid,
-        ...maybeAvatar(actor?.avatarUrl, actor?.did, req),
+        ...maybeAvatar(actor?.avatarUrl, actor?.did ?? actorDid, req),
         indexedAt: actor?.indexedAt?.toISOString(),
         viewer: {
           muted: false,

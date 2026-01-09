@@ -32,10 +32,11 @@ export async function getBlocks(req: Request, res: Response): Promise<void> {
     );
 
     if (blocks.length === 0) {
-      return res.json({
+      res.json({
         cursor,
         blocks: [],
       });
+      return;
     }
 
     const blockedDids = blocks.map((b) => b.blockedDid);
@@ -385,7 +386,6 @@ export async function createReport(req: Request, res: Response): Promise<void> {
       subject,
       subjectType,
       status: 'pending', // Use correct default status
-      createdAt: new Date(),
     });
 
     res.json({

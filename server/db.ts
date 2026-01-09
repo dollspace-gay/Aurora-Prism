@@ -51,11 +51,9 @@ export function createDbPool(
     const neonPool = new NeonPool({
       // Statement timeout to prevent runaway queries (30 seconds default)
       // Can be overridden per-transaction using SET LOCAL statement_timeout
-      options: {
-        statement_timeout: parseInt(
-          process.env.STATEMENT_TIMEOUT_MS || '30000'
-        ),
-      },
+      options: `-c statement_timeout=${parseInt(
+        process.env.STATEMENT_TIMEOUT_MS || '30000'
+      )}`,
       connectionString: databaseUrl,
       max: poolSize,
       idleTimeoutMillis: 10000,
@@ -110,9 +108,14 @@ const db = createDbPool(
   isNeonDatabase ? 'main (Neon)' : 'main (PostgreSQL)'
 );
 
+// Pool interface for legacy code that needs direct pool access
+export interface LegacyPool {
+  query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[]; rowCount: number }>;
+}
+
 // For backwards compatibility, export a pool variable (though the actual pool is internal to drizzle)
 // This is used by some legacy code that checks pool status
-export const pool = db as unknown;
+export const pool: LegacyPool = db as unknown as LegacyPool;
 
 // Export main db connection
 export { db };

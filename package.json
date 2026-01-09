@@ -72,7 +72,7 @@
     "dataloader": "^2.2.3",
     "date-fns": "^3.6.0",
     "drizzle-orm": "^0.44.5",
-    "drizzle-zod": "^0.8.3",
+    "drizzle-zod": "0.7.1",
     "elliptic": "^6.5.5",
     "embla-carousel-react": "^8.6.0",
     "express": "^4.21.2",
@@ -105,7 +105,7 @@
     "vaul": "^1.1.2",
     "wouter": "^3.3.5",
     "ws": "^8.18.0",
-    "zod": "^3.25.76",
+    "zod": "3.24.2",
     "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
@@ -156,5 +156,8 @@
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
+  },
+  "overrides": {
+    "esbuild": "^0.25.0"
   }
 }

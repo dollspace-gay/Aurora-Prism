@@ -58,7 +58,7 @@ export class Views {
     const viewerState = state.viewerStates?.get(uri);
 
     // Get thread context if available
-    const threadContext = state.threadContexts?.get(uri);
+    const threadContext = (state as { threadContexts?: Map<string, unknown> }).threadContexts?.get(uri);
 
     return {
       uri: postInfo.uri,
@@ -85,7 +85,7 @@ export class Views {
       labels: state.labels?.get(uri) || [],
       threadContext: threadContext
         ? {
-            rootAuthorLike: threadContext.rootAuthorLikeUri || undefined,
+            rootAuthorLike: (threadContext as { rootAuthorLikeUri?: string }).rootAuthorLikeUri || undefined,
           }
         : undefined,
     };

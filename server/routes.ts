@@ -250,6 +250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     interface RedisEvent {
       type: string;
       data: unknown;
+      messageId: string;
     }
     const processEvent = async (event: RedisEvent) => {
       let success = false;
@@ -554,7 +555,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Stream the response body
         if (response.body && typeof response.body.tee === 'function') {
           // Node.js 18+ has Readable.fromWeb for Web Streams
-          const nodeStream = Readable.fromWeb(response.body);
+          const nodeStream = Readable.fromWeb(
+            response.body as unknown as import('stream/web').ReadableStream<Uint8Array>
+          );
           nodeStream.pipe(res);
         } else {
           // Fallback for environments without Web Streams support
@@ -4904,7 +4907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         searchVector: null,
         createdAt: new Date(),
         indexedAt: new Date(),
-      };
+      } as any; // Use any for mock post since we only need text for filtering
 
       const result = contentFilter.wouldFilter(mockPost, settings || null);
 
@@ -4946,8 +4949,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         settings: settings
           ? {
               dataCollectionForbidden: settings.dataCollectionForbidden,
-              blockedKeywords: settings.blockedKeywords?.length || 0,
-              mutedUsers: settings.mutedUsers?.length || 0,
+              blockedKeywords: Array.isArray(settings.blockedKeywords)
+                ? settings.blockedKeywords.length
+                : 0,
+              mutedUsers: Array.isArray(settings.mutedUsers)
+                ? settings.mutedUsers.length
+                : 0,
               lastBackfillAt: settings.lastBackfillAt,
             }
           : null,
@@ -4961,7 +4968,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
@@ -4993,7 +5000,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
@@ -5138,7 +5145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Listen for label events from label service and broadcast to all connected clients
-  const broadcastLabelToClients = (label: unknown, eventId: number) => {
+  const broadcastLabelToClients = (label: { src: string; subject: string; val: string; neg: boolean; createdAt: Date | string }, eventId: number) => {
     const message = JSON.stringify({
       seq: eventId,
       labels: [

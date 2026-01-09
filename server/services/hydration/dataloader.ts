@@ -376,7 +376,7 @@ export class HydrationDataLoader {
             reposted: !!repostUri,
             repostUri: repostUri || null,
             bookmarked,
-            muted: state?.muted || false,
+            threadMuted: state?.threadMuted || false,
             replyDisabled: state?.replyDisabled || false,
           };
         });

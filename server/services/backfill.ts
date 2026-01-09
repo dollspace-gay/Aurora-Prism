@@ -8,7 +8,7 @@ import { logCollector } from './log-collector';
 // This ensures backfilled records are stored in the same database as the web view
 
 // Create dedicated event processor for backfill using main storage
-const backfillEventProcessor = new EventProcessor(storage);
+const backfillEventProcessor = new EventProcessor({ storage });
 
 export interface BackfillProgress {
   startCursor: number | null;

@@ -31,7 +31,8 @@ export async function getPosts(req: Request, res: Response): Promise<void> {
 
     if (posts.length === 0) {
       console.log(`[getPosts] No posts found for URIs:`, params.uris);
-      return res.json({ posts: [] });
+      res.json({ posts: [] });
+      return;
     }
 
     console.log(`[getPosts] Serializing ${posts.length} posts`);
@@ -70,12 +71,13 @@ export async function getLikes(req: Request, res: Response): Promise<void> {
     );
 
     if (likes.length === 0) {
-      return res.json({
+      res.json({
         uri: params.uri,
         cid: params.cid,
         cursor,
         likes: [],
       });
+      return;
     }
 
     const userDids = likes.map((like) => like.userDid);
@@ -290,12 +292,13 @@ export async function getRepostedBy(
     );
 
     if (reposts.length === 0) {
-      return res.json({
+      res.json({
         uri: params.uri,
         cid: params.cid,
         cursor,
         repostedBy: [],
       });
+      return;
     }
 
     const userDids = reposts.map((repost) => repost.userDid);
@@ -537,7 +540,8 @@ export async function getActorLikes(
     if (!params.actor.startsWith('did:')) {
       const user = await storage.getUserByHandle(params.actor);
       if (!user) {
-        return res.status(404).json({ error: 'Actor not found' });
+        res.status(404).json({ error: 'Actor not found' });
+        return;
       }
       actorDid = user.did;
     }
@@ -546,25 +550,28 @@ export async function getActorLikes(
     const relationship = await storage.getRelationship(viewerDid, actorDid);
     if (relationship) {
       if (relationship.blocking) {
-        return res.status(400).json({
+        res.status(400).json({
           error: 'BlockedActor',
           message: 'Requesting user has blocked the target actor',
         });
+        return;
       }
       if (relationship.blockedBy) {
-        return res.status(400).json({
+        res.status(400).json({
           error: 'BlockedByActor',
           message: 'Target actor has blocked the requesting user',
         });
+        return;
       }
     }
 
     // Authorization check: actor must be the requesting account
     if (actorDid !== viewerDid) {
-      return res.status(403).json({
+      res.status(403).json({
         error: 'Forbidden',
         message: 'Actor must be the requesting account',
       });
+      return;
     }
 
     console.log(
