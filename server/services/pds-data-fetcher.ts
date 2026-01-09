@@ -13,6 +13,7 @@ import * as Digest from 'multiformats/hashes/digest';
 
 interface PDSDataFetchResult {
   success: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PDS responses have dynamic structure
   data?: any;
   error?: string;
 }

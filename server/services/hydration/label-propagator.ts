@@ -81,7 +81,7 @@ export class LabelPropagator {
    */
   shouldFilter(
     labels: Label[],
-    viewerPreferences?: any
+    viewerPreferences?: { adultContentEnabled?: boolean }
   ): { shouldHide: boolean; reason?: string } {
     if (!labels || labels.length === 0) {
       return { shouldHide: false };

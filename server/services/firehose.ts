@@ -6,10 +6,12 @@ import { redisQueue } from './redis-queue';
 
 // Make WebSocket available globally for @skyware/firehose in Node.js environment
 if (typeof globalThis.WebSocket === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Node.js globalThis doesn't have WebSocket type
   (globalThis as any).WebSocket = WebSocket;
 }
 
-type EventCallback = (event: any) => void;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Firehose events have dynamic structure from relay
+type EventCallback = (event: Record<string, any>) => void;
 
 export class FirehoseClient {
   private client: Firehose | null = null;
@@ -19,7 +21,8 @@ export class FirehoseClient {
   private url: string;
   private isConnected = false;
   private eventCallbacks: EventCallback[] = [];
-  private recentEvents: any[] = []; // Keep last 50 events for dashboard
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Recent events have dynamic structure
+  private recentEvents: Record<string, any>[] = []; // Keep last 50 events for dashboard
   private statusHeartbeat: NodeJS.Timeout | null = null;
   private lastEventTime: number = Date.now(); // Track last event for stall detection
   private readonly STALL_THRESHOLD = 2 * 60 * 1000; // 2 minutes without events = stalled
@@ -130,7 +133,8 @@ export class FirehoseClient {
     }
   }
 
-  private async broadcastEvent(event: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Firehose events have dynamic structure
+  private async broadcastEvent(event: Record<string, any>) {
     // Add to recent events history (keep last 50)
     this.recentEvents.unshift(event);
     if (this.recentEvents.length > 50) {
@@ -246,7 +250,8 @@ export class FirehoseClient {
 
     try {
       // Configure options for Firehose constructor
-      const options: any = {
+
+      const options: { relay: string; cursor?: string } = {
         relay: this.url,
       };
 
@@ -299,7 +304,8 @@ export class FirehoseClient {
         const event = {
           repo: commit.repo,
           ops: commit.ops.map((op) => {
-            const baseOp: any = {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Building dynamic event structure
+            const baseOp: Record<string, any> = {
               action: op.action,
               path: op.path,
             };
@@ -479,6 +485,7 @@ export class FirehoseClient {
     }
 
     // Access underlying WebSocket from @skyware/firehose (exposed as .ws property)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- @skyware/firehose doesn't export .ws type
     const socket = (this.client as any)?.ws;
 
     if (!socket || typeof socket.ping !== 'function') {
@@ -487,6 +494,7 @@ export class FirehoseClient {
       );
       // Try again in 1 second after connection is fully established
       setTimeout(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- @skyware/firehose doesn't export .ws type
         const retrySocket = (this.client as any)?.ws;
         if (retrySocket && typeof retrySocket.ping === 'function') {
           this.setupWebSocketPingPong(retrySocket);
@@ -498,6 +506,7 @@ export class FirehoseClient {
     this.setupWebSocketPingPong(socket);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- WebSocket from @skyware/firehose not typed
   private setupWebSocketPingPong(socket: any) {
     console.log(
       '[FIREHOSE] Setting up WebSocket keepalive (ping every 30s, timeout 45s)'
@@ -509,6 +518,7 @@ export class FirehoseClient {
     });
 
     // Listen for unexpected close events (NAT timeout, TLS timeout, etc.)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- WebSocket event handlers not typed
     socket.on('unexpected-response', (req: any, res: any) => {
       console.error(
         `[FIREHOSE] Unexpected response from relay: ${res.statusCode}`
@@ -639,8 +649,9 @@ export class FirehoseClient {
     this.updateRedisStatus();
   }
 
-  private categorizeError(error: any): string {
-    const message = error?.message?.toLowerCase() || '';
+  private categorizeError(error: unknown): string {
+    const errObj = error as { message?: string } | null;
+    const message = errObj?.message?.toLowerCase() || '';
 
     if (message.includes('econnrefused') || message.includes('enotfound')) {
       return 'network';

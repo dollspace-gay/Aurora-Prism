@@ -89,7 +89,7 @@ class InstanceModerationService {
    */
   async checkAutoModeration(params: {
     text?: string;
-    embed?: any;
+    embed?: Record<string, unknown>;
     authorDid: string;
   }): Promise<string[]> {
     if (!INSTANCE_CONFIG.enabled) {

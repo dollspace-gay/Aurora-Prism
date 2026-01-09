@@ -50,7 +50,7 @@ export async function getServices(req: Request, res: Response): Promise<void> {
     const creatorProfiles = await getProfiles(creatorDids, req);
 
     // Create map for quick lookup
-    const profileMap = new Map(creatorProfiles.map((p: any) => [p.did, p]));
+    const profileMap = new Map(creatorProfiles.map((p) => [p.did, p]));
 
     // Batch fetch labels for all services
     const serviceUris = services.map((s) => s.uri);
@@ -75,7 +75,15 @@ export async function getServices(req: Request, res: Response): Promise<void> {
           return null;
         }
 
-        const view: any = {
+        const view: {
+          uri: string;
+          cid: string;
+          creator: typeof creatorProfile;
+          likeCount: number;
+          indexedAt: string;
+          policies?: unknown;
+          labels?: Array<{ src: string; uri: string; val: string; cts: string; neg?: boolean }>;
+        } = {
           uri: service.uri,
           cid: service.cid,
           creator: creatorProfile, // Full profileView

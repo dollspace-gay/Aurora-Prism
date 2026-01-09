@@ -8,7 +8,8 @@
       "Bash(node add-pool-monitoring.cjs:*)",
       "Bash(node update-bounded-maps.cjs:*)",
       "Bash(node fix-pruning-bugs.cjs:*)",
-      "Bash(chainlink help:*)"
+      "Bash(chainlink help:*)",
+      "Bash(npm run lint:*)"
     ],
     "deny": [],
     "ask": []

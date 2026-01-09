@@ -303,10 +303,10 @@ export function createAuthorViewerState(
  * This is the main post serialization function extracted from xrpc-api.ts
  */
 export async function serializePosts(
-  posts: any[],
+  posts: Array<{ authorDid: string; uri: string; cid: string; text: string; embed?: unknown; facets?: unknown; parentUri?: string | null; rootUri?: string | null; createdAt: Date; indexedAt: Date; langs?: string[] | null; tags?: string[] | null }>,
   viewerDid?: string,
   req?: Request
-): Promise<any[]> {
+): Promise<PostView[]> {
   const useEnhancedHydration =
     process.env.ENHANCED_HYDRATION_ENABLED === 'true';
 

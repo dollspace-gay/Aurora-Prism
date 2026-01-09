@@ -37,6 +37,33 @@ interface AssembleThreadOptions {
   viewerDid?: string; // For filtering blocked/muted content
 }
 
+// Facet feature for rich text annotations (mentions, links, hashtags)
+interface FacetFeature {
+  $type: string;
+  did?: string; // For mentions
+  uri?: string; // For links
+  tag?: string; // For hashtags
+}
+
+interface Facets {
+  features?: FacetFeature[];
+}
+
+// Thread gate data structure
+interface ThreadGateData {
+  allowMentions?: boolean;
+  allowFollowing?: boolean;
+  allowListMembers?: boolean;
+  allowedListUris?: string[];
+}
+
+interface ThreadGateContext {
+  threadGate: ThreadGateData;
+  mentionedDids: string[];
+  rootAuthorFollowing: Set<string>;
+  allowedListMembers: Set<string>;
+}
+
 export class ThreadAssembler {
   /**
    * Load viewer's blocks and mutes for filtering
@@ -223,29 +250,28 @@ export class ThreadAssembler {
   /**
    * Extract mentioned DIDs from post facets
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private getMentionedDids(facets: any): string[] {
+  private getMentionedDids(facets: Facets | null | undefined): string[] {
     if (!facets?.features) {
       return [];
     }
 
     const mentions = facets.features.filter(
-      (f: any) => f.$type === 'app.bsky.richtext.facet#mention'
+      (f: FacetFeature) => f.$type === 'app.bsky.richtext.facet#mention'
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return mentions.map((m: any) => m.did);
+    return mentions
+      .map((m: FacetFeature) => m.did)
+      .filter((did): did is string => did !== undefined);
   }
 
   /**
    * Check if a reply violates a thread gate
    * Returns true if the reply should be filtered out
    */
-
   private checkThreadGateViolation(
     replyAuthorDid: string,
     rootAuthorDid: string,
-    threadGate: any,
+    threadGate: ThreadGateData | null | undefined,
     mentionedDids: string[],
     rootAuthorFollowing: Set<string>,
     allowedListMembers: Set<string>
@@ -326,14 +352,7 @@ export class ThreadAssembler {
     // 5. Load thread gate data (if exists)
     const threadGate = await this.loadThreadGate(rootUri);
 
-    let threadGateContext:
-      | {
-          threadGate: any;
-          mentionedDids: string[];
-          rootAuthorFollowing: Set<string>;
-          allowedListMembers: Set<string>;
-        }
-      | undefined;
+    let threadGateContext: ThreadGateContext | undefined;
 
     if (threadGate) {
       // Load data needed for thread gate enforcement in parallel
@@ -494,13 +513,7 @@ export class ThreadAssembler {
     post: ThreadNode,
     maxDepth: number,
     viewerRelationships?: { blockedDids: Set<string>; mutedDids: Set<string> },
-
-    threadGateContext?: {
-      threadGate: any;
-      mentionedDids: string[];
-      rootAuthorFollowing: Set<string>;
-      allowedListMembers: Set<string>;
-    },
+    threadGateContext?: ThreadGateContext,
     rootAuthorDid?: string,
     currentDepth: number = 0
   ): Promise<ThreadNode> {

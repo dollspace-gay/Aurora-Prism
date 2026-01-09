@@ -5,6 +5,7 @@ import {
   ThreadContext,
   Label,
 } from '@shared/schema';
+import { getErrorMessage } from '../utils/error-utils';
 
 export interface CacheConfig {
   ttl: number; // Time to live in seconds
@@ -47,14 +48,15 @@ export class CacheService {
       console.log('[CACHE] Connected to Redis');
     });
 
-    this.redis.on('error', (error: any) => {
+    this.redis.on('error', (error: unknown) => {
+      const msg = getErrorMessage(error);
       // Handle READONLY errors specifically
-      if (error.message && error.message.includes('READONLY')) {
+      if (msg.includes('READONLY')) {
         console.error(
           '[CACHE] READONLY error - connected to replica instead of master.'
         );
       }
-      console.error('[CACHE] Redis error:', error);
+      console.error('[CACHE] Redis error:', msg);
     });
 
     this.isInitialized = true;
@@ -278,6 +280,7 @@ export class CacheService {
   }
 
   // Hydration State Caching
+  /* eslint-disable @typescript-eslint/no-explicit-any -- Hydration state contains dynamic data from multiple external sources */
   async getHydrationState(cacheKey: string): Promise<{
     posts: Map<string, any>;
     actors: Map<string, any>;
@@ -287,6 +290,7 @@ export class CacheService {
     embeds: Map<string, any>;
     labels: Map<string, any[]>;
   } | null> {
+    /* eslint-enable @typescript-eslint/no-explicit-any */
     if (!this.redis || !this.isInitialized) return null;
 
     try {
@@ -312,6 +316,7 @@ export class CacheService {
     }
   }
 
+  /* eslint-disable @typescript-eslint/no-explicit-any -- Hydration state contains dynamic data from multiple external sources */
   async setHydrationState(
     cacheKey: string,
     state: {
@@ -325,6 +330,7 @@ export class CacheService {
     },
     ttl?: number
   ): Promise<void> {
+    /* eslint-enable @typescript-eslint/no-explicit-any */
     if (!this.redis || !this.isInitialized) return;
 
     try {

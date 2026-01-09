@@ -3,6 +3,48 @@ import { posts, reposts, blocks, mutes } from '../../shared/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import { HydrationState, ProfileViewerState, FeedItem } from '../types/feed';
 
+// Hydrated post data structure
+interface HydratedPost {
+  uri: string;
+  cid: string;
+  record: {
+    text: string;
+    reply?: {
+      parent: { uri: string };
+      root?: { uri: string };
+    };
+    embed?: Record<string, unknown>;
+  };
+  author: {
+    did: string;
+  };
+  createdAt: string;
+  indexedAt: string;
+}
+
+// Hydrated repost data structure
+interface HydratedRepost {
+  uri: string;
+  cid: string;
+  postUri: string;
+  repostedBy: string;
+  createdAt: string;
+  indexedAt: string;
+}
+
+// Database post row type (matches drizzle return type)
+interface PostRow {
+  uri: string;
+  cid: string;
+  authorDid: string;
+  text: string;
+  parentUri: string | null;
+  rootUri: string | null;
+  embed: unknown; // jsonb returns unknown from drizzle
+  createdAt: Date;
+  indexedAt: Date;
+}
+
 export class Hydrator {
   async hydrateFeedItems(
     items: FeedItem[],
@@ -24,10 +66,10 @@ export class Hydrator {
     const authorDids = Array.from(
       new Set(
         Array.from(postsData.values())
-          .map((post: any) => post.author?.did)
+          .map((post) => (post as { author?: { did?: string } }).author?.did)
           .filter(Boolean)
       )
-    );
+    ) as string[];
 
     const profileViewers = viewerDid
       ? await this.hydrateProfileViewers(authorDids, viewerDid)
@@ -98,7 +140,7 @@ export class Hydrator {
     return result;
   }
 
-  private async hydratePosts(postUris: string[]): Promise<Map<string, any>> {
+  private async hydratePosts(postUris: string[]): Promise<Map<string, HydratedPost>> {
     if (postUris.length === 0) return new Map();
 
     const postsData = await db
@@ -118,7 +160,7 @@ export class Hydrator {
     }
 
     // Fetch reply parent and root posts
-    let replyPostsData: any[] = [];
+    let replyPostsData: PostRow[] = [];
     if (replyParentUris.size > 0 || replyRootUris.size > 0) {
       const replyUris = Array.from(
         new Set([...replyParentUris, ...replyRootUris])
@@ -166,7 +208,7 @@ export class Hydrator {
 
   private async hydrateReposts(
     repostUris: string[]
-  ): Promise<Map<string, any>> {
+  ): Promise<Map<string, HydratedRepost>> {
     if (repostUris.length === 0) return new Map();
 
     const repostsData = await db

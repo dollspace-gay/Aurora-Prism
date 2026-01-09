@@ -46,7 +46,8 @@ class DatabaseStateStore {
 
   async get(key: string): Promise<NodeSavedState | undefined> {
     const { storage } = await import('../storage');
-    return await storage.getOAuthState(key);
+    const state = await storage.getOAuthState(key);
+    return state as NodeSavedState | undefined;
   }
 
   async del(key: string): Promise<void> {

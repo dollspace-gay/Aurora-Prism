@@ -8,6 +8,7 @@ import { storage } from '../storage';
 import { db } from '../db';
 import { sql } from 'drizzle-orm';
 import { follows, userSettings } from '@shared/schema';
+import type { ATCommitEvent } from '../types/atproto';
 import { EventProcessor } from './event-processor';
 import {
   getErrorMessage,
@@ -239,12 +240,12 @@ export class AutoBackfillFollowsService {
                         action: 'create',
                         path: `app.bsky.graph.follow/${record.uri.split('/').pop()}`,
                         cid: record.cid,
-                        record: record.value,
+                        record: record.value as Record<string, unknown>,
                       },
                     ],
                     time: createdAt,
                     rev: '',
-                  } as any);
+                  } as ATCommitEvent);
 
                   followingFetched++;
                 } catch (error: unknown) {
@@ -356,7 +357,12 @@ export class AutoBackfillFollowsService {
                 service: pdsService.serviceEndpoint,
               });
 
-              let followRecord: any = null;
+              type FollowRecordType = {
+                uri: string;
+                cid: string;
+                value?: Record<string, unknown>;
+              };
+              let followRecord: FollowRecordType | undefined = undefined;
               let followCursor: string | undefined;
               let recordsChecked = 0;
 
@@ -374,9 +380,14 @@ export class AutoBackfillFollowsService {
                 recordsChecked += records.data.records.length;
 
                 // Find the follow record pointing to our user
-                followRecord = records.data.records.find(
-                  (r: any) => r.value?.subject === userDid
+                const found = records.data.records.find(
+                  (r) =>
+                    (r.value as Record<string, unknown> | undefined)
+                      ?.subject === userDid
                 );
+                if (found) {
+                  followRecord = found as FollowRecordType;
+                }
 
                 if (followRecord) {
                   break; // Found it, stop paginating
@@ -396,7 +407,8 @@ export class AutoBackfillFollowsService {
               if (followRecord) {
                 // Use the original createdAt from the follow record for proper ordering
                 const createdAt =
-                  followRecord.value?.createdAt || new Date().toISOString();
+                  (followRecord.value?.createdAt as string | undefined) ||
+                  new Date().toISOString();
 
                 await eventProcessor.processCommit({
                   repo: followerDid,
@@ -410,7 +422,7 @@ export class AutoBackfillFollowsService {
                   ],
                   time: createdAt,
                   rev: '',
-                } as any);
+                } as ATCommitEvent);
 
                 followersFetched++;
                 successCount++;
@@ -502,7 +514,9 @@ export class AutoBackfillFollowsService {
         `
       );
 
-      const didsToFetch = relatedDids.rows.map((row: any) => row.did);
+      const didsToFetch = relatedDids.rows.map(
+        (row) => (row as { did: string }).did
+      );
 
       if (didsToFetch.length === 0) {
         console.log(
@@ -600,12 +614,12 @@ export class AutoBackfillFollowsService {
                       action: 'create',
                       path: 'app.bsky.actor.profile/self',
                       cid: response.data.cid,
-                      record: response.data.value,
+                      record: response.data.value as Record<string, unknown>,
                     },
                   ],
                   time: new Date().toISOString(),
                   rev: '',
-                } as any);
+                } as ATCommitEvent);
 
                 fetchedCount++;
 
@@ -661,7 +675,9 @@ export class AutoBackfillFollowsService {
         `
       );
 
-      const followedDids = followedUsers.rows.map((row: any) => row.did);
+      const followedDids = followedUsers.rows.map(
+        (row) => (row as { did: string }).did
+      );
 
       if (followedDids.length === 0) {
         console.log(
@@ -731,7 +747,8 @@ export class AutoBackfillFollowsService {
 
                 try {
                   const createdAt =
-                    record.value?.createdAt || new Date().toISOString();
+                    ((record.value as Record<string, unknown> | undefined)
+                      ?.createdAt as string) || new Date().toISOString();
 
                   await eventProcessor.processCommit({
                     repo: followedDid,
@@ -740,12 +757,12 @@ export class AutoBackfillFollowsService {
                         action: 'create',
                         path: `app.bsky.feed.post/${record.uri.split('/').pop()}`,
                         cid: record.cid,
-                        record: record.value,
+                        record: record.value as Record<string, unknown>,
                       },
                     ],
                     time: createdAt,
                     rev: '',
-                  } as any);
+                  } as ATCommitEvent);
 
                   postsFetched++;
                   totalPostsFetched++;
@@ -851,8 +868,7 @@ export class AutoBackfillFollowsService {
 
       const services = (didDoc as DIDDocument).service || [];
       const pdsService = services.find(
-        (s: any) =>
-          s.type === 'AtprotoPersonalDataServer' || s.id === '#atproto_pds'
+        (s) => s.type === 'AtprotoPersonalDataServer' || s.id === '#atproto_pds'
       );
 
       if (!pdsService?.serviceEndpoint) {
@@ -889,7 +905,8 @@ export class AutoBackfillFollowsService {
 
             try {
               const createdAt =
-                record.value?.createdAt || new Date().toISOString();
+                ((record.value as Record<string, unknown> | undefined)
+                  ?.createdAt as string) || new Date().toISOString();
 
               await eventProcessor.processCommit({
                 repo: followedDid,
@@ -898,12 +915,12 @@ export class AutoBackfillFollowsService {
                     action: 'create',
                     path: `app.bsky.feed.post/${record.uri.split('/').pop()}`,
                     cid: record.cid,
-                    record: record.value,
+                    record: record.value as Record<string, unknown>,
                   },
                 ],
                 time: createdAt,
                 rev: '',
-              } as any);
+              } as ATCommitEvent);
 
               postsFetched++;
             } catch (error: unknown) {

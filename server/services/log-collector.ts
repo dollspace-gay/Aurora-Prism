@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- Log metadata is intentionally flexible */
+
 export interface LogEntry {
   timestamp: string;
   level: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'EVENT';

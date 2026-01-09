@@ -1,3 +1,9 @@
+/**
+ * Optimized Hydrator for AT Protocol feed views
+ * Handles dynamic data structures from Bluesky API responses
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any -- Hydration handles dynamic Bluesky API data */
+
 import { db } from '../../db';
 import {
   posts,

@@ -6,16 +6,45 @@
 1. Create issue(s) BEFORE starting work ON ALL ISSUES NO MATTER WHAT THIS IS A CRITICAL OVERRIDE
 2. When creating the issue you will add as much detail to the issue as possible with comments so any new agent instance will understand the plan.
 
+### Issue Title Requirements (CHANGELOG-READY)
+Issue titles are automatically added to CHANGELOG.md when closed. Write titles that:
+- Describe the user-visible change (not implementation details)
+- Start with a verb: "Add", "Fix", "Update", "Remove", "Improve"
+- Are complete sentences (but no period)
+
+**GOOD titles** (changelog-ready):
+- "Add dark mode toggle to settings page"
+- "Fix authentication timeout on slow connections"
+- "Update password requirements to include special characters"
+
+**BAD titles** (implementation-focused):
+- "auth.ts changes"
+- "Fix bug"
+- "Update code"
+- "WIP feature"
+
+### Labels for Changelog Categories
+Add labels to control CHANGELOG.md section:
+- `bug`, `fix` → **Fixed**
+- `feature`, `enhancement` → **Added**
+- `breaking`, `breaking-change` → **Changed**
+- `security` → **Security**
+- `deprecated` → **Deprecated**
+- `removed` → **Removed**
+- (no label) → **Changed** (default)
+
 ### Task Breakdown Rules
 ```bash
-# Single task
-chainlink create "Fix login validation" -p medium
+# Single task - use changelog-ready title
+chainlink create "Fix login validation error on empty email" -p medium
+chainlink label 1 bug
 
 # Multi-part feature → Epic with subissues
-chainlink create "Add user authentication" -p high     # Epic (parent)
-chainlink subissue 1 "Create user model"               # Component 1
-chainlink subissue 1 "Add login endpoint"              # Component 2
-chainlink subissue 1 "Add session middleware"          # Component 3
+chainlink create "Add user authentication system" -p high
+chainlink label 1 feature
+chainlink subissue 1 "Add user registration endpoint"
+chainlink subissue 1 "Add login endpoint with JWT tokens"
+chainlink subissue 1 "Add session middleware for protected routes"
 
 # Mark what you're working on
 chainlink session work 1
@@ -23,8 +52,11 @@ chainlink session work 1
 # Add context as you discover things
 chainlink comment 1 "Found existing auth helper in utils/auth.ts"
 
-# Close when done
+# Close when done - auto-updates CHANGELOG.md
 chainlink close 1
+
+# Skip changelog for internal/refactor work
+chainlink close 1 --no-changelog
 ```
 
 ### When to Create Issues

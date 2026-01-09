@@ -45,7 +45,7 @@ export async function getBlocks(req: Request, res: Response): Promise<void> {
     const profiles = await getProfiles(blockedDids, req);
 
     // Create a map of DID -> profile for quick lookup
-    const profileMap = new Map(profiles.map((p: any) => [p.did, p]));
+    const profileMap = new Map(profiles.map((p) => [p.did, p]));
 
     // Build blocks array with full profileView objects and viewer state
     const blocksWithProfiles = blocks

@@ -8,10 +8,18 @@ import { smartConsole } from './console-wrapper';
 import { isUrlSafeToFetch } from '../utils/security';
 import { promises as dnsPromises } from 'dns';
 
+interface VerificationMethod {
+  id: string;
+  type: string;
+  controller: string;
+  publicKeyJwk?: { crv?: string; x?: string; y?: string; kty?: string };
+  publicKeyMultibase?: string;
+}
+
 interface DIDDocument {
   id: string;
   alsoKnownAs?: string[];
-  verificationMethod?: any[];
+  verificationMethod?: VerificationMethod[];
   service?: Array<{
     id: string;
     type: string;
@@ -27,7 +35,7 @@ interface CacheEntry<T> {
 interface QueuedRequest<T> {
   operation: () => Promise<T>;
   resolve: (value: T) => void;
-  reject: (error: any) => void;
+  reject: (error: unknown) => void;
 }
 
 /**
@@ -103,7 +111,13 @@ class LRUCache<K, V> {
  * Request Queue with concurrency limiting
  */
 class RequestQueue {
-  private queue: QueuedRequest<any>[] = [];
+  // Queue holds heterogeneous request types - each item's resolve/reject types differ
+  // Using unknown[] with type assertions preserves type safety at call sites
+  private queue: Array<{
+    operation: () => Promise<unknown>;
+    resolve: (value: unknown) => void;
+    reject: (error: unknown) => void;
+  }> = [];
   private activeCount = 0;
   private maxConcurrent: number;
   private queuedCount = 0;
@@ -116,7 +130,12 @@ class RequestQueue {
 
   async enqueue<T>(operation: () => Promise<T>): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      this.queue.push({ operation, resolve, reject });
+      // Type assertion needed: queue stores heterogeneous request types
+      this.queue.push({
+        operation: operation as () => Promise<unknown>,
+        resolve: resolve as (value: unknown) => void,
+        reject,
+      });
       this.queuedCount++;
       this.processQueue();
     });

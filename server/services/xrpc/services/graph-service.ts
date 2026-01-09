@@ -81,7 +81,7 @@ export async function getKnownFollowers(
     const profiles = await getProfiles(allDids, req);
 
     // Create a map of DID -> profile for quick lookup
-    const profileMap = new Map(profiles.map((p: any) => [p.did, p]));
+    const profileMap = new Map(profiles.map((p) => [p.did, p]));
 
     // Extract subject profile
     const subject = profileMap.get(actorDid);

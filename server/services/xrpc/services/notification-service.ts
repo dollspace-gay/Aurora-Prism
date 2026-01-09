@@ -2,6 +2,7 @@
  * Notification Service
  * Handles notifications, notification preferences, and activity subscriptions
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- XRPC responses have dynamic AT Protocol structures */
 
 import type { Request, Response } from 'express';
 import { storage } from '../../../storage';

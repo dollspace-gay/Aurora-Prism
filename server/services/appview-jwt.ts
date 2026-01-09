@@ -28,7 +28,9 @@ const signES256K = (privateKeyPem: string, data: string): string => {
     // The `key-encoder` library is a CJS module that, when bundled,
     // might be wrapped in a default object. This handles that case
     // by checking for a `default` property and using it if it exists.
-    const KeyEncoderClass = (KeyEncoder as any).default || KeyEncoder;
+
+    const KeyEncoderClass =
+      (KeyEncoder as { default?: typeof KeyEncoder }).default || KeyEncoder;
     const keyEncoder = new KeyEncoderClass('secp256k1');
 
     // Convert PEM to raw key format
@@ -65,7 +67,16 @@ const signES256K = (privateKeyPem: string, data: string): string => {
  * This bypasses the jsonwebtoken library's algorithm validation
  */
 const createJWTWithES256K = (
-  payload: any,
+  payload:
+    | AppViewJWTPayload
+    | {
+        iss: string;
+        aud: string;
+        sub: string;
+        exp: number;
+        iat: number;
+        lxm: string;
+      },
   privateKeyPem: string,
   keyid: string
 ): string => {
@@ -246,14 +257,17 @@ export class AppViewJWTService {
   ): Promise<UserSignedJWTPayload | null> {
     try {
       // Decode without verification to check token structure
-      const decoded = jwt.decode(token, { complete: true }) as any;
+      const decoded = jwt.decode(token, { complete: true }) as {
+        header: { alg: string; kid?: string };
+        payload: UserSignedJWTPayload;
+      } | null;
 
       if (!decoded || !decoded.payload) {
         console.log('[AppViewJWT] Failed to decode user-signed token');
         return null;
       }
 
-      const payload = decoded.payload as UserSignedJWTPayload;
+      const payload = decoded.payload;
 
       // Validate required fields
       if (!payload.iss || !payload.aud || !payload.sub) {
@@ -330,7 +344,7 @@ export class AppViewJWTService {
 
       const header = JSON.parse(
         toString(fromString(headerB64, 'base64url'))
-      ) as any;
+      ) as { alg: string; kid?: string };
 
       const { didResolver } = await import('./did-resolver');
       const didDocument = await didResolver.resolveDID(signerDid);
@@ -394,7 +408,10 @@ export class AppViewJWTService {
   }
 
   private verifyES256KSignature(
-    method: any,
+    method: {
+      publicKeyJwk?: { crv?: string; x?: string; y?: string };
+      publicKeyMultibase?: string;
+    },
     headerB64: string,
     payloadB64: string,
     signatureB64: string
@@ -436,7 +453,9 @@ export class AppViewJWTService {
       }
 
       // Verify the signature using secp256k1
-      const KeyEncoderClass = (KeyEncoder as any).default || KeyEncoder;
+
+      const KeyEncoderClass =
+        (KeyEncoder as { default?: typeof KeyEncoder }).default || KeyEncoder;
       const keyEncoder = new KeyEncoderClass('secp256k1');
       const pemKey = keyEncoder.encodePublic(
         toString(publicKeyBytes, 'hex'),
@@ -472,7 +491,10 @@ export class AppViewJWTService {
   }
 
   private async verifyES256Signature(
-    method: any,
+    method: {
+      publicKeyJwk?: Record<string, unknown>;
+      publicKeyMultibase?: string;
+    },
     token: string
   ): Promise<boolean> {
     try {

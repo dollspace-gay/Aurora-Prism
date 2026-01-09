@@ -4,6 +4,7 @@
  * Extracted from xrpc-api.ts to eliminate the deprecated monolithic file.
  * Handles fetching and building complete profile views with all associated data.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- Profile data has dynamic AT Protocol structures */
 
 import type { Request } from 'express';
 import { storage } from '../../../storage';

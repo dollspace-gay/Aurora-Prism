@@ -3,6 +3,7 @@ import { IdResolver } from '@atproto/identity';
 import { EventProcessor } from './event-processor';
 import { storage } from '../storage';
 import { logCollector } from './log-collector';
+import { hasErrorCode } from '../utils/error-utils';
 
 // Use the main application storage instead of creating a separate connection
 // This ensures backfilled records are stored in the same database as the web view
@@ -234,7 +235,7 @@ export class BackfillService {
                 evt.record &&
                 typeof evt.record === 'object'
               ) {
-                const record = evt.record as any;
+                const record = evt.record as { createdAt?: string };
                 if (record.createdAt) {
                   const recordDate = new Date(record.createdAt);
                   if (recordDate < this.cutoffDate) {
@@ -325,8 +326,8 @@ export class BackfillService {
               await this.stop();
               resolve();
             }
-          } catch (error: any) {
-            if (error?.code === '23505') {
+          } catch (error: unknown) {
+            if (hasErrorCode(error, '23505')) {
               // Duplicate key - skip silently
             } else {
               console.error('[BACKFILL] Error processing event:', error);
@@ -337,11 +338,21 @@ export class BackfillService {
             }
           }
         },
-        onError: (err: any) => {
+        onError: (err: unknown) => {
           // Check if this is a DID resolution timeout error
-          const errorName = err?.name || '';
+          const errObj = err as {
+            name?: string;
+            cause?: { name?: string; constructor?: { name?: string } };
+            event?: {
+              seq?: number;
+              $type?: string;
+              did?: string;
+              handle?: string;
+            };
+          } | null;
+          const errorName = errObj?.name || '';
           const causeName =
-            err?.cause?.name || err?.cause?.constructor?.name || '';
+            errObj?.cause?.name || errObj?.cause?.constructor?.name || '';
           const isDidResolutionTimeout =
             errorName === 'FirehoseParseError' &&
             (causeName === 'AbortError' || causeName === 'DOMException');
@@ -350,11 +361,11 @@ export class BackfillService {
             // DID resolution timeouts are expected during backfill of suspended/deleted accounts
             // These events existed historically but the DIDs no longer resolve
             console.warn(
-              `[BACKFILL] Skipping event due to DID resolution timeout (seq: ${err?.event?.seq}):`,
+              `[BACKFILL] Skipping event due to DID resolution timeout (seq: ${errObj?.event?.seq}):`,
               {
-                type: err?.event?.['$type'],
-                did: err?.event?.did,
-                handle: err?.event?.handle,
+                type: errObj?.event?.['$type'],
+                did: errObj?.event?.did,
+                handle: errObj?.event?.handle,
                 causeName,
               }
             );

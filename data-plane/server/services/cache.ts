@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import type { ThreadRecord, PostRecord } from '../types';
+import type { ThreadRecord, PostRecord, ThreadGateRecord } from '../types';
 
 /**
  * Cache Service for Data-Plane
@@ -60,7 +60,7 @@ class CacheService {
       console.log('[CACHE] Connected to Redis');
     });
 
-    this.redis.on('error', (error: any) => {
+    this.redis.on('error', (error: Error) => {
       console.error('[CACHE] Redis error:', error);
     });
 
@@ -155,7 +155,7 @@ class CacheService {
   /**
    * Get cached thread gate
    */
-  async getThreadGate(postUri: string): Promise<any | null> {
+  async getThreadGate(postUri: string): Promise<ThreadGateRecord | null> {
     if (!this.isEnabled()) return null;
 
     try {
@@ -175,7 +175,7 @@ class CacheService {
   /**
    * Cache thread gate
    */
-  async setThreadGate(postUri: string, gate: any): Promise<void> {
+  async setThreadGate(postUri: string, gate: ThreadGateRecord): Promise<void> {
     if (!this.isEnabled()) return;
 
     try {

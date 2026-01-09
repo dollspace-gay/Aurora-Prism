@@ -7,6 +7,7 @@
  * - API requests with authentication
  */
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- XRPC responses have dynamic structure
 interface XRPCResponse<T = any> {
   success: boolean;
   data?: T;
@@ -82,6 +83,7 @@ export class PDSClient {
         root: { uri: string; cid: string };
         parent: { uri: string; cid: string };
       };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AT Protocol embeds have dynamic structure
       embed?: any;
     }
   ): Promise<XRPCResponse<{ uri: string; cid: string }>> {
@@ -325,6 +327,7 @@ export class PDSClient {
    * Proxies the authentication request to the user's home PDS
    * Returns the complete PDS response to preserve all AT Protocol fields
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PDS session response has dynamic structure
   async createSession(
     pdsEndpoint: string,
     identifier: string,
@@ -471,6 +474,7 @@ export class PDSClient {
   /**
    * Refresh session (alias for refreshAccessToken for XRPC compatibility)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PDS session response has dynamic structure
   async refreshSession(
     pdsEndpoint: string,
     refreshToken: string
@@ -481,6 +485,7 @@ export class PDSClient {
   /**
    * Get current session info using access token
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PDS session response has dynamic structure
   async getSession(
     pdsEndpoint: string,
     accessToken: string
@@ -523,6 +528,7 @@ export class PDSClient {
    * This method should be used when the AppView needs to make requests to a PDS
    * on behalf of a user, using the user's own authentication token.
    */
+  /* eslint-disable @typescript-eslint/no-explicit-any -- XRPC proxy handles dynamic request/response data */
   async proxyXRPCWithUserAuth(
     pdsEndpoint: string,
     method: string,
@@ -532,6 +538,7 @@ export class PDSClient {
     body: any,
     headers: any
   ): Promise<{ status: number; headers: Record<string, string>; body: any }> {
+    /* eslint-enable @typescript-eslint/no-explicit-any */
     // Log request details for debugging
     console.log(
       `[PDS_CLIENT] Proxying request to PDS with user authentication:`,
@@ -559,6 +566,7 @@ export class PDSClient {
    * This is used for proxying methods that are not implemented by the AppView.
    * It uses a strict allow-list for headers to prevent forwarding problematic ones.
    */
+  /* eslint-disable @typescript-eslint/no-explicit-any -- XRPC proxy handles dynamic request/response data */
   async proxyXRPC(
     pdsEndpoint: string,
     method: string,
@@ -568,6 +576,7 @@ export class PDSClient {
     body: any,
     headers: any
   ): Promise<{ status: number; headers: Record<string, string>; body: any }> {
+    /* eslint-enable @typescript-eslint/no-explicit-any */
     const searchParams = new URLSearchParams();
     for (const key in query) {
       const value = query[key];

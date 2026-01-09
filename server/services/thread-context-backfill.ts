@@ -3,6 +3,7 @@
  * Automatically fetches missing parent/root posts to prevent broken conversations
  * Uses Bluesky's public AppView for discovery, then fetches actual records from PDSs
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- AT Protocol API responses have dynamic structures */
 
 import { AtpAgent } from '@atproto/api';
 import { storage } from '../storage';

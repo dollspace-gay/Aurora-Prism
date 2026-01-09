@@ -1,4 +1,6 @@
 import type { Express, Request, Response } from 'express';
+import type { DIDDocument } from './types/atproto';
+import { getErrorMessage, hasErrorStatus } from './utils/error-utils';
 import { createServer, type Server } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { Readable } from 'stream';
@@ -74,6 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
 
     // Track response bytes on end (for streams and other responses)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     res.end = function (chunk?: any, encoding?: any, callback?: any) {
       if (chunk) {
         const responseBytes = Buffer.isBuffer(chunk)
@@ -210,10 +213,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(
         `[FIREHOSE] Connecting to ${additionalRelays.length} additional relay sources...`
       );
-      additionalRelays.forEach((relay: any, index: number) => {
-        relay.connect(workerId, totalWorkers);
-        console.log(`[FIREHOSE] Additional relay ${index + 1} connected`);
-      });
+      additionalRelays.forEach(
+        (
+          relay: { connect: (workerId: number, totalWorkers: number) => void },
+          index: number
+        ) => {
+          relay.connect(workerId, totalWorkers);
+          console.log(`[FIREHOSE] Additional relay ${index + 1} connected`);
+        }
+      );
     }
   } else if (!firehoseEnabled) {
     console.log(
@@ -1083,7 +1091,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             );
 
             const missingPostUris = missingPosts.rows.map(
-              (row: any) => row.post_uri
+              (row) => (row as { post_uri: string }).post_uri
             );
 
             console.log(
@@ -1140,9 +1148,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       }
 
                       // Find PDS service endpoint
-                      const services = (didDoc as any).service || [];
+                      const services = (didDoc as DIDDocument).service || [];
                       const pdsService = services.find(
-                        (s: any) =>
+                        (s) =>
                           s.type === 'AtprotoPersonalDataServer' ||
                           s.id === '#atproto_pds'
                       );
@@ -1183,7 +1191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         ],
                         time: new Date().toISOString(),
                         rev: '',
-                      } as any);
+                      });
 
                       fetchedCount++;
 
@@ -1192,17 +1200,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
                           `[BACKFILL_LIKES] Progress: ${fetchedCount} fetched, ${failedCount} failed, ${skippedCount} skipped`
                         );
                       }
-                    } catch (error: any) {
+                    } catch (error: unknown) {
+                      const msg = getErrorMessage(error);
                       if (
-                        error.status === 404 ||
-                        error.message?.includes('not found')
+                        hasErrorStatus(error, 404) ||
+                        msg.includes('not found')
                       ) {
                         skippedCount++;
                       } else {
                         console.error(
                           `[BACKFILL_LIKES] Error fetching ${postUri}:`,
-                          error.status,
-                          error.message
+                          msg
                         );
                         failedCount++;
                       }
@@ -3442,8 +3450,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { onDemandBackfill } = require('./services/on-demand-backfill');
 
       // Trigger backfill (non-blocking)
-      onDemandBackfill.backfillUser(did).catch((error: any) => {
-        console.error(`[API] On-demand backfill failed for ${did}:`, error);
+      onDemandBackfill.backfillUser(did).catch((error: unknown) => {
+        console.error(
+          `[API] On-demand backfill failed for ${did}:`,
+          getErrorMessage(error)
+        );
       });
 
       res.json({

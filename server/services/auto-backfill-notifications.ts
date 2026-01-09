@@ -9,6 +9,7 @@ import { db } from '../db';
 import { userSettings, posts } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { getErrorMessage } from '../utils/error-utils';
+import type { DIDDocument } from '../types/atproto';
 
 const BACKFILL_COOLDOWN_HOURS = 1;
 const CONCURRENT_FETCHES = 5;
@@ -174,9 +175,9 @@ export class AutoBackfillNotificationsService {
                   );
                   if (!likerDidDoc) continue;
 
-                  const services = (likerDidDoc as any).service || [];
+                  const services = (likerDidDoc as DIDDocument).service || [];
                   const pdsService = services.find(
-                    (s: any) =>
+                    (s) =>
                       s.type === 'AtprotoPersonalDataServer' ||
                       s.id === '#atproto_pds'
                   );
@@ -197,7 +198,15 @@ export class AutoBackfillNotificationsService {
 
                   // Find the like record for this specific post
                   const likeRecord = likeRecords.data.records.find(
-                    (r: any) => r.value?.subject?.uri === post.uri
+                    (r) =>
+                      (r.value as Record<string, unknown> | undefined)
+                        ?.subject &&
+                      (
+                        (r.value as Record<string, unknown>).subject as Record<
+                          string,
+                          unknown
+                        >
+                      )?.uri === post.uri
                   );
 
                   if (likeRecord) {
@@ -212,12 +221,12 @@ export class AutoBackfillNotificationsService {
                           action: 'create',
                           path: `app.bsky.feed.like/${likeRecord.uri.split('/').pop()}`,
                           cid: likeRecord.cid,
-                          record: likeRecord.value,
+                          record: likeRecord.value as Record<string, unknown>,
                         },
                       ],
                       time: createdAt,
                       rev: '',
-                    } as any);
+                    });
 
                     notificationsFetched++;
                   }
@@ -242,9 +251,10 @@ export class AutoBackfillNotificationsService {
                   );
                   if (!reposterDidDoc) continue;
 
-                  const services = (reposterDidDoc as any).service || [];
+                  const services =
+                    (reposterDidDoc as DIDDocument).service || [];
                   const pdsService = services.find(
-                    (s: any) =>
+                    (s) =>
                       s.type === 'AtprotoPersonalDataServer' ||
                       s.id === '#atproto_pds'
                   );
@@ -263,7 +273,15 @@ export class AutoBackfillNotificationsService {
                     });
 
                   const repostRecord = repostRecords.data.records.find(
-                    (r: any) => r.value?.subject?.uri === post.uri
+                    (r) =>
+                      (r.value as Record<string, unknown> | undefined)
+                        ?.subject &&
+                      (
+                        (r.value as Record<string, unknown>).subject as Record<
+                          string,
+                          unknown
+                        >
+                      )?.uri === post.uri
                   );
 
                   if (repostRecord) {
@@ -278,12 +296,12 @@ export class AutoBackfillNotificationsService {
                           action: 'create',
                           path: `app.bsky.feed.repost/${repostRecord.uri.split('/').pop()}`,
                           cid: repostRecord.cid,
-                          record: repostRecord.value,
+                          record: repostRecord.value as Record<string, unknown>,
                         },
                       ],
                       time: createdAt,
                       rev: '',
-                    } as any);
+                    });
 
                     notificationsFetched++;
                   }

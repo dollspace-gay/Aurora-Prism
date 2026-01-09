@@ -2,6 +2,7 @@
  * Timeline Service
  * Handles timeline feeds, author feeds, post threads, and feed generator consumption
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- XRPC responses have dynamic AT Protocol structures */
 
 import type { Request, Response } from 'express';
 import { storage } from '../../../storage';

@@ -160,9 +160,9 @@ export function isContentTypeSafe(contentType: string | undefined): boolean {
  * @returns Sanitized headers object
  */
 export function sanitizeResponseHeaders(
-  headers: Record<string, any>
-): Record<string, any> {
-  const sanitized: Record<string, any> = {};
+  headers: Record<string, string | number | string[] | undefined>
+): Record<string, string | number | string[]> {
+  const sanitized: Record<string, string | number | string[]> = {};
 
   // List of headers that are safe to forward
   const safeHeaders = [
@@ -183,16 +183,25 @@ export function sanitizeResponseHeaders(
   for (const [key, value] of Object.entries(headers)) {
     const lowerKey = key.toLowerCase();
 
-    // Only include safe headers
-    if (safeHeaders.includes(lowerKey)) {
+    // Only include safe headers with defined values
+    if (safeHeaders.includes(lowerKey) && value !== undefined) {
       // Sanitize header values to remove potential script injection
       if (typeof value === 'string') {
         sanitized[key] = value
           .replace(/<script[^>]*>.*?<\/script>/gi, '')
           .replace(/javascript:/gi, '')
           .replace(/on\w+=/gi, '');
-      } else {
+      } else if (typeof value === 'number') {
+        // Numbers are safe, pass through directly
         sanitized[key] = value;
+      } else if (Array.isArray(value)) {
+        // Sanitize each element in the array
+        sanitized[key] = value.map((v) =>
+          v
+            .replace(/<script[^>]*>.*?<\/script>/gi, '')
+            .replace(/javascript:/gi, '')
+            .replace(/on\w+=/gi, '')
+        );
       }
     }
   }

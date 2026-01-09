@@ -2,6 +2,7 @@
  * Feed Generator Service
  * Handles feed generator discovery, queries, and descriptions
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- XRPC responses have dynamic AT Protocol structures */
 
 import type { Request, Response } from 'express';
 import { storage } from '../../../storage';

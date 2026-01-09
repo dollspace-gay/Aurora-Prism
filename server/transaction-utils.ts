@@ -2,6 +2,7 @@
  * Transaction utilities with timeout and retry logic
  * Handles deadlocks and provides automatic retry with exponential backoff
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- Transaction handlers use generic callback types */
 
 import type { DbConnection } from './db';
 

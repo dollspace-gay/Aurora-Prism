@@ -13,6 +13,12 @@ import type {
   PostRecord,
   ThreadRecord,
   PaginatedResponse,
+  FollowRecord,
+  RelationshipRecord,
+  BlockRecord,
+  MuteRecord,
+  NotificationRecord,
+  FeedGeneratorRecord,
 } from '../server/types';
 
 interface CacheConfig {
@@ -338,8 +344,7 @@ export class DataPlaneClient {
    */
   private async request<T>(
     endpoint: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    body: any,
+    body: Record<string, unknown>,
     options: { timeout?: number; retries?: number } = {}
   ): Promise<T> {
     const { timeout = this.timeout, retries = 2 } = options;
@@ -608,34 +613,51 @@ export class DataPlaneClient {
   async getFollowers(
     actor: string,
     options: { limit?: number; cursor?: string } = {}
-  ): Promise<any> {
-    return this.request('/internal/getFollowers', { actor, ...options });
+  ): Promise<PaginatedResponse<FollowRecord>> {
+    return this.request<PaginatedResponse<FollowRecord>>(
+      '/internal/getFollowers',
+      { actor, ...options }
+    );
   }
 
   async getFollows(
     actor: string,
     options: { limit?: number; cursor?: string } = {}
-  ): Promise<any> {
-    return this.request('/internal/getFollows', { actor, ...options });
+  ): Promise<PaginatedResponse<FollowRecord>> {
+    return this.request<PaginatedResponse<FollowRecord>>(
+      '/internal/getFollows',
+      { actor, ...options }
+    );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getRelationships(actor: string, others: string[]): Promise<any> {
-    return this.request('/internal/getRelationships', { actor, others });
+  async getRelationships(
+    actor: string,
+    others: string[]
+  ): Promise<{ relationships: RelationshipRecord[] }> {
+    return this.request<{ relationships: RelationshipRecord[] }>(
+      '/internal/getRelationships',
+      { actor, others }
+    );
   }
 
   async getBlocks(
     actor: string,
     options: { limit?: number; cursor?: string } = {}
-  ): Promise<any> {
-    return this.request('/internal/getBlocks', { actor, ...options });
+  ): Promise<PaginatedResponse<BlockRecord>> {
+    return this.request<PaginatedResponse<BlockRecord>>(
+      '/internal/getBlocks',
+      { actor, ...options }
+    );
   }
 
   async getMutes(
     actor: string,
     options: { limit?: number; cursor?: string } = {}
-  ): Promise<any> {
-    return this.request('/internal/getMutes', { actor, ...options });
+  ): Promise<PaginatedResponse<MuteRecord>> {
+    return this.request<PaginatedResponse<MuteRecord>>(
+      '/internal/getMutes',
+      { actor, ...options }
+    );
   }
 
   // Search queries
@@ -650,8 +672,11 @@ export class DataPlaneClient {
       limit?: number;
       cursor?: string;
     } = {}
-  ): Promise<any> {
-    return this.request('/internal/searchPosts', { query, ...options });
+  ): Promise<PaginatedResponse<PostRecord>> {
+    return this.request<PaginatedResponse<PostRecord>>(
+      '/internal/searchPosts',
+      { query, ...options }
+    );
   }
 
   // Notification queries
@@ -659,8 +684,11 @@ export class DataPlaneClient {
   async listNotifications(
     actor: string,
     options: { limit?: number; cursor?: string; seenAt?: string } = {}
-  ): Promise<any> {
-    return this.request('/internal/listNotifications', { actor, ...options });
+  ): Promise<PaginatedResponse<NotificationRecord>> {
+    return this.request<PaginatedResponse<NotificationRecord>>(
+      '/internal/listNotifications',
+      { actor, ...options }
+    );
   }
 
   async getUnreadCount(
@@ -675,14 +703,19 @@ export class DataPlaneClient {
 
   // Feed generator queries
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getFeedGenerators(uris: string[]): Promise<any> {
-    return this.request('/internal/getFeedGenerators', { uris });
+  async getFeedGenerators(
+    uris: string[]
+  ): Promise<{ feedGenerators: FeedGeneratorRecord[] }> {
+    return this.request<{ feedGenerators: FeedGeneratorRecord[] }>(
+      '/internal/getFeedGenerators',
+      { uris }
+    );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getFeedGenerator(feed: string): Promise<any> {
-    return this.request('/internal/getFeedGenerator', { feed });
+  async getFeedGenerator(feed: string): Promise<FeedGeneratorRecord> {
+    return this.request<FeedGeneratorRecord>('/internal/getFeedGenerator', {
+      feed,
+    });
   }
 
   // Health check

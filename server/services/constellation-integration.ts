@@ -6,6 +6,7 @@
  */
 
 import Redis from 'ioredis';
+import { getErrorMessage } from '../utils/error-utils';
 
 interface ConstellationConfig {
   enabled: boolean;
@@ -73,14 +74,15 @@ class ConstellationIntegration {
           role: 'master',
         });
 
-        this.redis.on('error', (error: any) => {
+        this.redis.on('error', (error: unknown) => {
+          const msg = getErrorMessage(error);
           // Handle READONLY errors specifically
-          if (error.message && error.message.includes('READONLY')) {
+          if (msg.includes('READONLY')) {
             console.error(
               '[CONSTELLATION] READONLY error - connected to replica instead of master.'
             );
           }
-          console.error('[CONSTELLATION] Redis error:', error);
+          console.error('[CONSTELLATION] Redis error:', msg);
         });
       }
 
@@ -118,7 +120,7 @@ class ConstellationIntegration {
   /**
    * Set value in cache
    */
-  private async setInCache(key: string, value: any): Promise<void> {
+  private async setInCache(key: string, value: unknown): Promise<void> {
     if (!this.redis) return;
 
     try {

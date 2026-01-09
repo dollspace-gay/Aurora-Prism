@@ -37,15 +37,19 @@ export interface FeedItem {
 }
 
 // Hydration state for feed items
+// Note: These use Record<string, any> as the values have dynamic shapes from external APIs
+
+/* eslint-disable @typescript-eslint/no-explicit-any -- Hydration state contains dynamic data from Bluesky API */
 export interface HydrationState {
-  posts?: Map<string, any>;
-  reposts?: Map<string, any>;
-  profileViewers?: Map<string, any>;
-  postBlocks?: Map<string, any>;
-  aggregations?: Map<string, any>;
-  viewerStates?: Map<string, any>;
-  labels?: Map<string, any[]>;
+  posts?: Map<string, Record<string, any>>;
+  reposts?: Map<string, Record<string, any>>;
+  profileViewers?: Map<string, Record<string, any>>;
+  postBlocks?: Map<string, Record<string, any>>;
+  aggregations?: Map<string, Record<string, any>>;
+  viewerStates?: Map<string, Record<string, any>>;
+  labels?: Map<string, Record<string, any>[]>;
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // Profile viewer state
 export interface ProfileViewerState {
@@ -86,18 +90,21 @@ export interface ProfileViewerState {
 }
 
 // Feed view post structure
+
+/* eslint-disable @typescript-eslint/no-explicit-any -- FeedViewPost contains dynamic Bluesky API response data */
 export interface FeedViewPost {
-  post: any; // PostView
+  post: Record<string, any>; // PostView
   reason?: {
     $type: 'app.bsky.feed.defs#reasonRepost' | 'app.bsky.feed.defs#reasonPin';
-    by: any; // ProfileViewBasic
+    by: Record<string, any>; // ProfileViewBasic
     indexedAt: string;
   };
   reply?: {
-    root: any; // PostView
-    parent: any; // PostView
+    root: Record<string, any>; // PostView
+    parent: Record<string, any>; // PostView
   };
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // Self-thread tracker for posts_and_author_threads filter
 export class SelfThreadTracker {
@@ -152,7 +159,8 @@ export class SelfThreadTracker {
     return this.ok(parentUri, loop);
   }
 
-  private getParentUri(post: any): string | null {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private getParentUri(post: Record<string, any>): string | null {
     return post.record?.reply?.parent?.uri ?? null;
   }
 }

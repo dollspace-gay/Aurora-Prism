@@ -1,3 +1,8 @@
+/**
+ * Repo Backfill Service - Fetches complete repository CAR files from PDSs
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any -- AT Protocol repo records have dynamic structures */
+
 import { AtpAgent } from '@atproto/api';
 import { IdResolver } from '@atproto/identity';
 import { readCar, MemoryBlockstore } from '@atproto/repo';
@@ -8,6 +13,11 @@ import { pdsDataFetcher } from './pds-data-fetcher';
 import { logCollector } from './log-collector';
 import { sanitizeObject } from '../utils/sanitize';
 import { createHash } from 'crypto';
+import {
+  getErrorMessage,
+  hasErrorCode,
+  getErrorStatus,
+} from '../utils/error-utils';
 
 // Use the main application storage instead of creating a separate connection
 // This ensures backfilled records are stored in the same database as the web view
@@ -119,8 +129,11 @@ export class RepoBackfillService {
     try {
       await this.fetchAndProcessRepo(did);
       console.log(`[REPO_BACKFILL] ✓ Successfully processed ${did}`);
-    } catch (error: any) {
-      console.error(`[REPO_BACKFILL] Error processing ${did}:`, error.message);
+    } catch (error: unknown) {
+      console.error(
+        `[REPO_BACKFILL] Error processing ${did}:`,
+        getErrorMessage(error)
+      );
       throw error;
     }
   }
@@ -217,7 +230,7 @@ export class RepoBackfillService {
             `${this.progress.totalRecordsSkipped} skipped (${rate.toFixed(0)} rec/s)`
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[REPO_BACKFILL] Error listing repos:', error);
       logCollector.error('Repo backfill list error', { error });
     }
@@ -431,16 +444,16 @@ export class RepoBackfillService {
                 `[REPO_BACKFILL] Progress: ${recordsProcessed} records processed...`
               );
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             // Skip unparseable records but provide better visibility
-            if (error?.code === '23505') {
+            if (hasErrorCode(error, '23505')) {
               // Silently ignore duplicates (common during reconnections)
               recordsSkipped++;
             } else {
               // Log other errors for debugging
               console.error(
                 `[REPO_BACKFILL] Error processing ${collection}/${rkey}:`,
-                error.message
+                getErrorMessage(error)
               );
               recordsSkipped++;
             }
@@ -475,16 +488,22 @@ export class RepoBackfillService {
       // After processing, queue all referenced users with handle.invalid for PDS fetching
       // This ensures handles are resolved after bulk import completes
       await this.queueUsersForHandleResolution(Array.from(referencedDids));
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const status = getErrorStatus(error);
+      const errObj = error as {
+        statusText?: string;
+        stack?: string;
+        constructor?: { name?: string };
+      } | null;
       console.error(`[REPO_BACKFILL] Error fetching ${did}:`, {
-        message: error.message,
-        status: error.status,
-        statusText: error.statusText,
-        errorType: error.constructor.name,
-        stack: error.stack?.split('\n').slice(0, 3).join('\n'),
+        message: getErrorMessage(error),
+        status,
+        statusText: errObj?.statusText,
+        errorType: errObj?.constructor?.name,
+        stack: errObj?.stack?.split('\n').slice(0, 3).join('\n'),
       });
 
-      if (error?.status === 404 || error?.status === 400) {
+      if (status === 404 || status === 400) {
         console.debug(`[REPO_BACKFILL] Repo not found or invalid: ${did}`);
       }
     }
@@ -528,12 +547,12 @@ export class RepoBackfillService {
               handle: 'handle.invalid', // Standard fallback, will be updated by PDS fetcher
             });
             created++;
-          } catch (error: any) {
+          } catch (error: unknown) {
             // Ignore duplicate key errors (user was created by another process)
-            if (error?.code !== '23505') {
+            if (!hasErrorCode(error, '23505')) {
               console.error(
                 `[REPO_BACKFILL] Error creating user ${userDid}:`,
-                error.message
+                getErrorMessage(error)
               );
             }
           }
@@ -627,10 +646,10 @@ export class RepoBackfillService {
               pdsDataFetcher.markIncomplete('user', did);
               queued++;
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             console.error(
               `[REPO_BACKFILL] Error checking user ${did}:`,
-              error.message
+              getErrorMessage(error)
             );
           }
         })

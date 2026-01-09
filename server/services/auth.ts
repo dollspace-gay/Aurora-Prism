@@ -19,7 +19,9 @@ const verifyEs256kSig = (
     // The `key-encoder` library is a CJS module that, when bundled,
     // might be wrapped in a default object. This handles that case
     // by checking for a `default` property and using it if it exists.
-    const KeyEncoderClass = (KeyEncoder as any).default || KeyEncoder;
+
+    const KeyEncoderClass =
+      (KeyEncoder as { default?: typeof KeyEncoder }).default || KeyEncoder;
     const keyEncoder = new KeyEncoderClass('secp256k1');
     const pemKey = keyEncoder.encodePublic(
       toString(publicKey, 'hex'),
@@ -112,14 +114,17 @@ export class AuthService {
   } | null> {
     try {
       // Decode without verification to check token structure
-      const decoded = jwt.decode(token, { complete: true }) as any;
+      const decoded = jwt.decode(token, { complete: true }) as {
+        header: { alg: string; kid?: string };
+        payload: Record<string, unknown>;
+      } | null;
 
       if (!decoded || !decoded.payload) {
         console.log('[AUTH] Failed to decode token');
         return null;
       }
 
-      const payload = decoded.payload;
+      const payload = decoded.payload as Record<string, unknown>;
 
       // AT Protocol supports two token formats:
       // 1. OAuth access tokens (RFC 9068): sub=userDID, iss=authServer, aud=resourceServer
@@ -129,19 +134,21 @@ export class AuthService {
       let signingDid: string | null = null;
 
       // Check for OAuth access token format (sub field with DID)
-      if (
-        payload.sub &&
-        typeof payload.sub === 'string' &&
-        payload.sub.startsWith('did:')
-      ) {
-        userDid = payload.sub;
+      const sub = payload.sub as string | undefined;
+      const aud = payload.aud as string | undefined;
+      const iss = payload.iss as string | undefined;
+      const scope = payload.scope as string | undefined;
+      const lxm = payload.lxm as string | undefined;
+
+      if (sub && typeof sub === 'string' && sub.startsWith('did:')) {
+        userDid = sub;
 
         // PDS-issued tokens: sub=userDID, aud=pdsDID, scope=com.atproto.access or com.atproto.appPassPrivileged
         // SECURITY: All JWTs MUST have their cryptographic signatures verified
-        const pdsDid = payload.aud;
+        const pdsDid = aud;
         if (
-          (payload.scope === 'com.atproto.appPassPrivileged' ||
-            payload.scope === 'com.atproto.access') &&
+          (scope === 'com.atproto.appPassPrivileged' ||
+            scope === 'com.atproto.access') &&
           pdsDid &&
           typeof pdsDid === 'string' &&
           pdsDid.startsWith('did:')
@@ -149,12 +156,12 @@ export class AuthService {
           // For PDS-issued tokens, the PDS is the signer
           signingDid = pdsDid;
           console.log(
-            `[AUTH] PDS token detected (scope: ${payload.scope}) for DID: ${payload.sub} (from PDS: ${pdsDid}) - verifying signature`
+            `[AUTH] PDS token detected (scope: ${scope}) for DID: ${sub} (from PDS: ${pdsDid}) - verifying signature`
           );
         }
         // OAuth tokens with iss field need signature verification
-        else if (payload.iss && typeof payload.iss === 'string') {
-          signingDid = payload.iss;
+        else if (iss && typeof iss === 'string') {
+          signingDid = iss;
         }
         // Fallback: use aud as signing DID if present
         else if (
@@ -173,13 +180,13 @@ export class AuthService {
       }
       // Check for AT Protocol service auth token format (iss field with DID, lxm field present)
       else if (
-        payload.iss &&
-        typeof payload.iss === 'string' &&
-        payload.iss.startsWith('did:') &&
-        payload.lxm
+        iss &&
+        typeof iss === 'string' &&
+        iss.startsWith('did:') &&
+        lxm
       ) {
-        userDid = payload.iss;
-        signingDid = payload.iss; // Token signed by user's DID
+        userDid = iss;
+        signingDid = iss; // Token signed by user's DID
       } else {
         console.log(`[AUTH] Not an AT Protocol token - invalid structure`);
         return null;
@@ -195,18 +202,19 @@ export class AuthService {
       // Clients talk to PDS, which proxies to AppView using service auth tokens.
       // This code path may be hit by non-standard direct-to-AppView clients.
       const isPdsToken =
-        payload.scope === 'com.atproto.access' ||
-        payload.scope === 'com.atproto.appPassPrivileged';
+        scope === 'com.atproto.access' ||
+        scope === 'com.atproto.appPassPrivileged';
 
+      const exp = payload.exp as number | undefined;
       if (isPdsToken) {
         console.warn(
-          `[AUTH] ⚠️ PDS token received directly (unusual flow) - DID: ${userDid}, PDS: ${signingDid}, scope: ${payload.scope}, exp: ${payload.exp ? new Date(payload.exp * 1000).toISOString() : 'none'}`
+          `[AUTH] ⚠️ PDS token received directly (unusual flow) - DID: ${userDid}, PDS: ${signingDid}, scope: ${scope}, exp: ${exp ? new Date(exp * 1000).toISOString() : 'none'}`
         );
         return {
           did: userDid,
-          aud: (payload as AtProtoTokenPayload).aud,
-          lxm: (payload as AtProtoTokenPayload).lxm,
-          scope: payload.scope,
+          aud: aud,
+          lxm: lxm,
+          scope: scope,
         };
       }
 
@@ -225,8 +233,8 @@ export class AuthService {
       );
       return {
         did: userDid,
-        aud: (payload as AtProtoTokenPayload).aud,
-        lxm: (payload as AtProtoTokenPayload).lxm,
+        aud: aud,
+        lxm: lxm,
       };
     } catch (error) {
       console.error(

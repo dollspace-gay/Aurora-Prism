@@ -9,6 +9,7 @@ import { db } from '../db';
 import { userSettings } from '@shared/schema';
 import { EventProcessor } from './event-processor';
 import { getErrorMessage, hasErrorStatus } from '../utils/error-utils';
+import type { DIDDocument } from '../types/atproto';
 
 const BACKFILL_COOLDOWN_HOURS = 1;
 
@@ -130,10 +131,9 @@ export class AutoBackfillFeedsService {
       }
 
       // Find PDS service endpoint
-      const services = (didDoc as any).service || [];
+      const services = (didDoc as DIDDocument).service || [];
       const pdsService = services.find(
-        (s: any) =>
-          s.type === 'AtprotoPersonalDataServer' || s.id === '#atproto_pds'
+        (s) => s.type === 'AtprotoPersonalDataServer' || s.id === '#atproto_pds'
       );
 
       if (!pdsService?.serviceEndpoint) {
@@ -165,9 +165,10 @@ export class AutoBackfillFeedsService {
         const prefsResponse = await agent.app.bsky.actor.getPreferences();
         const savedFeeds = prefsResponse.data.preferences
           .filter(
-            (pref: any) => pref.$type === 'app.bsky.actor.defs#savedFeedsPref'
+            (pref): pref is { $type: string; saved?: string[] } =>
+              pref.$type === 'app.bsky.actor.defs#savedFeedsPref'
           )
-          .flatMap((pref: any) => pref.saved || []);
+          .flatMap((pref) => pref.saved || []);
 
         console.log(
           `[AUTO_BACKFILL_FEEDS] Found ${savedFeeds.length} saved feed subscriptions`
@@ -198,9 +199,9 @@ export class AutoBackfillFeedsService {
             }
 
             const feedCreatorServices =
-              (feedCreatorDidDoc as any).service || [];
+              (feedCreatorDidDoc as DIDDocument).service || [];
             const feedCreatorPdsService = feedCreatorServices.find(
-              (s: any) =>
+              (s) =>
                 s.type === 'AtprotoPersonalDataServer' ||
                 s.id === '#atproto_pds'
             );

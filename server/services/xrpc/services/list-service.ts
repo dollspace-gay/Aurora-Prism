@@ -2,6 +2,7 @@
  * List Service
  * Handles user list queries and list feed operations
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- XRPC responses have dynamic AT Protocol structures */
 
 import type { Request, Response } from 'express';
 import { storage } from '../../../storage';

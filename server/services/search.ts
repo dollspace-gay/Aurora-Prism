@@ -10,6 +10,7 @@ export interface PostSearchResult {
   cid: string;
   authorDid: string;
   text: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Post embeds have dynamic structure from AT Protocol
   embed: any;
   parentUri: string | null;
   rootUri: string | null;
@@ -75,7 +76,7 @@ class SearchService {
     const conditions: string[] = [
       `search_vector @@ plainto_tsquery('english', $1)`,
     ];
-    const params: any[] = [trimmedQuery];
+    const params: (string | Date | number)[] = [trimmedQuery];
     let paramIndex = 2;
 
     // Time range filters

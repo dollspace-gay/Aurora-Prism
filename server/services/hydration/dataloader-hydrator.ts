@@ -1,3 +1,9 @@
+/**
+ * DataLoader-based Hydrator for AT Protocol feed views
+ * Handles batched data loading with dynamic Bluesky API structures
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any -- Hydration state contains dynamic API data */
+
 import { HydrationDataLoader, createDataLoader } from './dataloader';
 import { EmbedResolver } from './embed-resolver';
 import { LabelPropagator } from './label-propagator';

@@ -51,7 +51,7 @@ async function backfillHandles() {
       }
 
       const batchStartResolved = totalResolved;
-      const dids = batch.rows.map((row: any) => row.did);
+      const dids = batch.rows.map((row) => String(row.did));
       const resolvedHandles = await identityResolver.resolveDidsToHandles(dids);
 
       for (const [did, handle] of Array.from(resolvedHandles.entries())) {

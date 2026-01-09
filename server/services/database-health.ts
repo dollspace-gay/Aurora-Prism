@@ -2,6 +2,7 @@ import { db } from '../db';
 import { sql } from 'drizzle-orm';
 import { users, posts, likes, reposts, follows } from '../../shared/schema';
 import { logCollector } from './log-collector';
+import { getErrorMessage } from '../utils/error-utils';
 
 interface HealthMetrics {
   connected: boolean;
@@ -71,9 +72,11 @@ export class DatabaseHealthService {
         ) as posts_exists
       `);
 
+      const tableRow = tableCheck.rows[0] as
+        | { users_exists: boolean; posts_exists: boolean }
+        | undefined;
       metrics.tablesExist =
-        (tableCheck.rows[0] as any)?.users_exists &&
-        (tableCheck.rows[0] as any)?.posts_exists;
+        tableRow?.users_exists === true && tableRow?.posts_exists === true;
 
       if (metrics.tablesExist) {
         // Get record counts
@@ -115,12 +118,13 @@ export class DatabaseHealthService {
           tables: tableCheck.rows,
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const msg = getErrorMessage(error);
       metrics.connected = false;
-      metrics.errors.push(error.message);
-      console.error('[DB_HEALTH] Health check failed:', error);
+      metrics.errors.push(msg);
+      console.error('[DB_HEALTH] Health check failed:', msg);
       logCollector.error('Database health check failed', {
-        error: error.message,
+        error: msg,
       });
     }
 
@@ -168,7 +172,10 @@ export class DatabaseHealthService {
     }
   }
 
-  async checkConnectionPool(): Promise<{ healthy: boolean; details: any }> {
+  async checkConnectionPool(): Promise<{
+    healthy: boolean;
+    details: Record<string, unknown>;
+  }> {
     try {
       // Test query response time
       const start = Date.now();
@@ -184,11 +191,11 @@ export class DatabaseHealthService {
           status: healthy ? 'healthy' : 'slow',
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         healthy: false,
         details: {
-          error: error.message,
+          error: getErrorMessage(error),
           status: 'failed',
         },
       };

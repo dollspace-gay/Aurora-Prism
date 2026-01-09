@@ -1,3 +1,9 @@
+/**
+ * Embed Resolver for AT Protocol embeds
+ * Handles dynamic embed structures (images, external links, quotes, videos)
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any -- Embeds have dynamic structure per type */
+
 import { db } from '../../db';
 import { posts, users, postAggregations } from '../../../shared/schema';
 import { eq, inArray } from 'drizzle-orm';

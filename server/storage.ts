@@ -138,7 +138,8 @@ export interface IStorage {
   getUsersListCounts(dids: string[]): Promise<Map<string, number>>;
   getUserFeedGeneratorCount(did: string): Promise<number>;
   getUsersFeedGeneratorCounts(dids: string[]): Promise<Map<string, number>>;
-  getUserProfileRecord(did: string): Promise<any | undefined>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Profile records have dynamic shape from external sources
+  getUserProfileRecord(did: string): Promise<Record<string, any> | undefined>;
 
   // Post operations
   getPost(uri: string): Promise<Post | undefined>;
@@ -710,10 +711,27 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   private db: DbConnection;
-  private statsCache: { data: unknown; timestamp: number } | null = null;
+  private statsCache: {
+    data: {
+      totalUsers: number;
+      totalPosts: number;
+      totalLikes: number;
+      totalReposts: number;
+      totalFollows: number;
+      totalBlocks: number;
+    };
+    timestamp: number;
+  } | null = null;
   private readonly STATS_CACHE_TTL = 60000;
   private statsQueryInProgress = false;
-  private statsQueryPromise: Promise<any> | null = null;
+  private statsQueryPromise: Promise<{
+    totalUsers: number;
+    totalPosts: number;
+    totalLikes: number;
+    totalReposts: number;
+    totalFollows: number;
+    totalBlocks: number;
+  }> | null = null;
   private backgroundRefreshInterval: NodeJS.Timeout | null = null;
 
   constructor(dbConnection?: DbConnection) {
@@ -980,14 +998,16 @@ export class DatabaseStorage implements IStorage {
     return new Map(results.map((r) => [r.did, r.count]));
   }
 
-  async getUserProfileRecord(did: string): Promise<any | undefined> {
+  async getUserProfileRecord(
+    did: string
+  ): Promise<Record<string, unknown> | undefined> {
     const [user] = await this.db
       .select({ profileRecord: users.profileRecord })
       .from(users)
       .where(eq(users.did, did))
       .limit(1);
 
-    return user ? user.profileRecord : undefined;
+    return user ? (user.profileRecord as Record<string, unknown>) : undefined;
   }
 
   async findMutingListForUser(
@@ -2320,6 +2340,7 @@ export class DatabaseStorage implements IStorage {
 
     const totalCount = parseInt(countResult.rows[0]?.count || '0', 10);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Raw SQL result rows
     const rows = results.rows as any[];
     const hasMore = rows.length > limit;
     const followers: User[] = (hasMore ? rows.slice(0, limit) : rows).map(
@@ -2676,13 +2697,16 @@ export class DatabaseStorage implements IStorage {
       });
   }
 
-  async getOAuthState(state: string): Promise<any | undefined> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- OAuth state data is dynamic JSON
+  async getOAuthState(state: string): Promise<Record<string, any> | undefined> {
     const { oauthStates } = await import('@shared/schema');
     const [stateRecord] = await this.db
       .select()
       .from(oauthStates)
       .where(eq(oauthStates.state, state));
-    return stateRecord ? stateRecord.stateData : undefined;
+    return stateRecord
+      ? (stateRecord.stateData as Record<string, any>)
+      : undefined;
   }
 
   async deleteOAuthState(state: string): Promise<void> {
@@ -2891,6 +2915,7 @@ export class DatabaseStorage implements IStorage {
 
     let query = this.db.select().from(labels);
 
+    /* eslint-disable @typescript-eslint/no-explicit-any -- Drizzle query chaining type limitations */
     if (conditions.length > 0) {
       query = query.where(and(...conditions)) as any;
     }
@@ -2900,6 +2925,7 @@ export class DatabaseStorage implements IStorage {
     if (params.limit) {
       query = query.limit(params.limit) as any;
     }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 
     return await query;
   }
@@ -2963,6 +2989,7 @@ export class DatabaseStorage implements IStorage {
     let query = this.db.select().from(labelEvents);
 
     if (since) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Drizzle query chaining type
       query = query.where(sql`${labelEvents.createdAt} > ${since}`) as any;
     }
 
@@ -3546,6 +3573,7 @@ export class DatabaseStorage implements IStorage {
     const results = await this.db
       .select()
       .from(starterPacks)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Drizzle where clause type
       .where(conditions.length ? and(...conditions) : (undefined as any))
       .orderBy(desc(starterPacks.indexedAt))
       .limit(limit + 1);

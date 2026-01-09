@@ -10,6 +10,7 @@ import { sql } from 'drizzle-orm';
 import { likes, posts, userSettings } from '@shared/schema';
 import { EventProcessor } from './event-processor';
 import { getErrorMessage, hasErrorStatus } from '../utils/error-utils';
+import type { DIDDocument } from '../types/atproto';
 
 const BATCH_SIZE = 100;
 const CONCURRENT_FETCHES = 10;
@@ -135,7 +136,7 @@ export class AutoBackfillLikesService {
         );
 
         const missingPostUris = missingPosts.rows.map(
-          (row: any) => row.post_uri
+          (row) => (row as { post_uri: string }).post_uri
         );
 
         if (missingPostUris.length === 0) {
@@ -191,9 +192,9 @@ export class AutoBackfillLikesService {
                   }
 
                   // Find PDS service endpoint
-                  const services = (didDoc as any).service || [];
+                  const services = (didDoc as DIDDocument).service || [];
                   const pdsService = services.find(
-                    (s: any) =>
+                    (s) =>
                       s.type === 'AtprotoPersonalDataServer' ||
                       s.id === '#atproto_pds'
                   );

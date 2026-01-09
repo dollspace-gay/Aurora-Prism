@@ -1,4 +1,18 @@
+/**
+ * Event Processor for AT Protocol firehose events
+ *
+ * This file processes events from the Bluesky firehose relay which have dynamic
+ * structures. The `any` type is used in several places where:
+ * - Record content comes from the relay with varying schemas per collection type
+ * - Embed structures vary based on type (images, external links, quotes, etc.)
+ * - Reply/parent references may have different shapes
+ *
+ * Proper typing would require extensive runtime type guards for each record type.
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any -- Firehose events have dynamic structure from relay */
+
 import { storage as globalStorage, type IStorage } from '../storage';
+import { getErrorMessage, hasErrorCode } from '../utils/error-utils';
 import { db } from '../db';
 import { labelService as globalLabelService, type LabelService } from './label';
 import { didResolver as globalDidResolver } from './did-resolver';
@@ -43,12 +57,7 @@ import { withTransaction } from '../transaction-utils';
 
 import { BoundedArrayMap, BoundedMap } from '../bounded-map';
 import { Semaphore } from '../semaphore';
-import type {
-  BlobRef,
-  ATEmbed,
-  ATCommitEvent,
-  DIDDocument,
-} from '../types/atproto';
+import type { BlobRef, ATEmbed } from '../types/atproto';
 
 function sanitizeText(text: string | undefined | null): string | undefined {
   if (!text) return undefined;
@@ -562,11 +571,11 @@ export class EventProcessor {
         const opUri = op.payload.uri;
         this.pendingOpIndex.delete(opUri);
         this.totalPendingCount--;
-      } catch (error: any) {
+      } catch (error: unknown) {
         // If still failing, skip it
         smartConsole.error(
           `[EVENT_PROCESSOR] Error flushing pending ${op.type}:`,
-          error.message
+          getErrorMessage(error)
         );
         // Still remove from index and count
         const opUri = op.payload.uri;
@@ -709,11 +718,11 @@ export class EventProcessor {
         // Remove from index
         this.pendingListItemIndex.delete(item.payload.uri);
         this.totalPendingListItems--;
-      } catch (error: any) {
+      } catch (error: unknown) {
         // If still failing, skip it
         smartConsole.error(
           `[EVENT_PROCESSOR] Error flushing pending list item:`,
-          error.message
+          getErrorMessage(error)
         );
         // Still remove from index and count
         this.pendingListItemIndex.delete(item.payload.uri);
@@ -932,10 +941,10 @@ export class EventProcessor {
       await this.flushPendingUserOps(did);
       await this.flushPendingUserCreationOps(did);
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If createUser resulted in a unique constraint violation, it means the user was created
       // by a parallel process. We can treat this as a success and flush the queues.
-      if (error.code === '23505') {
+      if (hasErrorCode(error, '23505')) {
         await this.flushPendingUserOps(did);
         await this.flushPendingUserCreationOps(did);
         return true;
@@ -1068,10 +1077,10 @@ export class EventProcessor {
             `[EVENT_PROCESSOR] Unknown record type: ${recordType}`
           );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle duplicate key errors gracefully (common during firehose reconnections)
       // Silently skip duplicates as they don't matter
-      if (error?.code === '23505') {
+      if (hasErrorCode(error, '23505')) {
         // Silently skip duplicates
         return;
       }
@@ -1167,19 +1176,22 @@ export class EventProcessor {
         } else if (action === 'delete') {
           await this.processDelete(uri, collection);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Handle duplicate key errors gracefully (common during firehose reconnections)
-        if (error?.code === '23505') {
+        if (hasErrorCode(error, '23505')) {
           // Silently skip duplicates
         }
         // Handle foreign key constraint violations (record references missing data)
-        else if (error?.code === '23503') {
+        else if (hasErrorCode(error, '23503')) {
+          const constraint =
+            (error as { constraint?: string }).constraint ||
+            'unknown constraint';
           smartConsole.log(
-            `[EVENT_PROCESSOR] Skipped ${action} ${uri} - referenced record not yet indexed (${error.constraint || 'unknown constraint'})`
+            `[EVENT_PROCESSOR] Skipped ${action} ${uri} - referenced record not yet indexed (${constraint})`
           );
 
           // Mark as incomplete for PDS data fetching
-          this.markIncompleteForFetch(action, uri, error.constraint);
+          this.markIncompleteForFetch(action, uri, constraint);
         } else {
           smartConsole.error(
             `[EVENT_PROCESSOR] Error processing ${action} ${uri}:`,
@@ -1265,9 +1277,9 @@ export class EventProcessor {
           bookmarkCount: 0,
           quoteCount: 0,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Ignore duplicate key errors (23505) - aggregation already exists
-        if (error?.code !== '23505') {
+        if (!hasErrorCode(error, '23505')) {
           throw error;
         }
       }
@@ -1507,9 +1519,9 @@ export class EventProcessor {
           );
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ignore duplicate key errors (23505)
-      if (error.code === '23505') {
+      if (hasErrorCode(error, '23505')) {
         return;
       }
       throw error;
@@ -1604,9 +1616,9 @@ export class EventProcessor {
           );
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ignore duplicate key errors (23505)
-      if (error.code === '23505') {
+      if (hasErrorCode(error, '23505')) {
         return;
       }
       throw error;
@@ -1660,9 +1672,9 @@ export class EventProcessor {
         embeddingDisabled: false,
         pinned: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ignore duplicate key errors (23505)
-      if (error.code === '23505') {
+      if (hasErrorCode(error, '23505')) {
         return;
       }
       throw error;
@@ -1811,9 +1823,9 @@ export class EventProcessor {
           );
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ignore duplicate key errors (23505)
-      if (error.code === '23505') {
+      if (hasErrorCode(error, '23505')) {
         return;
       }
       smartConsole.error(
@@ -1867,9 +1879,9 @@ export class EventProcessor {
 
       // Invalidate viewer relationships cache for the blocker
       await this.cacheService.invalidateViewerRelationships(blockerDid);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ignore duplicate key errors (23505)
-      if (error.code === '23505') {
+      if (hasErrorCode(error, '23505')) {
         return;
       }
       smartConsole.error(
@@ -1966,9 +1978,9 @@ export class EventProcessor {
 
       // Invalidate list members cache for this list
       await this.cacheService.invalidateListMembers(record.list);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Fallback: if FK error still happens (race condition), queue it
-      if (error.code === '23503') {
+      if (hasErrorCode(error, '23503')) {
         this.enqueuePendingListItem(record.list, {
           payload: listItem,
           enqueuedAt: Date.now(),
@@ -1991,8 +2003,8 @@ export class EventProcessor {
       smartConsole.log(
         `[LABEL] Applied label ${record.val} to ${record.uri || record.did} from ${src}`
       );
-    } catch (error: any) {
-      if (error?.code === '23505') {
+    } catch (error: unknown) {
+      if (hasErrorCode(error, '23505')) {
         smartConsole.log(
           `[EVENT_PROCESSOR] Skipped duplicate label ${record.val} for ${record.uri || record.did}`
         );
@@ -2667,8 +2679,8 @@ export class EventProcessor {
       smartConsole.log(
         `[EVENT_PROCESSOR] Generic record processed: ${recordType} - ${uri}`
       );
-    } catch (error: any) {
-      if (error?.code === '23505') {
+    } catch (error: unknown) {
+      if (hasErrorCode(error, '23505')) {
         // Duplicate key - skip silently
         return;
       }

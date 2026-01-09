@@ -4,6 +4,7 @@
  * Reduces log spam by aggregating similar log messages and only outputting
  * them periodically with counts and summaries.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- Log metadata is intentionally flexible */
 
 interface AggregatedLog {
   key: string;

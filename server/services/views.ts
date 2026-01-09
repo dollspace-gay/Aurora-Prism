@@ -1,3 +1,8 @@
+/**
+ * Views - Transform hydrated data into AT Protocol API response format
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any -- View data has dynamic AT Protocol structures */
+
 import {
   HydrationState,
   FeedItem,

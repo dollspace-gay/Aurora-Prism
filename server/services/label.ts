@@ -133,7 +133,7 @@ export class LabelService extends EventEmitter {
     value: string;
     description?: string;
     severity?: 'info' | 'warn' | 'alert' | 'none';
-    localizedStrings?: Record<string, any>;
+    localizedStrings?: Record<string, string>;
   }): Promise<LabelDefinition> {
     const definition: InsertLabelDefinition = {
       value: params.value,

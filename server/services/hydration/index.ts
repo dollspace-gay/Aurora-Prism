@@ -1,3 +1,9 @@
+/**
+ * Hydration Service for AT Protocol feed views
+ * Handles dynamic data structures from Bluesky API
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any -- Hydration state contains dynamic API data */
+
 import { db } from '../../db';
 import { posts, users, postAggregations } from '../../../shared/schema';
 import { inArray } from 'drizzle-orm';

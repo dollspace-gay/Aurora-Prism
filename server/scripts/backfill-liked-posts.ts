@@ -91,6 +91,7 @@ async function backfillLikedPosts(userDid: string) {
               ],
               time: new Date().toISOString(),
               rev: '',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ATCommitEvent shape
             } as any);
 
             fetchedCount++;
@@ -100,14 +101,14 @@ async function backfillLikedPosts(userDid: string) {
                 `[BACKFILL] Progress: ${fetchedCount} fetched, ${failedCount} failed, ${skippedCount} skipped`
               );
             }
-          } catch (error: any) {
-            if (error.status === 404) {
+          } catch (error: unknown) {
+            const status = (error as { status?: number })?.status;
+            if (status === 404) {
               skippedCount++;
             } else {
-              console.error(
-                `[BACKFILL] Error fetching ${postUri}:`,
-                error.message
-              );
+              const message =
+                error instanceof Error ? error.message : String(error);
+              console.error(`[BACKFILL] Error fetching ${postUri}:`, message);
               failedCount++;
             }
           }

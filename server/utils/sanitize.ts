@@ -47,11 +47,11 @@ export function removeNullBytesFromObject<T>(obj: T): T {
   }
 
   if (typeof obj === 'object') {
-    const sanitized: any = {};
+    const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
       sanitized[key] = removeNullBytesFromObject(value);
     }
-    return sanitized;
+    return sanitized as T;
   }
 
   return obj;

@@ -5,7 +5,7 @@
 
 import type { Request, Response } from 'express';
 import { storage } from '../../../storage';
-import { searchService } from '../../search';
+import { searchService, type PostSearchResult } from '../../search';
 import { getAuthenticatedDid } from '../utils/auth-helpers';
 import { handleError } from '../utils/error-handler';
 import { maybeAvatar, serializePostsEnhanced } from '../utils/serializers';
@@ -74,7 +74,7 @@ export async function searchPosts(req: Request, res: Response): Promise<void> {
     );
 
     const serialized = await serializePosts(
-      posts as any,
+      posts as PostSearchResult[],
       viewerDid || undefined,
       req
     );
@@ -256,7 +256,7 @@ export async function searchStarterPacks(
     );
 
     res.json({
-      starterPacks: (starterPacks as any[]).map((sp) => ({
+      starterPacks: starterPacks.map((sp) => ({
         uri: sp.uri,
         cid: sp.cid,
         creator: sp.creator || { did: sp.creatorDid, handle: sp.creatorDid },

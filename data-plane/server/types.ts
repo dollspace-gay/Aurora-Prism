@@ -136,6 +136,19 @@ export interface RelationshipRecord {
   muting?: boolean; // True if muting
 }
 
+export interface BlockRecord {
+  uri: string;
+  blockerDid: string;
+  blockedDid: string;
+  createdAt: string;
+}
+
+export interface MuteRecord {
+  muterDid: string;
+  mutedDid: string;
+  createdAt: string;
+}
+
 // Search
 export interface SearchPostsRequest extends Pagination {
   query: string;
@@ -193,4 +206,19 @@ export interface FeedGeneratorRecord {
   likeCount?: number;
   indexedAt: string;
   createdAt: string;
+}
+
+// Thread gate for controlling who can reply
+export interface ThreadGateRecord {
+  uri: string;
+  cid: string;
+  postUri: string;
+  authorDid: string;
+  allowRules: ThreadGateRule[];
+  createdAt: string;
+}
+
+export interface ThreadGateRule {
+  type: 'mentionRule' | 'followingRule' | 'listRule';
+  listUri?: string; // For listRule
 }

@@ -114,7 +114,7 @@ export interface ATCommitOp {
 export interface ATCommitEvent {
   repo: string;
   ops: ATCommitOp[];
-  time: string;
+  time?: string;
   rev?: string;
   seq?: number;
   tooBig?: boolean;

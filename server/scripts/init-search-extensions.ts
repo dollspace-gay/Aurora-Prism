@@ -1,5 +1,6 @@
 import { db } from '../db';
 import { sql } from 'drizzle-orm';
+import { hasErrorCode } from '../utils/error-utils';
 
 /**
  * Initialize required PostgreSQL extensions and indexes for search functionality
@@ -13,9 +14,9 @@ export async function initSearchExtensions() {
     try {
       await db.execute(sql`CREATE EXTENSION IF NOT EXISTS pg_trgm;`);
       console.log('[SEARCH_INIT] ✓ pg_trgm extension enabled');
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ignore if extension already exists (race condition during concurrent creation)
-      if (error.code !== '42710') {
+      if (!hasErrorCode(error, '42710')) {
         throw error;
       }
       console.log('[SEARCH_INIT] ✓ pg_trgm extension already exists');
@@ -28,9 +29,9 @@ export async function initSearchExtensions() {
         ON users USING gin (handle gin_trgm_ops);
       `);
       console.log('[SEARCH_INIT] ✓ Trigram index on users.handle created');
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ignore if index already exists (42P07) or duplicate key (23505 during race condition)
-      if (error.code === '42P07' || error.code === '23505') {
+      if (hasErrorCode(error, '42P07') || hasErrorCode(error, '23505')) {
         console.log('[SEARCH_INIT] ✓ Trigram index already exists');
       } else {
         throw error;

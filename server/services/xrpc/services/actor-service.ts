@@ -114,7 +114,7 @@ export async function getSuggestions(
 
     // Build response with optional cursor and recId
     const response: {
-      actors: any[];
+      actors: Awaited<ReturnType<typeof buildProfiles>>;
       cursor?: string;
       recId?: number;
     } = {

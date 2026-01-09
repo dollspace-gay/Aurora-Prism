@@ -1,8 +1,10 @@
 import Redis from 'ioredis';
+import { getErrorMessage } from '../utils/error-utils';
 
 export interface FirehoseEvent {
   type: 'commit' | 'identity' | 'account';
-  data: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Firehose event data has dynamic structure from relay
+  data: Record<string, any>;
   seq?: string;
 }
 
@@ -49,9 +51,10 @@ class RedisQueue {
       console.log('[REDIS] Connected');
     });
 
-    this.redis.on('error', (error: any) => {
+    this.redis.on('error', (error: unknown) => {
       // Handle READONLY errors specifically - indicates connection to replica instead of master
-      if (error.message && error.message.includes('READONLY')) {
+      const msg = getErrorMessage(error);
+      if (msg.includes('READONLY')) {
         console.error(
           '[REDIS] READONLY error - connected to replica instead of master. Check REDIS_URL configuration.'
         );
@@ -178,9 +181,9 @@ class RedisQueue {
         'MKSTREAM'
       );
       console.log(`[REDIS] Created consumer group: ${this.CONSUMER_GROUP}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // BUSYGROUP error means group already exists, which is fine
-      if (!error.message.includes('BUSYGROUP')) {
+      if (!getErrorMessage(error).includes('BUSYGROUP')) {
         console.error('[REDIS] Error creating consumer group:', error);
       }
     }
@@ -244,8 +247,13 @@ class RedisQueue {
       }
 
       const events: Array<FirehoseEvent & { messageId: string }> = [];
-      for (const [_stream, messages] of results as any[]) {
-        for (const [messageId, fields] of messages as any[]) {
+      // Redis XREADGROUP returns [[stream, [[id, fields], ...]]]
+
+      for (const [_stream, messages] of results as [
+        string,
+        [string, string[]][],
+      ][]) {
+        for (const [messageId, fields] of messages) {
           try {
             const type = fields[1] as 'commit' | 'identity' | 'account';
             const data = JSON.parse(fields[3]);
@@ -266,8 +274,8 @@ class RedisQueue {
       }
 
       return events;
-    } catch (error: any) {
-      const errorMsg = error.message || error.toString() || '';
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error);
 
       // Handle READONLY error - connected to replica instead of master
       if (errorMsg.includes('READONLY')) {
@@ -372,7 +380,8 @@ class RedisQueue {
         10
       );
 
-      for (const entry of pending as any[]) {
+      // XPENDING returns [id, consumer, idleMs, deliveries] for each entry
+      for (const entry of pending as [string, string, number, number][]) {
         const messageId = entry[0];
         const idleMs = entry[2];
         const deliveries = entry[3];
@@ -393,7 +402,8 @@ class RedisQueue {
             );
 
             if (claimed && claimed.length > 0) {
-              const [claimedId, fields] = claimed[0] as any[];
+              // XCLAIM returns [[id, fields], ...]
+              const [claimedId, fields] = claimed[0] as [string, string[]];
               try {
                 const type = fields[1] as 'commit' | 'identity' | 'account';
                 const data = JSON.parse(fields[3]);
@@ -456,7 +466,7 @@ class RedisQueue {
           );
 
           if (claimed && claimed.length > 0) {
-            for (const [claimedId, fields] of claimed as any[]) {
+            for (const [claimedId, fields] of claimed as [string, string[]][]) {
               try {
                 const type = fields[1] as 'commit' | 'identity' | 'account';
                 const data = JSON.parse(fields[3]);
@@ -478,9 +488,9 @@ class RedisQueue {
       }
 
       return events;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle NOGROUP error gracefully
-      const errorMsg = error.message || error.toString() || '';
+      const errorMsg = getErrorMessage(error);
       const isNogroupError =
         errorMsg.includes('NOGROUP') || errorMsg.includes('No such key');
 
@@ -542,7 +552,7 @@ class RedisQueue {
 
   async getDeadLetters(
     count: number = 100
-  ): Promise<Array<Record<string, any>>> {
+  ): Promise<Array<Record<string, string>>> {
     if (!this.redis || !this.isInitialized) {
       return [];
     }
@@ -554,9 +564,10 @@ class RedisQueue {
         'COUNT',
         count
       );
-      return (items as any[]).map((entry: any[]) => {
+      // XREVRANGE returns [[id, [field, value, ...]], ...]
+      return (items as [string, string[]][]).map((entry) => {
         const [id, fields] = entry;
-        const obj: Record<string, any> = { id };
+        const obj: Record<string, string> = { id };
         for (let i = 0; i < fields.length; i += 2) {
           obj[fields[i]] = fields[i + 1];
         }
@@ -610,7 +621,8 @@ class RedisQueue {
   }
 
   // Store recent events for dashboard visibility across all workers
-  async setRecentEvents(events: any[]): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dashboard events have rich structure
+  async setRecentEvents(events: Record<string, any>[]): Promise<void> {
     if (!this.redis || !this.isInitialized) {
       return;
     }
@@ -626,7 +638,8 @@ class RedisQueue {
     }
   }
 
-  async getRecentEvents(): Promise<any[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dashboard events have rich structure
+  async getRecentEvents(): Promise<Record<string, any>[]> {
     if (!this.redis || !this.isInitialized) {
       return [];
     }
@@ -691,7 +704,8 @@ class RedisQueue {
 
   // Redis pub/sub for broadcasting events to all workers
   private subscriber: Redis | null = null;
-  private eventCallbacks: Array<(event: any) => void> = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dashboard events have rich structure
+  private eventCallbacks: Array<(event: Record<string, any>) => void> = [];
 
   async initializePubSub() {
     if (this.subscriber) {
@@ -724,7 +738,8 @@ class RedisQueue {
     console.log('[REDIS] Subscribed to event broadcasts');
   }
 
-  async publishEvent(event: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dashboard events have rich structure
+  async publishEvent(event: Record<string, any>) {
     if (!this.redis || !this.isInitialized) {
       return;
     }
@@ -739,11 +754,13 @@ class RedisQueue {
     }
   }
 
-  onEventBroadcast(callback: (event: any) => void) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dashboard events have rich structure
+  onEventBroadcast(callback: (event: Record<string, any>) => void) {
     this.eventCallbacks.push(callback);
   }
 
-  offEventBroadcast(callback: (event: any) => void) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dashboard events have rich structure
+  offEventBroadcast(callback: (event: Record<string, any>) => void) {
     this.eventCallbacks = this.eventCallbacks.filter((cb) => cb !== callback);
   }
 

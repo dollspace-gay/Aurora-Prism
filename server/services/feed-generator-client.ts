@@ -6,9 +6,37 @@ import { db } from '../db';
 import { blocks } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
+// Feed skeleton reason types (repost, pin, etc.)
+interface SkeletonReasonRepost {
+  $type: 'app.bsky.feed.defs#skeletonReasonRepost';
+  repost: string; // URI of the repost record
+}
+
+interface SkeletonReasonPin {
+  $type: 'app.bsky.feed.defs#skeletonReasonPin';
+}
+
+type SkeletonReason = SkeletonReasonRepost | SkeletonReasonPin;
+
+// Skeleton feed item
+interface SkeletonFeedPost {
+  post: string;
+  reason?: SkeletonReason;
+}
+
+const skeletonReasonSchema = z.union([
+  z.object({
+    $type: z.literal('app.bsky.feed.defs#skeletonReasonRepost'),
+    repost: z.string(),
+  }),
+  z.object({
+    $type: z.literal('app.bsky.feed.defs#skeletonReasonPin'),
+  }),
+]);
+
 const skeletonPostSchema = z.object({
   post: z.string(),
-  reason: z.any().optional(),
+  reason: skeletonReasonSchema.optional(),
 });
 
 const feedSkeletonResponseSchema = z.object({
@@ -25,7 +53,7 @@ export interface FeedGeneratorParams {
 
 export interface HydratedFeedPost {
   post: Post;
-  reason?: any;
+  reason?: SkeletonReason;
 }
 
 export class FeedGeneratorClient {
@@ -38,7 +66,7 @@ export class FeedGeneratorClient {
     serviceEndpoint: string,
     params: FeedGeneratorParams,
     options?: { viewerAuthorization?: string | undefined }
-  ): Promise<{ feed: Array<{ post: string; reason?: any }>; cursor?: string }> {
+  ): Promise<{ feed: SkeletonFeedPost[]; cursor?: string }> {
     try {
       const url = new URL(
         '/xrpc/app.bsky.feed.getFeedSkeleton',
@@ -115,7 +143,7 @@ export class FeedGeneratorClient {
   }
 
   async hydrateSkeleton(
-    skeleton: Array<{ post: string; reason?: any }>,
+    skeleton: SkeletonFeedPost[],
     viewerDid?: string
   ): Promise<HydratedFeedPost[]> {
     if (skeleton.length === 0) {

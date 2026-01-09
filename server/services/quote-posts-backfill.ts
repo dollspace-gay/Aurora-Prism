@@ -10,6 +10,7 @@ import { db } from '../db';
 import { posts } from '@shared/schema';
 import { sql } from 'drizzle-orm';
 import { EventProcessor } from './event-processor';
+import { getErrorMessage, getErrorStatus } from '../utils/error-utils';
 
 const BSKY_APPVIEW = 'https://public.api.bsky.app';
 const BATCH_SIZE = 50;
@@ -52,10 +53,10 @@ export class QuotePostsBackfillService {
             const result = await this.fetchQuotesForPost(post.uri);
             totalQuotesFound += result.quotesFound;
             totalQuotesFetched += result.quotesFetched;
-          } catch (error: any) {
+          } catch (error: unknown) {
             console.error(
               `[QUOTE_POSTS] Error fetching quotes for ${post.uri}:`,
-              error.message
+              getErrorMessage(error)
             );
           }
         })
@@ -124,14 +125,16 @@ export class QuotePostsBackfillService {
           }
 
           cursor = response.data.cursor;
-        } catch (error: any) {
-          if (error.status === 404 || error.message?.includes('not found')) {
+        } catch (error: unknown) {
+          const status = getErrorStatus(error);
+          const msg = getErrorMessage(error);
+          if (status === 404 || msg.includes('not found')) {
             // Post doesn't exist or has no quotes
             break;
           }
           console.error(
             `[QUOTE_POSTS] Error querying quotes for ${postUri}:`,
-            error.message
+            msg
           );
           break;
         }
@@ -177,9 +180,9 @@ export class QuotePostsBackfillService {
           const authorDidDoc = await didResolver.resolveDID(authorDid);
           if (!authorDidDoc) return;
 
-          const services = (authorDidDoc as any).service || [];
+          const services = (authorDidDoc as { service?: Array<{ type?: string; id?: string; serviceEndpoint?: string }> }).service || [];
           const pdsService = services.find(
-            (s: any) =>
+            (s) =>
               s.type === 'AtprotoPersonalDataServer' || s.id === '#atproto_pds'
           );
 
@@ -231,17 +234,19 @@ export class QuotePostsBackfillService {
               }
             }
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const status = getErrorStatus(error);
+          const msg = getErrorMessage(error);
           if (
-            error.status === 404 ||
-            error.message?.includes('not found') ||
-            error.message?.includes('Could not locate record')
+            status === 404 ||
+            msg.includes('not found') ||
+            msg.includes('Could not locate record')
           ) {
             // Post was deleted, skip silently
           } else {
             console.error(
               `[QUOTE_POSTS] Error fetching quote post ${quoteUri}:`,
-              error.message
+              msg
             );
           }
         }
@@ -280,10 +285,10 @@ export class QuotePostsBackfillService {
         const result = await this.fetchQuotesForPost(post.uri);
         totalQuotesFound += result.quotesFound;
         totalQuotesFetched += result.quotesFetched;
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(
           `[QUOTE_POSTS] Error fetching quotes for ${post.uri}:`,
-          error.message
+          getErrorMessage(error)
         );
       }
     }

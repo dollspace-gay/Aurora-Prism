@@ -46,7 +46,7 @@ export const profileSchema = z
     $type: z.literal('app.bsky.actor.profile'),
     displayName: z.optional(z.string().max(640)),
     description: z.optional(z.string().max(2560)),
-    avatar: z.optional(z.any()),
+    avatar: z.optional(z.unknown()),
     banner: z.optional(z.any()),
   })
   .passthrough();
@@ -73,7 +73,7 @@ export const feedGeneratorSchema = z
     did: z.string(),
     displayName: z.string(),
     description: z.optional(z.string()),
-    avatar: z.optional(z.any()),
+    avatar: z.optional(z.unknown()),
     acceptsInteractions: z.optional(z.boolean()),
     labels: z.optional(z.any()),
     createdAt: z.string(),
@@ -103,7 +103,7 @@ export const listSchema = z
     name: z.string(),
     purpose: z.string(),
     description: z.optional(z.string()),
-    avatar: z.optional(z.any()),
+    avatar: z.optional(z.unknown()),
     createdAt: z.string(),
   })
   .passthrough();

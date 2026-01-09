@@ -69,10 +69,23 @@ export function ActivityChart() {
   };
 
   // Custom tooltip with aurora styling
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
+  interface TooltipPayload {
+    name: string;
+    value: number;
+    color: string;
+  }
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: {
+    active?: boolean;
+    payload?: TooltipPayload[];
+    label?: number;
+  }) => {
+    if (active && payload && payload.length && label !== undefined) {
       const total = payload.reduce(
-        (sum: number, entry: any) => sum + entry.value,
+        (sum: number, entry: TooltipPayload) => sum + entry.value,
         0
       );
 
@@ -82,7 +95,7 @@ export function ActivityChart() {
             {formatTime(label)}
           </p>
           <div className="space-y-1">
-            {payload.map((entry: any) => (
+            {payload.map((entry: TooltipPayload) => (
               <div
                 key={entry.name}
                 className="flex items-center justify-between gap-3"

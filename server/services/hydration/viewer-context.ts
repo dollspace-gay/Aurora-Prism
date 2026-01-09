@@ -19,7 +19,7 @@ export interface ViewerContext {
   mutedByLists: Map<string, string[]>; // did -> list URIs
   threadMutes: Set<string>; // thread URIs
   listMemberships: Map<string, string[]>; // list URI -> member DIDs
-  preferences?: any;
+  preferences?: Record<string, unknown>;
 }
 
 export class ViewerContextBuilder {
