@@ -514,7 +514,9 @@ export async function requireAuth(
   if (payload.sessionId) {
     const session = await validateAndRefreshSession(payload.sessionId);
     if (!session) {
-      return res.status(401).json({ error: 'Session not found or has expired' });
+      return res
+        .status(401)
+        .json({ error: 'Session not found or has expired' });
     }
   }
 

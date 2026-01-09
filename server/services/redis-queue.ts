@@ -512,7 +512,7 @@ class RedisQueue {
         return isNaN(pendingTotal) ? 0 : pendingTotal;
       }
       return 0;
-    } catch (error) {
+    } catch {
       return 0;
     }
   }
@@ -524,7 +524,7 @@ class RedisQueue {
     }
     try {
       return await this.redis.xlen(this.STREAM_KEY);
-    } catch (error) {
+    } catch {
       return 0;
     }
   }
@@ -535,7 +535,7 @@ class RedisQueue {
     }
     try {
       return await this.redis.xlen(this.DEAD_LETTER_STREAM_KEY);
-    } catch (error) {
+    } catch {
       return 0;
     }
   }
@@ -562,7 +562,7 @@ class RedisQueue {
         }
         return obj;
       });
-    } catch (error) {
+    } catch {
       return [];
     }
   }

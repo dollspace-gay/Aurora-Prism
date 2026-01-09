@@ -52,9 +52,6 @@ export class ThreadAssembler {
       cacheService.getViewerMutes(viewerDid),
     ]);
 
-    let blockedDids: Set<string>;
-    let mutedDids: Set<string>;
-
     // If both are in cache, return immediately
     if (cachedBlocks && cachedMutes) {
       return { blockedDids: cachedBlocks, mutedDids: cachedMutes };
@@ -77,8 +74,8 @@ export class ThreadAssembler {
             .where(eq(mutes.muterDid, viewerDid)),
     ]);
 
-    blockedDids = cachedBlocks || new Set(blockedUsers.map((b) => b.did));
-    mutedDids = cachedMutes || new Set(mutedUsers.map((m) => m.did));
+    const blockedDids = cachedBlocks || new Set(blockedUsers.map((b) => b.did));
+    const mutedDids = cachedMutes || new Set(mutedUsers.map((m) => m.did));
 
     // Cache the results
     await Promise.all([

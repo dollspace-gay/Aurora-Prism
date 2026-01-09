@@ -65,7 +65,7 @@ async function discoverPdsViaHandle(handle: string): Promise<string | null> {
         return null;
       }
     }
-  } catch (error) {
+  } catch {
     // Well-known resolution failed, which is expected for most handles
     console.log(
       `[PDS_DISCOVERY] Well-known resolution failed for handle ${handle} (this is normal)`

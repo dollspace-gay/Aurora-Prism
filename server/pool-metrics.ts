@@ -29,6 +29,8 @@ export class PoolMonitor {
    * Collect current pool metrics
    */
   collect(): PoolMetrics {
+    // Access internal pool properties for metrics (not part of public API)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pool = this.pool as any;
 
     const metrics: PoolMetrics = {
@@ -188,7 +190,7 @@ export function getAllMonitors(): Map<string, PoolMonitor> {
  */
 export function logAllPoolStatus(): void {
   console.log('\n[PoolMonitor] === Connection Pool Status ===');
-  for (const [label, monitor] of monitors.entries()) {
+  for (const [_label, monitor] of monitors.entries()) {
     monitor.logStatus();
   }
   console.log('[PoolMonitor] ================================\n');

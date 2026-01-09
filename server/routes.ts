@@ -1095,7 +1095,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               return;
             }
 
-            const agent = new AtpAgent({ service: PDS_HOST });
+            const _agent = new AtpAgent({ service: PDS_HOST });
             const eventProcessor = new EventProcessor({ storage });
             eventProcessor.setSkipPdsFetching(true);
             eventProcessor.setSkipDataCollectionCheck(true);
@@ -5145,7 +5145,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Listen for label events from label service and broadcast to all connected clients
-  const broadcastLabelToClients = (label: { src: string; subject: string; val: string; neg: boolean; createdAt: Date | string }, eventId: number) => {
+  const broadcastLabelToClients = (
+    label: {
+      src: string;
+      subject: string;
+      val: string;
+      neg: boolean;
+      createdAt: Date | string;
+    },
+    eventId: number
+  ) => {
     const message = JSON.stringify({
       seq: eventId,
       labels: [

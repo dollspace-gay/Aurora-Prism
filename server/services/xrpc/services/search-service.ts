@@ -73,7 +73,11 @@ export async function searchPosts(req: Request, res: Response): Promise<void> {
       viewerDid || undefined
     );
 
-    const serialized = await serializePosts(posts as any, viewerDid || undefined, req);
+    const serialized = await serializePosts(
+      posts as any,
+      viewerDid || undefined,
+      req
+    );
 
     res.json({ posts: serialized, cursor });
   } catch (error) {
@@ -110,7 +114,7 @@ export async function searchActors(req: Request, res: Response): Promise<void> {
     type ActorSearchResult = { did: string };
     const actorResults = actors as ActorSearchResult[];
     const dids = actorResults.map((a) => a.did);
-    const users = await storage.getUsers(dids) as UserModel[];
+    const users = (await storage.getUsers(dids)) as UserModel[];
     const userMap = new Map(users.map((u) => [u.did, u]));
 
     // Get viewer relationships if authenticated

@@ -8,7 +8,12 @@ interface TestResult {
   name: string;
   passed: boolean;
   message: string;
-  data?: any;
+  data?: Record<string, unknown>;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
 }
 
 class AppViewTester {
@@ -79,13 +84,14 @@ class AppViewTester {
           message: `No results found for query "${query}"`,
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[ERROR] Actor search failed:', error);
-      if (error.cause) console.error('[ERROR] Cause:', error.cause);
+      if (error instanceof Error && error.cause)
+        console.error('[ERROR] Cause:', error.cause);
       this.logResult({
         name: 'Actor Search',
         passed: false,
-        message: `Error: ${error.message}`,
+        message: `Error: ${getErrorMessage(error)}`,
       });
     }
   }
@@ -114,19 +120,23 @@ class AppViewTester {
           postsCount: response.data.postsCount,
         },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[ERROR] Get profile failed:', error);
-      if (error.validationError)
-        console.error('[ERROR] Validation:', error.validationError.message);
-      if (error.responseBody)
+      const err = error as Record<string, unknown>;
+      if (err.validationError)
+        console.error(
+          '[ERROR] Validation:',
+          (err.validationError as { message: string }).message
+        );
+      if (err.responseBody)
         console.error(
           '[ERROR] Response body:',
-          JSON.stringify(error.responseBody, null, 2)
+          JSON.stringify(err.responseBody, null, 2)
         );
       this.logResult({
         name: 'Get Profile',
         passed: false,
-        message: `Error: ${error.message}`,
+        message: `Error: ${getErrorMessage(error)}`,
       });
     }
   }
@@ -170,15 +180,18 @@ class AppViewTester {
           data: {
             uri: firstPost.post.uri,
             author: firstPost.post.author.handle,
-            text: (firstPost.post.record as any)?.text?.substring(0, 100),
+            text: (firstPost.post.record as { text?: string })?.text?.substring(
+              0,
+              100
+            ),
           },
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.logResult({
         name: 'Get Timeline',
         passed: false,
-        message: `Error: ${error.message}`,
+        message: `Error: ${getErrorMessage(error)}`,
       });
     }
   }
@@ -218,15 +231,15 @@ class AppViewTester {
           name: 'Author Feed Post Structure',
           passed: hasRequiredFields,
           message: hasRequiredFields
-            ? `Post: ${(firstPost.post.record as any)?.text?.substring(0, 50) || 'No text'}...`
+            ? `Post: ${(firstPost.post.record as { text?: string })?.text?.substring(0, 50) || 'No text'}...`
             : 'Post missing required fields',
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.logResult({
         name: 'Get Author Feed',
         passed: false,
-        message: `Error: ${error.message}`,
+        message: `Error: ${getErrorMessage(error)}`,
       });
     }
   }

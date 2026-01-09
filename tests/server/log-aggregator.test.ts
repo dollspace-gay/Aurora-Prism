@@ -238,7 +238,7 @@ describe('LogAggregator', () => {
       aggregator.log('Thrice');
       aggregator.log('Thrice');
 
-      const logs = aggregator.getAggregatedLogs();
+      aggregator.getAggregatedLogs();
       aggregator.flush();
 
       // Most frequent should be output first

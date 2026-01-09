@@ -24,13 +24,13 @@ import {
 
 // Forward declarations for service types
 // These will be imported as services are refactored
-type CacheServiceType = any;
-type DidResolverType = any;
-type PdsClientType = any;
-type FirehoseClientType = any;
-type RedisQueueType = any;
-type MetricsServiceType = any;
-type AuthServiceType = any;
+type CacheServiceType = unknown;
+type DidResolverType = unknown;
+type PdsClientType = unknown;
+type FirehoseClientType = unknown;
+type RedisQueueType = unknown;
+type MetricsServiceType = unknown;
+type AuthServiceType = unknown;
 
 /**
  * Configuration for the service container

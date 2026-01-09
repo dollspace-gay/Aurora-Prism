@@ -331,7 +331,7 @@ export async function serializePosts(
     authorLabels,
     listMutes,
     listBlocks,
-    threadContexts,
+    _threadContexts,
   ] = await Promise.all([
     storage.getUsers(authorDids),
     viewerDid ? storage.getLikeUris(viewerDid, postUris) : new Map(),
@@ -424,8 +424,8 @@ export async function serializePosts(
   return posts
     .map((post) => {
       const author = authorsByDid.get(post.authorDid);
-      const likeUri = likeUris.get(post.uri);
-      const repostUri = repostUris.get(post.uri);
+      const _likeUri = likeUris.get(post.uri);
+      const _repostUri = repostUris.get(post.uri);
       const aggregation = aggregations.get(post.uri);
       const viewerState = viewerStates.get(post.uri);
 
@@ -739,9 +739,10 @@ export async function serializePostsEnhanced(
           ).images?.map((img: unknown) => ({
             ...(img as Record<string, unknown>),
             image: {
-              ...((img as { image: Record<string, unknown> }).image),
+              ...(img as { image: Record<string, unknown> }).image,
               ref: {
-                ...((img as { image: { ref: Record<string, unknown> } }).image.ref),
+                ...(img as { image: { ref: Record<string, unknown> } }).image
+                  .ref,
                 link: transformBlobToCdnUrl(
                   (img as { image: { ref: { $link: string } } }).image.ref
                     .$link,
@@ -756,7 +757,9 @@ export async function serializePostsEnhanced(
           (embedData as { $type: string }).$type === 'app.bsky.embed.external'
         ) {
           // Handle external embeds
-          const external = { ...((embedData as { external: Record<string, unknown> }).external) };
+          const external = {
+            ...(embedData as { external: Record<string, unknown> }).external,
+          };
 
           // Only transform thumbnail if it exists and has a valid ref
           if (
@@ -775,11 +778,15 @@ export async function serializePostsEnhanced(
             );
             if (thumbUrl) {
               (external as { thumb: unknown }).thumb = {
-                ...((embedData as { external: { thumb: Record<string, unknown> } }).external
-                  .thumb),
+                ...(
+                  embedData as { external: { thumb: Record<string, unknown> } }
+                ).external.thumb,
                 ref: {
-                  ...((embedData as { external: { thumb: { ref: Record<string, unknown> } } })
-                    .external.thumb.ref),
+                  ...(
+                    embedData as {
+                      external: { thumb: { ref: Record<string, unknown> } };
+                    }
+                  ).external.thumb.ref,
                   link: thumbUrl,
                 },
               };

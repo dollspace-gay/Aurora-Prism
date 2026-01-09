@@ -9,6 +9,7 @@ import { db } from '../db';
 import { sql } from 'drizzle-orm';
 import { likes, posts, userSettings } from '@shared/schema';
 import { EventProcessor } from './event-processor';
+import { getErrorMessage, hasErrorStatus } from '../utils/error-utils';
 
 const BATCH_SIZE = 100;
 const CONCURRENT_FETCHES = 10;
@@ -142,7 +143,7 @@ export class AutoBackfillLikesService {
           return;
         }
 
-        const agent = new AtpAgent({ service: PDS_HOST });
+        const _agent = new AtpAgent({ service: PDS_HOST });
         const eventProcessor = new EventProcessor({ storage });
         eventProcessor.setSkipPdsFetching(true);
         eventProcessor.setSkipDataCollectionCheck(true);
@@ -244,18 +245,19 @@ export class AutoBackfillLikesService {
                       `[AUTO_BACKFILL_LIKES] Progress for ${userDid}: ${fetchedCount}/${missingPostUris.length} (${failedCount} failed, ${skippedCount} skipped)`
                     );
                   }
-                } catch (error: any) {
+                } catch (error: unknown) {
+                  const msg = getErrorMessage(error);
                   if (
-                    error.status === 404 ||
-                    error.message?.includes('not found') ||
-                    error.message?.includes('Could not locate record')
+                    hasErrorStatus(error, 404) ||
+                    msg.includes('not found') ||
+                    msg.includes('Could not locate record')
                   ) {
                     // Post was deleted, skip silently
                     skippedCount++;
                   } else {
                     console.error(
                       `[AUTO_BACKFILL_LIKES] Error fetching ${postUri}:`,
-                      error.message
+                      msg
                     );
                     failedCount++;
                   }

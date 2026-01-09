@@ -8,6 +8,7 @@ import { storage } from '../storage';
 import { db } from '../db';
 import { userSettings } from '@shared/schema';
 import { EventProcessor } from './event-processor';
+import { getErrorMessage, hasErrorStatus } from '../utils/error-utils';
 
 const BACKFILL_COOLDOWN_HOURS = 1;
 
@@ -237,13 +238,14 @@ export class AutoBackfillFeedsService {
 
               feedsFetched++;
             }
-          } catch (error: any) {
-            if (error.status === 404 || error.message?.includes('not found')) {
+          } catch (error: unknown) {
+            const msg = getErrorMessage(error);
+            if (hasErrorStatus(error, 404) || msg.includes('not found')) {
               // Feed doesn't exist, skip silently
             } else {
               console.error(
                 `[AUTO_BACKFILL_FEEDS] Error fetching feed ${feedUri}:`,
-                error.message
+                getErrorMessage(error)
               );
             }
           }
@@ -252,10 +254,10 @@ export class AutoBackfillFeedsService {
         console.log(
           `[AUTO_BACKFILL_FEEDS] Fetched ${feedsFetched} feed generators`
         );
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(
           `[AUTO_BACKFILL_FEEDS] Error fetching preferences:`,
-          error.message || error
+          getErrorMessage(error)
         );
       }
     } catch (error) {

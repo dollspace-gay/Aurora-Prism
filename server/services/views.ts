@@ -58,7 +58,9 @@ export class Views {
     const viewerState = state.viewerStates?.get(uri);
 
     // Get thread context if available
-    const threadContext = (state as { threadContexts?: Map<string, unknown> }).threadContexts?.get(uri);
+    const threadContext = (
+      state as { threadContexts?: Map<string, unknown> }
+    ).threadContexts?.get(uri);
 
     return {
       uri: postInfo.uri,
@@ -85,7 +87,9 @@ export class Views {
       labels: state.labels?.get(uri) || [],
       threadContext: threadContext
         ? {
-            rootAuthorLike: (threadContext as { rootAuthorLikeUri?: string }).rootAuthorLikeUri || undefined,
+            rootAuthorLike:
+              (threadContext as { rootAuthorLikeUri?: string })
+                .rootAuthorLikeUri || undefined,
           }
         : undefined,
     };
@@ -284,7 +288,7 @@ export class Views {
     _state: HydrationState
   ): boolean {
     // Check if the viewer is blocking the subject via a moderation list
-    return !!(relationship.blockingByList?.uri);
+    return !!relationship.blockingByList?.uri;
   }
 
   blockedByList(

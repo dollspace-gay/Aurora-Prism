@@ -221,7 +221,6 @@ export class EnhancedHydrator {
     const embedsMap = await this.embedResolver.resolveEmbeds(postUris);
 
     // Fetch labels
-    const allSubjects = [...postUris, ...Array.from(actorDids)];
     const labelsMap = await this.labelPropagator.propagateActorLabels(
       Array.from(actorDids),
       postUris

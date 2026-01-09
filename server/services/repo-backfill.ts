@@ -315,7 +315,10 @@ export class RepoBackfillService {
       referencedDids.add(did); // Add the repo owner
 
       // First pass: collect all DIDs without processing records
-      for await (const { collection, record: rawRecord } of repo.walkRecords()) {
+      for await (const {
+        collection,
+        record: rawRecord,
+      } of repo.walkRecords()) {
         try {
           // Cast to any since the ATProto repo library doesn't provide specific types
           const record = rawRecord as any;
@@ -363,7 +366,7 @@ export class RepoBackfillService {
               referencedDids.add(record.subject);
             }
           }
-        } catch (error: any) {
+        } catch {
           // Ignore errors during DID extraction
         }
       }
@@ -508,7 +511,7 @@ export class RepoBackfillService {
       const batch = dids.slice(i, i + BATCH_SIZE);
 
       // Process batch in parallel
-      const results = await Promise.allSettled(
+      await Promise.allSettled(
         batch.map(async (userDid) => {
           try {
             // Check if user already exists
@@ -615,7 +618,7 @@ export class RepoBackfillService {
       const batch = dids.slice(i, i + BATCH_SIZE);
 
       // Check each user in parallel
-      const results = await Promise.allSettled(
+      await Promise.allSettled(
         batch.map(async (did) => {
           try {
             const user = await storage.getUser(did);

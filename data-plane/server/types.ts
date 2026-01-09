@@ -78,8 +78,8 @@ export interface PostRecord {
   text: string;
   parentUri?: string;
   rootUri?: string;
-  embed?: any;
-  facets?: any;
+  embed?: Record<string, unknown>;
+  facets?: Array<Record<string, unknown>>;
   likeCount: number;
   repostCount: number;
   replyCount: number;

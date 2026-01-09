@@ -143,7 +143,7 @@ export class OptimizedHydrator {
   private async executeBatchedQueries(
     postUris: string[],
     viewerDid?: string,
-    viewerContext?: ViewerContext
+    _viewerContext?: ViewerContext
   ): Promise<BatchedQueries> {
     // Collect all URIs we need to fetch
     const allPostUris = new Set(postUris);
@@ -455,7 +455,7 @@ export class OptimizedHydrator {
   private async processBatchedResults(
     batchedData: BatchedQueries,
     viewerContext?: ViewerContext,
-    viewerDid?: string
+    _viewerDid?: string
   ): Promise<OptimizedHydrationState> {
     const postUris = Array.from(batchedData.posts.keys());
     const actorDids = Array.from(batchedData.actors.keys());
@@ -477,7 +477,7 @@ export class OptimizedHydrator {
 
     // Fetch feed generators if any posts are from feed generators
     const feedGeneratorDids = new Set<string>();
-    for (const [uri, post] of batchedData.posts) {
+    for (const [_uri, post] of batchedData.posts) {
       // Check if post has feed generator metadata in tags
       if (post.tags && Array.isArray(post.tags)) {
         for (const tag of post.tags) {

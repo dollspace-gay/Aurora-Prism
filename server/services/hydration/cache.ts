@@ -52,7 +52,7 @@ export class HydrationCache {
         if (value) {
           try {
             result.set(keys[index], JSON.parse(value) as T);
-          } catch (e) {
+          } catch {
             console.error(
               `[HYDRATION_CACHE] Failed to parse cached value for ${keys[index]}`
             );

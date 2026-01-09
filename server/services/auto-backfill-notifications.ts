@@ -8,6 +8,7 @@ import { storage } from '../storage';
 import { db } from '../db';
 import { userSettings, posts } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+import { getErrorMessage } from '../utils/error-utils';
 
 const BACKFILL_COOLDOWN_HOURS = 1;
 const CONCURRENT_FETCHES = 5;
@@ -220,7 +221,7 @@ export class AutoBackfillNotificationsService {
 
                     notificationsFetched++;
                   }
-                } catch (error: any) {
+                } catch {
                   // Skip errors silently for individual likes
                 }
               }
@@ -286,14 +287,14 @@ export class AutoBackfillNotificationsService {
 
                     notificationsFetched++;
                   }
-                } catch (error: any) {
+                } catch {
                   // Skip errors silently
                 }
               }
-            } catch (error: any) {
+            } catch (error: unknown) {
               console.error(
                 `[AUTO_BACKFILL_NOTIFICATIONS] Error processing post ${post.uri}:`,
-                error.message
+                getErrorMessage(error)
               );
             }
           })

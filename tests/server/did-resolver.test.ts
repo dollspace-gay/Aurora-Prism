@@ -296,7 +296,9 @@ describe('RequestQueue behavior', () => {
       await queue.enqueue(async () => {
         throw new Error('fail');
       });
-    } catch {}
+    } catch {
+      // Expected to fail
+    }
 
     const stats = queue.getStats();
     expect(stats.completed).toBe(2);

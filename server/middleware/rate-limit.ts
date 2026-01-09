@@ -1,4 +1,5 @@
 import rateLimit from 'express-rate-limit';
+import type { Request, Response, NextFunction } from 'express';
 
 /**
  * Configurable Rate Limiting for AT Protocol AppView
@@ -27,7 +28,8 @@ import rateLimit from 'express-rate-limit';
 const RATE_LIMIT_ENABLED = process.env.RATE_LIMIT_ENABLED !== 'false';
 
 // Helper to create a no-op limiter when disabled
-const noopLimiter = (_req: any, _res: any, next: any) => next();
+const noopLimiter = (_req: Request, _res: Response, next: NextFunction) =>
+  next();
 
 // Parse environment variable with fallback
 const parseLimit = (

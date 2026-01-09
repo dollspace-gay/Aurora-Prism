@@ -216,7 +216,11 @@ export async function getAuthorFeed(
     }
 
     // Serialize posts using the extracted utility function
-    const serializedPosts = await serializePosts(filteredPosts, viewerDid ?? undefined, req);
+    const serializedPosts = await serializePosts(
+      filteredPosts,
+      viewerDid ?? undefined,
+      req
+    );
     const postsByUri = new Map(serializedPosts.map((p: any) => [p.uri, p]));
 
     // Build feed with reposts and pinned posts
@@ -659,7 +663,7 @@ export async function getPostThreadOtherV2(
   res: Response
 ): Promise<void> {
   try {
-    const params = getPostThreadOtherV2Schema.parse(req.query);
+    const _params = getPostThreadOtherV2Schema.parse(req.query);
 
     // TODO: Implement actual functionality for paginated/hidden replies
     // For now, return empty array indicating no additional replies

@@ -1,0 +1,677 @@
+
+> rest-express@1.0.0 lint
+> eslint . --max-warnings 0
+
+
+C:\Users\texas\prism\Aurora-Prism\client\src\components\activity-chart.tsx
+  72:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  75:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  85:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\data-plane\client\index.ts
+  611:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  618:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  630:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  637:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  653:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  662:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\data-plane\server\services\cache.ts
+   63:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  158:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  178:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\data-plane\server\services\thread-assembler.ts
+   80:5   warning  'blockedDids' is never reassigned. Use 'const' instead  prefer-const
+   81:5   warning  'mutedDids' is never reassigned. Use 'const' instead    prefer-const
+  236:11  warning  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  251:17  warning  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  334:23  warning  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  502:19  warning  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\data-plane\server\types.ts
+  81:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  82:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\osprey-bridge\firehose-to-kafka\src\adapters\redis-adapter.ts
+  244:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  252:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  253:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\osprey-bridge\firehose-to-kafka\src\event-enricher.ts
+  36:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\middleware\rate-limit.ts
+  30:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\routes.ts
+    77:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+    77:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+    77:65  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   213:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1086:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1143:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1145:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1186:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1195:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  3445:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  4910:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\scripts\backfill-handles-batch.ts
+  54:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\scripts\backfill-liked-posts.ts
+   94:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  103:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\scripts\init-search-extensions.ts
+  16:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  31:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\appview-jwt.ts
+   31:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   68:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  249:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  333:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  397:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  439:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  475:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\auth.ts
+   22:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  115:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\auto-backfill-feeds.ts
+  132:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  134:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  167:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  169:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  200:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  202:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  236:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  240:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  255:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\auto-backfill-follows.ts
+  190:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  192:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  240:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  243:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  252:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  303:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  334:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  336:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  352:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  371:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  406:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  417:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  497:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  558:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  560:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  600:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  609:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  658:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  690:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  692:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  742:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  746:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  763:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  776:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  846:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  848:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  900:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  903:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  920:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\auto-backfill-likes.ts
+   64:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  193:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  195:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  238:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  247:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\auto-backfill-notifications.ts
+  176:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  178:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  199:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  219:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  244:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  246:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  265:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  285:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  293:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\backfill.ts
+  237:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  328:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  340:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  531:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\cache.ts
+   50:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  282:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  283:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  284:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  285:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  286:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  287:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  288:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  318:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  319:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  320:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  321:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  322:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  323:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  324:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\constellation-integration.ts
+   76:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  321:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\database-health.ts
+   75:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   76:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  171:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  187:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\did-resolver.ts
+   14:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   30:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  106:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\event-processor.ts
+    64:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   151:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   151:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   175:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   236:7   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   496:71  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   555:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   702:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   902:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   925:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1013:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1061:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1075:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1160:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1183:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1197:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1208:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1258:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1424:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1500:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1512:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1597:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1609:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1653:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1666:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1684:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1726:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1804:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1816:71  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1860:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1876:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1915:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1959:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1972:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1984:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  1999:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2098:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2098:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2100:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2121:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2199:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2228:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2239:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2278:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2439:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2525:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2539:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2553:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2557:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2561:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2564:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2610:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2624:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2640:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2660:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\feed-generator-client.ts
+   28:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   41:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\feed-generator-discovery.ts
+  444:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  473:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\firehose.ts
+    9:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   12:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   22:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  133:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  249:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  302:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  482:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  490:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  501:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  512:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  512:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  642:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\hydration.ts
+   27:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:71  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  169:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\hydration\benchmark-dataloader.ts
+  19:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\hydration\benchmark.ts
+  16:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\hydration\cache.ts
+   21:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   34:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   79:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   82:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  124:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  180:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\hydration\dataloader-hydrator.ts
+    7:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+    8:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+    9:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   10:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   11:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   12:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   13:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   14:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   15:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  152:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  153:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  154:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  155:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  156:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  157:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  158:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  237:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\hydration\embed-resolver.ts
+   10:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   68:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   98:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  126:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  194:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  217:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  230:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  265:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  298:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  390:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  398:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  431:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  439:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  444:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  461:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  485:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  485:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  500:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\hydration\index.ts
+   12:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   13:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   14:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   15:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   16:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   17:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   50:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  146:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  174:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  199:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  212:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  262:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  276:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\hydration\label-propagator.ts
+   84:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  179:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\hydration\optimized-hydrator.ts
+   28:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   29:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   30:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   31:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   32:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   33:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   35:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   36:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   37:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   48:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   49:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   50:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   51:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   52:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   53:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   54:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   63:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  221:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  228:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  231:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  339:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  345:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  380:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  447:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  491:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  651:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  670:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  691:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\hydration\viewer-context.ts
+   22:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  141:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  188:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  235:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  264:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\instance-moderation.ts
+  92:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\label.ts
+  136:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\lexicon-validator.ts
+  135:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\log-aggregator.ts
+   15:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   54:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   74:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  109:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  142:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  301:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\log-collector.ts
+   5:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  15:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  50:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  54:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  58:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  62:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  66:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\metrics.ts
+  228:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\oauth-service.ts
+  208:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\on-demand-backfill.ts
+  95:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\pds-client.ts
+   10:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  332:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  477:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  487:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  530:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  532:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  533:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  534:71  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  566:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  568:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  569:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  570:71  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\pds-data-fetcher.ts
+   16:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   35:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  168:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  448:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  531:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\quote-posts-backfill.ts
+   55:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  180:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  182:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  213:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  218:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  234:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  283:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\redis-queue.ts
+    5:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   52:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  181:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  247:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  248:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  269:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  375:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  396:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  459:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  481:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  545:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  557:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  557:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  559:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  613:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  629:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  694:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  727:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  742:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  746:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\repo-backfill.ts
+   25:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  122:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  220:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  244:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  324:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  415:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  416:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  434:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  478:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  531:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  559:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  560:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  630:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\schema-introspection.ts
+  214:67  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  246:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\search.ts
+   13:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   78:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  195:66  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\thread-context-backfill.ts
+   53:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   56:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  177:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  192:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  194:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  226:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  231:60  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  269:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\views.ts
+   26:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   52:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   98:57  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  124:6   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  129:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  191:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  193:6   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\services\actor-service.ts
+  117:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\services\feed-generator-service.ts
+   38:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   41:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  156:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  222:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  284:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  398:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  459:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\services\graph-service.ts
+  84:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\services\list-service.ts
+   99:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  160:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  187:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  305:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  394:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  455:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  562:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  596:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  672:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  776:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\services\moderation-service.ts
+  48:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\services\notification-service.ts
+   69:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  323:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  329:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  472:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  476:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  513:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  558:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\services\post-interaction-service.ts
+  137:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  150:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  174:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  210:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  254:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  358:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  371:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  397:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  433:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  477:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  621:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\services\search-service.ts
+   77:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  259:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\services\starter-pack-service.ts
+   61:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  140:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  217:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  347:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  360:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  439:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  504:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  517:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\services\timeline-service.ts
+   77:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   82:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  224:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  232:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  331:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  344:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  346:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  480:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  487:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  488:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  493:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  535:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  545:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  572:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  582:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  625:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\services\utility-service.ts
+  53:56  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  78:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\utils\profile-builder.ts
+   36:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   37:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   41:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  105:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  238:43  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  248:37  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  261:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  274:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  280:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  321:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  334:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\services\xrpc\utils\serializers.ts
+  306:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  309:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  395:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  473:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  487:68  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\storage.ts
+   141:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   716:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   983:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2323:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2679:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2895:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2898:54  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2901:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2966:72  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  3549:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\transaction-utils.ts
+   28:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   56:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   87:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  153:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\types\feed.ts
+   41:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   42:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   43:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   44:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   45:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   46:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   47:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   90:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   93:9   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:11  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   98:13  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  155:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\utils\sanitize.ts
+  50:22  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\server\utils\security.ts
+  163:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  164:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  165:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\texas\prism\Aurora-Prism\test-client\at-protocol-client.ts
+   11:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   82:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  173:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  177:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  221:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  225:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 524 problems (0 errors, 524 warnings)
+

@@ -7,12 +7,19 @@ import { AtpAgent } from '@atproto/api';
 import { storage } from '../storage';
 import { db } from '../db';
 import { sql } from 'drizzle-orm';
-import { follows, users, userSettings } from '@shared/schema';
+import { follows, userSettings } from '@shared/schema';
 import { EventProcessor } from './event-processor';
+import {
+  getErrorMessage,
+  hasErrorStatus,
+  hasErrorCode,
+  getErrorCode,
+  getErrorStatus,
+} from '../utils/error-utils';
+import type { DIDDocument } from '../types/atproto';
 
 const BATCH_SIZE = 100;
 const CONCURRENT_FETCHES = 50; // Increased from 10 to 50 for faster processing
-const PDS_HOST = process.env.PDS_HOST || 'https://bsky.network';
 const BACKFILL_COOLDOWN_HOURS = 1; // Cooldown before re-running automatic backfill
 const MAX_FOLLOW_RECORDS_TO_CHECK = 500; // Don't paginate through more than 500 follows per user
 
@@ -187,9 +194,9 @@ export class AutoBackfillFollowsService {
           `[AUTO_BACKFILL_FOLLOWS] Could not resolve DID ${userDid}`
         );
       } else {
-        const services = (didDoc as any).service || [];
+        const services = (didDoc as DIDDocument).service || [];
         const pdsService = services.find(
-          (s: any) =>
+          (s) =>
             s.type === 'AtprotoPersonalDataServer' || s.id === '#atproto_pds'
         );
 
@@ -240,19 +247,19 @@ export class AutoBackfillFollowsService {
                   } as any);
 
                   followingFetched++;
-                } catch (error: any) {
+                } catch (error: unknown) {
                   console.error(
                     `[AUTO_BACKFILL_FOLLOWS] Error processing outgoing follow:`,
-                    error.message
+                    getErrorMessage(error)
                   );
                 }
               }
 
               cursor = response.data.cursor;
-            } catch (error: any) {
+            } catch (error: unknown) {
               console.error(
                 `[AUTO_BACKFILL_FOLLOWS] Error listing follow records:`,
-                error.message || error
+                getErrorMessage(error)
               );
               break;
             }
@@ -300,10 +307,10 @@ export class AutoBackfillFollowsService {
           }
 
           cursor = response.data.cursor;
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error(
             `[AUTO_BACKFILL_FOLLOWS] Error fetching followers from Bluesky:`,
-            error.message || error
+            getErrorMessage(error)
           );
           break;
         }
@@ -331,9 +338,9 @@ export class AutoBackfillFollowsService {
                 return;
               }
 
-              const services = (followerDidDoc as any).service || [];
+              const services = (followerDidDoc as DIDDocument).service || [];
               const pdsService = services.find(
-                (s: any) =>
+                (s) =>
                   s.type === 'AtprotoPersonalDataServer' ||
                   s.id === '#atproto_pds'
               );
@@ -414,39 +421,40 @@ export class AutoBackfillFollowsService {
                 );
                 failedCount++;
               }
-            } catch (error: any) {
-              if (
-                error.status === 404 ||
-                error.message?.includes('not found')
-              ) {
+            } catch (error: unknown) {
+              const msg = getErrorMessage(error);
+              const status = getErrorStatus(error);
+              const code = getErrorCode(error);
+
+              if (hasErrorStatus(error, 404) || msg.includes('not found')) {
                 // User or record doesn't exist
                 console.warn(
-                  `[AUTO_BACKFILL_FOLLOWS] User/record not found for ${followerDid}: ${error.message}`
+                  `[AUTO_BACKFILL_FOLLOWS] User/record not found for ${followerDid}: ${msg}`
                 );
               } else if (
-                error.status === 400 &&
-                error.message?.includes('Could not find repo')
+                hasErrorStatus(error, 400) &&
+                msg.includes('Could not find repo')
               ) {
                 // Repo doesn't exist (account deleted/suspended)
                 console.warn(
                   `[AUTO_BACKFILL_FOLLOWS] Repo not found for ${followerDid} (likely deleted/suspended)`
                 );
               } else if (
-                error.code === 'ECONNREFUSED' ||
-                error.code === 'ETIMEDOUT'
+                hasErrorCode(error, 'ECONNREFUSED') ||
+                hasErrorCode(error, 'ETIMEDOUT')
               ) {
                 // PDS connection issues
                 console.error(
-                  `[AUTO_BACKFILL_FOLLOWS] PDS connection error for ${followerDid}: ${error.code}`
+                  `[AUTO_BACKFILL_FOLLOWS] PDS connection error for ${followerDid}: ${code}`
                 );
               } else {
                 // Unexpected error - log full details
                 console.error(
                   `[AUTO_BACKFILL_FOLLOWS] Unexpected error fetching follow record from ${followerDid}:`,
                   {
-                    message: error.message,
-                    status: error.status,
-                    code: error.code,
+                    message: msg,
+                    status,
+                    code,
                   }
                 );
               }
@@ -523,7 +531,7 @@ export class AutoBackfillFollowsService {
         `[AUTO_BACKFILL_FOLLOWS] Fetching ${missingDids.length} missing profiles`
       );
 
-      const agent = new AtpAgent({ service: PDS_HOST });
+      // Note: We use per-PDS agents instead of a global agent
       const eventProcessor = new EventProcessor({ storage });
       eventProcessor.setSkipPdsFetching(true);
       eventProcessor.setSkipDataCollectionCheck(true);
@@ -555,9 +563,9 @@ export class AutoBackfillFollowsService {
                 }
 
                 // Find PDS service endpoint
-                const services = (didDoc as any).service || [];
+                const services = (didDoc as DIDDocument).service || [];
                 const pdsService = services.find(
-                  (s: any) =>
+                  (s) =>
                     s.type === 'AtprotoPersonalDataServer' ||
                     s.id === '#atproto_pds'
                 );
@@ -606,16 +614,14 @@ export class AutoBackfillFollowsService {
                     `[AUTO_BACKFILL_FOLLOWS] Profile progress: ${fetchedCount}/${missingDids.length} (${failedCount} failed)`
                   );
                 }
-              } catch (error: any) {
-                if (
-                  error.status === 404 ||
-                  error.message?.includes('not found')
-                ) {
+              } catch (error: unknown) {
+                const msg = getErrorMessage(error);
+                if (hasErrorStatus(error, 404) || msg.includes('not found')) {
                   // Profile doesn't exist, skip silently
                 } else {
                   console.error(
                     `[AUTO_BACKFILL_FOLLOWS] Error fetching profile ${did}:`,
-                    error.message
+                    msg
                   );
                 }
                 failedCount++;
@@ -687,9 +693,9 @@ export class AutoBackfillFollowsService {
             continue;
           }
 
-          const services = (didDoc as any).service || [];
+          const services = (didDoc as DIDDocument).service || [];
           const pdsService = services.find(
-            (s: any) =>
+            (s) =>
               s.type === 'AtprotoPersonalDataServer' || s.id === '#atproto_pds'
           );
 
@@ -743,12 +749,12 @@ export class AutoBackfillFollowsService {
 
                   postsFetched++;
                   totalPostsFetched++;
-                } catch (error: any) {
+                } catch (error: unknown) {
                   // Silently skip individual post errors (e.g., duplicates)
-                  if (error?.code !== '23505') {
+                  if (!hasErrorCode(error, '23505')) {
                     console.error(
                       `[AUTO_BACKFILL_FOLLOWS] Error processing post from ${followedDid}:`,
-                      error.message
+                      getErrorMessage(error)
                     );
                   }
                 }
@@ -760,10 +766,10 @@ export class AutoBackfillFollowsService {
               }
 
               cursor = response.data.cursor;
-            } catch (error: any) {
+            } catch (error: unknown) {
               console.error(
                 `[AUTO_BACKFILL_FOLLOWS] Error listing posts for ${followedDid}:`,
-                error.message
+                getErrorMessage(error)
               );
               break;
             }
@@ -773,10 +779,10 @@ export class AutoBackfillFollowsService {
           console.log(
             `[AUTO_BACKFILL_FOLLOWS] User ${usersCompleted}/${followedDids.length}: Fetched ${postsFetched} posts from ${followedDid}`
           );
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error(
             `[AUTO_BACKFILL_FOLLOWS] Error backfilling posts for ${followedDid}:`,
-            error.message
+            getErrorMessage(error)
           );
           usersFailed++;
         }
@@ -843,7 +849,7 @@ export class AutoBackfillFollowsService {
         return;
       }
 
-      const services = (didDoc as any).service || [];
+      const services = (didDoc as DIDDocument).service || [];
       const pdsService = services.find(
         (s: any) =>
           s.type === 'AtprotoPersonalDataServer' || s.id === '#atproto_pds'
@@ -900,12 +906,12 @@ export class AutoBackfillFollowsService {
               } as any);
 
               postsFetched++;
-            } catch (error: any) {
+            } catch (error: unknown) {
               // Silently skip duplicates
-              if (error?.code !== '23505') {
+              if (!hasErrorCode(error, '23505')) {
                 console.error(
                   `[AUTO_BACKFILL_FOLLOWS] Error processing post from ${followedDid}:`,
-                  error.message
+                  getErrorMessage(error)
                 );
               }
             }
@@ -917,10 +923,10 @@ export class AutoBackfillFollowsService {
           }
 
           cursor = response.data.cursor;
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error(
             `[AUTO_BACKFILL_FOLLOWS] Error listing posts for ${followedDid}:`,
-            error.message
+            getErrorMessage(error)
           );
           break;
         }

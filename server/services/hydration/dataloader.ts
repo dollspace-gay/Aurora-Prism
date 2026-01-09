@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// DataLoaders work with dynamic database records - proper typing requires schema inference
 import DataLoader from 'dataloader';
 import { db } from '../../db';
 import {

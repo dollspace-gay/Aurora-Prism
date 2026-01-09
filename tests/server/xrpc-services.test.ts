@@ -43,7 +43,7 @@ vi.mock('../../server/services/xrpc/utils/auth-helpers', () => ({
 }));
 
 vi.mock('../../server/services/xrpc/utils/error-handler', () => ({
-  handleError: vi.fn((res, error, context) => {
+  handleError: vi.fn((res, error, _context) => {
     res
       .status(500)
       .json({ error: 'InternalServerError', message: error.message });

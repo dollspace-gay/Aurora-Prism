@@ -43,6 +43,13 @@ import { withTransaction } from '../transaction-utils';
 
 import { BoundedArrayMap, BoundedMap } from '../bounded-map';
 import { Semaphore } from '../semaphore';
+import type {
+  BlobRef,
+  ATEmbed,
+  ATCommitEvent,
+  DIDDocument,
+} from '../types/atproto';
+
 function sanitizeText(text: string | undefined | null): string | undefined {
   if (!text) return undefined;
   return text.replace(/\u0000/g, '');
@@ -61,7 +68,9 @@ function sanitizeRequiredText(text: string | undefined | null): string {
  * - {cid: 'cid'} (Direct CID field)
  * - Direct CID string
  */
-function extractBlobCid(blob: any): string | null {
+function extractBlobCid(
+  blob: BlobRef | string | null | undefined
+): string | null {
   if (!blob) return null;
 
   // Handle direct string
@@ -122,11 +131,8 @@ function extractBlobCid(blob: any): string | null {
         const multihashDigest = Digest.create(mh.code, digestBytes);
 
         // Create CID from parts: version, codec, and multihash
-        const cidObj = CID.create(
-          blob.ref.version || 1,
-          blob.ref.code,
-          multihashDigest
-        );
+        const version = (blob.ref.version || 1) as 0 | 1;
+        const cidObj = CID.create(version, blob.ref.code, multihashDigest);
 
         return cidObj.toString();
       } catch (error) {
@@ -148,7 +154,9 @@ function extractBlobCid(blob: any): string | null {
  * Normalize embed data to ensure all blob references are valid
  * Removes invalid/empty thumb and image references that would cause validation errors
  */
-function normalizeEmbed(embed: any): any {
+function normalizeEmbed(
+  embed: ATEmbed | null | undefined
+): ATEmbed | null | undefined {
   if (!embed || typeof embed !== 'object') return embed;
 
   const normalized = { ...embed };
@@ -171,17 +179,18 @@ function normalizeEmbed(embed: any): any {
     normalized.$type === 'app.bsky.embed.images' &&
     Array.isArray(normalized.images)
   ) {
-    normalized.images = normalized.images
-      .map((img: any) => {
-        if (!img.image) return null;
+    const validImages = normalized.images
+      .map((img) => {
+        if (!img?.image) return null;
         const imageCid = extractBlobCid(img.image);
         if (!imageCid) return null;
         return img;
       })
-      .filter(Boolean); // Remove null entries
+      .filter((img): img is NonNullable<typeof img> => img !== null);
+    normalized.images = validImages;
 
     // If all images were invalid, remove the embed entirely
-    if (normalized.images.length === 0) {
+    if (validImages.length === 0) {
       return null;
     }
   }
@@ -191,7 +200,8 @@ function normalizeEmbed(embed: any): any {
     normalized.$type === 'app.bsky.embed.recordWithMedia' &&
     normalized.media
   ) {
-    normalized.media = normalizeEmbed(normalized.media);
+    const normalizedMedia = normalizeEmbed(normalized.media);
+    normalized.media = normalizedMedia ?? undefined;
     // If media normalization removed all content, convert to plain record embed
     if (!normalized.media) {
       return {
@@ -2090,7 +2100,7 @@ export class EventProcessor {
   ): void {
     // Check if follower has ever logged in (async, non-blocking)
     import('../../shared/schema')
-      .then(({ sessions }) => {
+      .then(({ sessions: _sessions }) => {
         import('../db')
           .then(({ db }) => {
             db.query.sessions

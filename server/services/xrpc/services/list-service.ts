@@ -508,13 +508,6 @@ export async function getListsWithMembership(
       return;
     }
 
-    const creatorData = creator as {
-      handle: string;
-      displayName?: string;
-      avatarUrl?: string;
-      did: string;
-    };
-
     // Build creator ProfileView (will be same for all lists)
     const creatorProfiles = await getProfiles([sessionDid], req);
     const creatorView = creatorProfiles[0];

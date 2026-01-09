@@ -110,7 +110,10 @@ const db = createDbPool(
 
 // Pool interface for legacy code that needs direct pool access
 export interface LegacyPool {
-  query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[]; rowCount: number }>;
+  query: (
+    sql: string,
+    params?: unknown[]
+  ) => Promise<{ rows: unknown[]; rowCount: number }>;
 }
 
 // For backwards compatibility, export a pool variable (though the actual pool is internal to drizzle)

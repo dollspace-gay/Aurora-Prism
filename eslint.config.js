@@ -15,6 +15,9 @@ export default [
       'build/**',
       'docs/**',
       'coverage/**',
+      '.stryker-tmp/**',
+      'reports/**',
+      'scripts/*.cjs',
       '*.config.js',
       '*.config.ts',
       'vite.config.ts',
@@ -127,6 +130,10 @@ export default [
         ...globals.browser,
         ...globals.node,
       },
+    },
+    rules: {
+      // Allow any in test files for mocking flexibility
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ];

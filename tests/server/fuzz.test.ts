@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'vitest';
 import fc from 'fast-check';
 import {
   sanitizeString,
@@ -199,7 +199,9 @@ describe('Fuzz Tests - Edge Cases', () => {
   it('should handle empty and whitespace strings', () => {
     fc.assert(
       fc.property(
-        fc.array(fc.constantFrom(' ', '\t', '\n', '\r')).map((arr) => arr.join('')),
+        fc
+          .array(fc.constantFrom(' ', '\t', '\n', '\r'))
+          .map((arr) => arr.join('')),
         (input) => {
           const result = sanitizeString(input);
           return typeof result === 'string';

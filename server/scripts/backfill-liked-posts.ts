@@ -8,7 +8,7 @@ import { storage } from '../storage';
 import { EventProcessor } from '../services/event-processor';
 import { db } from '../db';
 import { likes, posts } from '../../shared/schema';
-import { sql, eq, isNull } from 'drizzle-orm';
+import { sql, eq } from 'drizzle-orm';
 
 const BATCH_SIZE = 100;
 const CONCURRENT_FETCHES = 10;

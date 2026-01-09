@@ -682,7 +682,7 @@ export async function putActivitySubscription(
     }
 
     // Create/update the activity subscription
-    const subscription = await storage.createActivitySubscription({
+    await storage.createActivitySubscription({
       uri,
       cid,
       subscriberDid: userDid,

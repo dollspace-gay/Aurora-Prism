@@ -181,7 +181,10 @@ export class OnDemandBackfill {
           throw new Error(`Failed to list ${collection}: ${response.status}`);
         }
 
-        const data: { records?: { uri: string; cid: string; value: unknown }[]; cursor?: string } = await response.json();
+        const data: {
+          records?: { uri: string; cid: string; value: unknown }[];
+          cursor?: string;
+        } = await response.json();
         const records = data.records || [];
 
         if (records.length === 0) {

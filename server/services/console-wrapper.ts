@@ -8,32 +8,32 @@
 import { logAggregator } from './log-aggregator';
 
 interface ConsoleWrapper {
-  log: (message: string, ...args: any[]) => void;
-  warn: (message: string, ...args: any[]) => void;
-  error: (message: string, ...args: any[]) => void;
-  info: (message: string, ...args: any[]) => void;
+  log: (message: string, ...args: unknown[]) => void;
+  warn: (message: string, ...args: unknown[]) => void;
+  error: (message: string, ...args: unknown[]) => void;
+  info: (message: string, ...args: unknown[]) => void;
 }
 
 class AggregatedConsole implements ConsoleWrapper {
-  log(message: string, ...args: any[]) {
+  log(message: string, ...args: unknown[]) {
     const fullMessage =
       args.length > 0 ? `${message} ${args.join(' ')}` : message;
     logAggregator.log(fullMessage);
   }
 
-  warn(message: string, ...args: any[]) {
+  warn(message: string, ...args: unknown[]) {
     const fullMessage =
       args.length > 0 ? `${message} ${args.join(' ')}` : message;
     logAggregator.warn(fullMessage);
   }
 
-  error(message: string, ...args: any[]) {
+  error(message: string, ...args: unknown[]) {
     const fullMessage =
       args.length > 0 ? `${message} ${args.join(' ')}` : message;
     logAggregator.error(fullMessage);
   }
 
-  info(message: string, ...args: any[]) {
+  info(message: string, ...args: unknown[]) {
     const fullMessage =
       args.length > 0 ? `${message} ${args.join(' ')}` : message;
     logAggregator.log(fullMessage);
@@ -55,7 +55,7 @@ export function shouldAggregateLog(message: string): boolean {
 
 // Enhanced console wrapper that conditionally aggregates
 export class SmartConsole implements ConsoleWrapper {
-  log(message: string, ...args: any[]) {
+  log(message: string, ...args: unknown[]) {
     const fullMessage =
       args.length > 0 ? `${message} ${args.join(' ')}` : message;
 
@@ -66,7 +66,7 @@ export class SmartConsole implements ConsoleWrapper {
     }
   }
 
-  warn(message: string, ...args: any[]) {
+  warn(message: string, ...args: unknown[]) {
     const fullMessage =
       args.length > 0 ? `${message} ${args.join(' ')}` : message;
 
@@ -77,7 +77,7 @@ export class SmartConsole implements ConsoleWrapper {
     }
   }
 
-  error(message: string, ...args: any[]) {
+  error(message: string, ...args: unknown[]) {
     const fullMessage =
       args.length > 0 ? `${message} ${args.join(' ')}` : message;
 
@@ -88,7 +88,7 @@ export class SmartConsole implements ConsoleWrapper {
     }
   }
 
-  info(message: string, ...args: any[]) {
+  info(message: string, ...args: unknown[]) {
     const fullMessage =
       args.length > 0 ? `${message} ${args.join(' ')}` : message;
 
