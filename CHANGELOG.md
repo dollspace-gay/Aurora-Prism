@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Worker process coordination
 
 ### Changed
+- Set up fuzzing and mutation testing with GitHub Actions (#44)
 - Implement placeholder data-plane routes (graph, search, notifications, feed-generators) (#43)
 - Implement placeholder feed generator queries in data-plane client (#42)
 - Implement placeholder notification queries in data-plane client (#41)

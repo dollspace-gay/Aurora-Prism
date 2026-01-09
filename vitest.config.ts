@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    pool: 'vmForks',
     include: ['**/*.test.ts', '**/*.test.tsx'],
     exclude: ['node_modules', 'dist', 'build'],
     setupFiles: ['./tests/setup.ts'],

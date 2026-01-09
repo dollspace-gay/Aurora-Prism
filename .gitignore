@@ -29,3 +29,4 @@ nul
 .chainlink/daemon.log
 .chainlink/daemon.pid
 .chainlink/issues.db
+.stryker-tmp/
