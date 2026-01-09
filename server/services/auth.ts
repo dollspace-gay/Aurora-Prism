@@ -140,7 +140,8 @@ export class AuthService {
         // SECURITY: All JWTs MUST have their cryptographic signatures verified
         const pdsDid = payload.aud;
         if (
-          (payload.scope === 'com.atproto.appPassPrivileged' || payload.scope === 'com.atproto.access') &&
+          (payload.scope === 'com.atproto.appPassPrivileged' ||
+            payload.scope === 'com.atproto.access') &&
           pdsDid &&
           typeof pdsDid === 'string' &&
           pdsDid.startsWith('did:')
@@ -156,7 +157,11 @@ export class AuthService {
           signingDid = payload.iss;
         }
         // Fallback: use aud as signing DID if present
-        else if (pdsDid && typeof pdsDid === 'string' && pdsDid.startsWith('did:')) {
+        else if (
+          pdsDid &&
+          typeof pdsDid === 'string' &&
+          pdsDid.startsWith('did:')
+        ) {
           signingDid = pdsDid;
           console.log(
             `[AUTH] Using aud field as signing DID for token from: ${pdsDid}`
@@ -189,7 +194,9 @@ export class AuthService {
       // NOTE: In standard AT Protocol flow, PDS access tokens shouldn't reach AppViews directly.
       // Clients talk to PDS, which proxies to AppView using service auth tokens.
       // This code path may be hit by non-standard direct-to-AppView clients.
-      const isPdsToken = payload.scope === 'com.atproto.access' || payload.scope === 'com.atproto.appPassPrivileged';
+      const isPdsToken =
+        payload.scope === 'com.atproto.access' ||
+        payload.scope === 'com.atproto.appPassPrivileged';
 
       if (isPdsToken) {
         console.warn(

@@ -10,7 +10,10 @@ import { storage } from '../../../storage';
 import { transformBlobToCdnUrl } from './serializers';
 
 // Handle resolution cache (shared across all calls)
-const handleResolutionCache = new Map<string, { did: string; timestamp: number }>();
+const handleResolutionCache = new Map<
+  string,
+  { did: string; timestamp: number }
+>();
 const HANDLE_RESOLUTION_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 // Clean expired cache entries every minute
@@ -26,7 +29,9 @@ setInterval(() => {
 /**
  * Get authenticated DID from request
  */
-export async function getAuthenticatedDid(req: Request): Promise<string | null> {
+export async function getAuthenticatedDid(
+  req: Request
+): Promise<string | null> {
   // Check for DID in request (set by auth middleware)
   if ((req as any).auth?.did) {
     return (req as any).auth.did;
@@ -44,7 +49,11 @@ export async function getAuthenticatedDid(req: Request): Promise<string | null> 
 /**
  * Helper to add avatar to profile if it exists
  */
-function maybeAvatar(avatarUrl: string | null, did: string, req?: Request): { avatar?: string } {
+function maybeAvatar(
+  avatarUrl: string | null,
+  did: string,
+  req?: Request
+): { avatar?: string } {
   if (!avatarUrl) return {};
 
   const avatarUri = transformBlobToCdnUrl(avatarUrl, did, 'avatar', req);
@@ -57,7 +66,11 @@ function maybeAvatar(avatarUrl: string | null, did: string, req?: Request): { av
 /**
  * Helper to add banner to profile if it exists
  */
-function maybeBanner(bannerUrl: string | null, did: string, req?: Request): { banner?: string } {
+function maybeBanner(
+  bannerUrl: string | null,
+  did: string,
+  req?: Request
+): { banner?: string } {
   if (!bannerUrl) return {};
 
   const bannerUri = transformBlobToCdnUrl(bannerUrl, did, 'banner', req);
@@ -86,7 +99,10 @@ function directCidToCdnUrl(
  * @param req - Express request object (for viewer context and CDN URL generation)
  * @returns Array of complete profile views
  */
-export async function getProfiles(actors: string[], req: Request): Promise<any[]> {
+export async function getProfiles(
+  actors: string[],
+  req: Request
+): Promise<any[]> {
   const viewerDid = await getAuthenticatedDid(req);
 
   // Resolve all handles to DIDs
@@ -100,7 +116,10 @@ export async function getProfiles(actors: string[], req: Request): Promise<any[]
 
       // Check cache first
       const cached = handleResolutionCache.get(handle);
-      if (cached && Date.now() - cached.timestamp < HANDLE_RESOLUTION_CACHE_TTL) {
+      if (
+        cached &&
+        Date.now() - cached.timestamp < HANDLE_RESOLUTION_CACHE_TTL
+      ) {
         return cached.did;
       }
 
@@ -152,9 +171,14 @@ export async function getProfiles(actors: string[], req: Request): Promise<any[]
         try {
           const { pdsDataFetcher } = await import('../../pds-data-fetcher');
           await pdsDataFetcher.fetchUser(did);
-          console.log(`[PROFILE_BUILDER] Successfully fetched user ${did} from their PDS`);
+          console.log(
+            `[PROFILE_BUILDER] Successfully fetched user ${did} from their PDS`
+          );
         } catch (error) {
-          console.error(`[PROFILE_BUILDER] Failed to fetch user ${did} from PDS:`, error);
+          console.error(
+            `[PROFILE_BUILDER] Failed to fetch user ${did} from PDS:`,
+            error
+          );
         }
       })
     );
@@ -187,7 +211,9 @@ export async function getProfiles(actors: string[], req: Request): Promise<any[]
       ? storage.findMutingListsForUsers(viewerDid, uniqueDids)
       : Promise.resolve(new Map()),
     viewerDid
-      ? Promise.all(uniqueDids.map((did) => storage.getKnownFollowers(did, viewerDid, 5)))
+      ? Promise.all(
+          uniqueDids.map((did) => storage.getKnownFollowers(did, viewerDid, 5))
+        )
       : Promise.resolve(uniqueDids.map(() => ({ followers: [], count: 0 }))),
   ]);
 
@@ -234,7 +260,9 @@ export async function getProfiles(actors: string[], req: Request): Promise<any[]
 
       const profileRecord = user.profileRecord as any;
       const pinnedPostUri = profileRecord?.pinnedPost?.uri;
-      const pinnedPostCid = pinnedPostUri ? pinnedPostCidByUri.get(pinnedPostUri) : undefined;
+      const pinnedPostCid = pinnedPostUri
+        ? pinnedPostCidByUri.get(pinnedPostUri)
+        : undefined;
 
       const viewerState = viewerDid ? relationships.get(did) : null;
       const mutingList = viewerDid ? mutingLists.get(did) : null;
@@ -260,7 +288,11 @@ export async function getProfiles(actors: string[], req: Request): Promise<any[]
                 const avatarUri = f.avatarUrl.startsWith('http')
                   ? f.avatarUrl
                   : directCidToCdnUrl(f.avatarUrl, f.did, 'avatar', req);
-                if (avatarUri && typeof avatarUri === 'string' && avatarUri.trim() !== '') {
+                if (
+                  avatarUri &&
+                  typeof avatarUri === 'string' &&
+                  avatarUri.trim() !== ''
+                ) {
                   follower.avatar = avatarUri;
                 }
               }

@@ -83,7 +83,9 @@ describe('Instance Moderation Config', () => {
     });
 
     it('should contain malicious-link label', () => {
-      const malicious = QUALITY_LABELS.find((l) => l.value === 'malicious-link');
+      const malicious = QUALITY_LABELS.find(
+        (l) => l.value === 'malicious-link'
+      );
       expect(malicious).toBeDefined();
       expect(malicious?.severity).toBe('alert');
     });

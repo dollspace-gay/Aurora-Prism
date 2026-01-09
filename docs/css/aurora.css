@@ -5,12 +5,12 @@
 
 :root {
   /* Aurora Stack Color Palette */
-  --aurora-background: #0D1117;
-  --aurora-card: #161B22;
-  --aurora-teal: #00F5D4;
-  --aurora-green: #9AEF82;
-  --aurora-purple: #B900F5;
-  --aurora-text: #F0F0F0;
+  --aurora-background: #0d1117;
+  --aurora-card: #161b22;
+  --aurora-teal: #00f5d4;
+  --aurora-green: #9aef82;
+  --aurora-purple: #b900f5;
+  --aurora-text: #f0f0f0;
   --aurora-border: rgba(139, 148, 158, 0.3);
 
   /* Typography */
@@ -30,7 +30,7 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: linear-gradient(135deg, #0D1117 0%, #161B22 100%);
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
   color: var(--aurora-text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -425,7 +425,7 @@ body {
    ======================================== */
 
 .heading-aurora {
-  background: linear-gradient(90deg, #00F5D4 0%, #9AEF82 50%, #B900F5 100%);
+  background: linear-gradient(90deg, #00f5d4 0%, #9aef82 50%, #b900f5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -451,7 +451,8 @@ body {
 }
 
 @keyframes aurora-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

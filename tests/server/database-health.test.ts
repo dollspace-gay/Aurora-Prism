@@ -3,7 +3,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // Mock dependencies
 vi.mock('../../server/db', () => ({
   db: {
-    execute: vi.fn().mockResolvedValue({ rows: [{ users_exists: true, posts_exists: true }] }),
+    execute: vi.fn().mockResolvedValue({
+      rows: [{ users_exists: true, posts_exists: true }],
+    }),
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockResolvedValue([{ count: 100 }]),
   },
@@ -32,7 +34,10 @@ vi.mock('../../server/services/log-collector', () => ({
   },
 }));
 
-import { DatabaseHealthService, databaseHealthService } from '../../server/services/database-health';
+import {
+  DatabaseHealthService,
+  databaseHealthService,
+} from '../../server/services/database-health';
 
 describe('DatabaseHealthService', () => {
   let service: DatabaseHealthService;

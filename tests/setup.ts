@@ -1,3 +1,5 @@
+/* eslint-env browser */
+/* global window, ResizeObserver, IntersectionObserver */
 import { afterEach, vi } from 'vitest';
 
 // Set environment variables needed by modules that check them at import time

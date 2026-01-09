@@ -161,13 +161,16 @@ describe('serializers', () => {
     it('should return CID from ref.toString() when ref is present', () => {
       const blobJson = {
         ref: {
-          toString: () => 'bafyreieqwksglqmwpqthgjmn2p3kfbhvtgxs5xjzrqjglhdjdkgbm2xsiy',
+          toString: () =>
+            'bafyreieqwksglqmwpqthgjmn2p3kfbhvtgxs5xjzrqjglhdjdkgbm2xsiy',
         },
       };
 
       const result = cidFromBlobJson(blobJson);
 
-      expect(result).toBe('bafyreieqwksglqmwpqthgjmn2p3kfbhvtgxs5xjzrqjglhdjdkgbm2xsiy');
+      expect(result).toBe(
+        'bafyreieqwksglqmwpqthgjmn2p3kfbhvtgxs5xjzrqjglhdjdkgbm2xsiy'
+      );
     });
 
     it('should handle blob type with ref containing $link', () => {
@@ -192,7 +195,9 @@ describe('serializers', () => {
 
       const result = cidFromBlobJson(blobJson);
 
-      expect(result).toBe('bafyreieqwksglqmwpqthgjmn2p3kfbhvtgxs5xjzrqjglhdjdkgbm2xsiy');
+      expect(result).toBe(
+        'bafyreieqwksglqmwpqthgjmn2p3kfbhvtgxs5xjzrqjglhdjdkgbm2xsiy'
+      );
     });
 
     it('should return empty string for null input', () => {

@@ -52,7 +52,9 @@ describe('queryClient', () => {
 
       const queryFn = getQueryFn({ on401: 'throw' });
 
-      await expect(queryFn({ queryKey: ['/api/protected'] } as any)).rejects.toEqual(error);
+      await expect(
+        queryFn({ queryKey: ['/api/protected'] } as any)
+      ).rejects.toEqual(error);
     });
 
     it('should throw on other errors regardless of on401 setting', async () => {
@@ -61,7 +63,9 @@ describe('queryClient', () => {
 
       const queryFn = getQueryFn({ on401: 'returnNull' });
 
-      await expect(queryFn({ queryKey: ['/api/test'] } as any)).rejects.toEqual(error);
+      await expect(queryFn({ queryKey: ['/api/test'] } as any)).rejects.toEqual(
+        error
+      );
     });
   });
 
@@ -75,7 +79,8 @@ describe('queryClient', () => {
     });
 
     it('should have retry function that returns false for 401/403/404', () => {
-      const retryFn = queryClient.getDefaultOptions().queries?.retry as Function;
+      const retryFn = queryClient.getDefaultOptions().queries
+        ?.retry as Function;
 
       // 401 should not retry
       expect(retryFn(1, { response: { status: 401 } })).toBe(false);

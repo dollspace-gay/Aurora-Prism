@@ -11,11 +11,15 @@ describe('Semaphore', () => {
     });
 
     it('should throw for zero permits', () => {
-      expect(() => new Semaphore(0)).toThrow('Semaphore permits must be positive');
+      expect(() => new Semaphore(0)).toThrow(
+        'Semaphore permits must be positive'
+      );
     });
 
     it('should throw for negative permits', () => {
-      expect(() => new Semaphore(-1)).toThrow('Semaphore permits must be positive');
+      expect(() => new Semaphore(-1)).toThrow(
+        'Semaphore permits must be positive'
+      );
     });
   });
 
@@ -43,7 +47,9 @@ describe('Semaphore', () => {
     it('should throw when releasing without acquire', () => {
       const sem = new Semaphore(2);
 
-      expect(() => sem.release()).toThrow('Semaphore release() called without acquire()');
+      expect(() => sem.release()).toThrow(
+        'Semaphore release() called without acquire()'
+      );
     });
 
     it('should queue waiters when at capacity', async () => {
@@ -126,7 +132,7 @@ describe('Semaphore', () => {
       const operation = async (id: number) => {
         currentConcurrent++;
         maxConcurrent = Math.max(maxConcurrent, currentConcurrent);
-        await new Promise(r => setTimeout(r, 10));
+        await new Promise((r) => setTimeout(r, 10));
         currentConcurrent--;
         return id;
       };
@@ -239,7 +245,9 @@ describe('acquireWithTimeout', () => {
     // Advance past timeout
     await vi.advanceTimersByTimeAsync(1100);
 
-    await expect(resultPromise).rejects.toThrow('Semaphore acquire timeout after 1000ms');
+    await expect(resultPromise).rejects.toThrow(
+      'Semaphore acquire timeout after 1000ms'
+    );
 
     // Release to clean up the waiting acquire in the semaphore queue
     sem.release();

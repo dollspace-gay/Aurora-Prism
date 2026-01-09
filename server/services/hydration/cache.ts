@@ -45,7 +45,7 @@ export class HydrationCache {
 
     // Batch fetch with Redis mget
     try {
-      const prefixedKeys = keys.map(k => `hydration:${k}`);
+      const prefixedKeys = keys.map((k) => `hydration:${k}`);
       const values = await cacheService.redis.mget(...prefixedKeys);
 
       values.forEach((value: string | null, index: number) => {
@@ -53,7 +53,9 @@ export class HydrationCache {
           try {
             result.set(keys[index], JSON.parse(value) as T);
           } catch (e) {
-            console.error(`[HYDRATION_CACHE] Failed to parse cached value for ${keys[index]}`);
+            console.error(
+              `[HYDRATION_CACHE] Failed to parse cached value for ${keys[index]}`
+            );
           }
         }
       });
@@ -130,7 +132,7 @@ export class HydrationCache {
 
     // Batch delete with Redis pipeline
     try {
-      const prefixedKeys = keys.map(k => `hydration:${k}`);
+      const prefixedKeys = keys.map((k) => `hydration:${k}`);
       if (prefixedKeys.length > 0) {
         await cacheService.redis.del(...prefixedKeys);
       }

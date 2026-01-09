@@ -210,7 +210,9 @@ export class DataPlaneClient {
 
       // Create lookup map
       const profileMap = new Map(
-        profiles.map((p) => [p.did, p]).concat(profiles.map((p) => [p.handle, p]))
+        profiles
+          .map((p) => [p.did, p])
+          .concat(profiles.map((p) => [p.handle, p]))
       );
 
       // Resolve all pending requests
@@ -237,9 +239,7 @@ export class DataPlaneClient {
       // Reject all pending requests
       requestMap.forEach((requests) => {
         requests.forEach((req) =>
-          req.reject(
-            error instanceof Error ? error : new Error(String(error))
-          )
+          req.reject(error instanceof Error ? error : new Error(String(error)))
         );
       });
     }
@@ -301,9 +301,7 @@ export class DataPlaneClient {
       // Reject all pending requests
       requestMap.forEach((requests) => {
         requests.forEach((req) =>
-          req.reject(
-            error instanceof Error ? error : new Error(String(error))
-          )
+          req.reject(error instanceof Error ? error : new Error(String(error)))
         );
       });
     }
@@ -463,7 +461,10 @@ export class DataPlaneClient {
         filter: options.filter || 'posts_with_replies',
         limit: options.limit || 50,
       });
-      const cacheKey = this.getCacheKey('author_feed', `${actor}:${optionsKey}`);
+      const cacheKey = this.getCacheKey(
+        'author_feed',
+        `${actor}:${optionsKey}`
+      );
 
       // Try cache first
       const cached =

@@ -79,7 +79,9 @@ describe('cn (className utility)', () => {
     });
 
     it('should handle hover states separately', () => {
-      expect(cn('hover:bg-red-500', 'hover:bg-blue-500')).toBe('hover:bg-blue-500');
+      expect(cn('hover:bg-red-500', 'hover:bg-blue-500')).toBe(
+        'hover:bg-blue-500'
+      );
     });
 
     it('should handle responsive prefixes', () => {
@@ -110,13 +112,20 @@ describe('cn (className utility)', () => {
     });
 
     it('should handle button-like class composition', () => {
-      const base = 'inline-flex items-center justify-center rounded-md text-sm font-medium';
+      const base =
+        'inline-flex items-center justify-center rounded-md text-sm font-medium';
       const size = 'h-10 px-4 py-2';
       const variant = 'bg-primary text-primary-foreground hover:bg-primary/90';
       const disabled = false;
       const className = 'custom-class';
 
-      const result = cn(base, size, variant, disabled && 'opacity-50', className);
+      const result = cn(
+        base,
+        size,
+        variant,
+        disabled && 'opacity-50',
+        className
+      );
 
       expect(result).toContain('inline-flex');
       expect(result).toContain('h-10');

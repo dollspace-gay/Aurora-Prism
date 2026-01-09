@@ -136,7 +136,10 @@ export class ModerationService {
         account_suspended: 'resolved',
       };
       const newStatus = statusMap[params.actionType] || 'resolved';
-      await this.storage.updateModerationReportStatus(params.reportId, newStatus);
+      await this.storage.updateModerationReportStatus(
+        params.reportId,
+        newStatus
+      );
     }
 
     const assignments = await this.storage.getModeratorAssignmentsByReport(
@@ -186,7 +189,8 @@ export class ModerationService {
   }> {
     const report = await this.storage.getModerationReport(reportId);
     const actions = await this.storage.getModerationActionsByReport(reportId);
-    const assignments = await this.storage.getModeratorAssignmentsByReport(reportId);
+    const assignments =
+      await this.storage.getModeratorAssignmentsByReport(reportId);
 
     return { report, actions, assignments };
   }
@@ -195,11 +199,12 @@ export class ModerationService {
     activeAssignments: ModeratorAssignment[];
     totalActions: ModerationAction[];
   }> {
-    const activeAssignments = await this.storage.getModeratorAssignmentsByModerator(
-      moderatorDid,
-      false, // Don't include completed
-      100
-    );
+    const activeAssignments =
+      await this.storage.getModeratorAssignmentsByModerator(
+        moderatorDid,
+        false, // Don't include completed
+        100
+      );
 
     const totalActions = await this.storage.getModerationActionsByModerator(
       moderatorDid,
@@ -221,7 +226,10 @@ export class ModerationService {
     ).length;
 
     if (pendingOrReviewCount >= 3) {
-      await this.storage.updateModerationReportStatus(report.id, 'under_review');
+      await this.storage.updateModerationReportStatus(
+        report.id,
+        'under_review'
+      );
 
       const spamLikeTypes = ['spam', 'violation'];
       if (spamLikeTypes.includes(report.reportType)) {

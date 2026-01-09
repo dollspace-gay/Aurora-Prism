@@ -30,22 +30,25 @@ const NEW_FOLLOW_BACKFILL_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour cooldown
 export class AutoBackfillFollowsService {
   constructor() {
     // Periodically clean up old entries from recentlyBackfilledUsers to prevent memory leaks
-    setInterval(() => {
-      const now = Date.now();
-      let cleaned = 0;
-      const entries = Array.from(recentlyBackfilledUsers.entries());
-      for (const [did, timestamp] of entries) {
-        if (now - timestamp > NEW_FOLLOW_BACKFILL_COOLDOWN_MS) {
-          recentlyBackfilledUsers.delete(did);
-          cleaned++;
+    setInterval(
+      () => {
+        const now = Date.now();
+        let cleaned = 0;
+        const entries = Array.from(recentlyBackfilledUsers.entries());
+        for (const [did, timestamp] of entries) {
+          if (now - timestamp > NEW_FOLLOW_BACKFILL_COOLDOWN_MS) {
+            recentlyBackfilledUsers.delete(did);
+            cleaned++;
+          }
         }
-      }
-      if (cleaned > 0) {
-        console.log(
-          `[AUTO_BACKFILL_FOLLOWS] Cleaned ${cleaned} expired cooldown entries`
-        );
-      }
-    }, 60 * 60 * 1000); // Run every hour
+        if (cleaned > 0) {
+          console.log(
+            `[AUTO_BACKFILL_FOLLOWS] Cleaned ${cleaned} expired cooldown entries`
+          );
+        }
+      },
+      60 * 60 * 1000
+    ); // Run every hour
   }
 
   /**

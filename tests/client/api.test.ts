@@ -35,11 +35,14 @@ describe('API Client', () => {
       });
 
       await import('../../client/src/lib/api');
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
-      expect(mockFetch).toHaveBeenCalledWith('/api/csrf-token', expect.objectContaining({
-        credentials: 'include',
-      }));
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/csrf-token',
+        expect.objectContaining({
+          credentials: 'include',
+        })
+      );
     });
   });
 
@@ -57,7 +60,7 @@ describe('API Client', () => {
         });
 
       const { api } = await import('../../client/src/lib/api');
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
       const result = await api.get('/api/test');
       expect(result).toEqual({ data: 'test' });
@@ -76,7 +79,7 @@ describe('API Client', () => {
         });
 
       const { api } = await import('../../client/src/lib/api');
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
       const result = await api.post('/api/test', { name: 'test' });
       expect(result).toEqual({ success: true });
@@ -95,7 +98,7 @@ describe('API Client', () => {
         });
 
       const { api } = await import('../../client/src/lib/api');
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
       const result = await api.put('/api/test/1', { name: 'updated' });
       expect(result).toEqual({ updated: true });
@@ -114,7 +117,7 @@ describe('API Client', () => {
         });
 
       const { api } = await import('../../client/src/lib/api');
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
       const result = await api.delete('/api/test/1');
       expect(result).toEqual({ deleted: true });
@@ -132,7 +135,7 @@ describe('API Client', () => {
         });
 
       const { api } = await import('../../client/src/lib/api');
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
       const result = await api.delete('/api/test/1');
       expect(result).toBeNull();
@@ -153,9 +156,11 @@ describe('API Client', () => {
         });
 
       const { api } = await import('../../client/src/lib/api');
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
-      await expect(api.get('/api/test')).rejects.toThrow('HTTP error! status: 500');
+      await expect(api.get('/api/test')).rejects.toThrow(
+        'HTTP error! status: 500'
+      );
     });
 
     it('should retry on CSRF validation failure', async () => {
@@ -180,7 +185,7 @@ describe('API Client', () => {
         });
 
       const { api } = await import('../../client/src/lib/api');
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
       const result = await api.post('/api/test', { data: 'test' });
       expect(result).toEqual({ success: true });
@@ -200,7 +205,7 @@ describe('API Client', () => {
 
       const { queryClient } = await import('../../client/src/lib/queryClient');
       const { api } = await import('../../client/src/lib/api');
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
       await expect(api.get('/api/test')).rejects.toThrow();
 
@@ -224,11 +229,13 @@ describe('API Client', () => {
         });
 
       const { api } = await import('../../client/src/lib/api');
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
 
       await api.get('/api/test');
 
-      const getCall = mockFetch.mock.calls.find((call) => call[0] === '/api/test');
+      const getCall = mockFetch.mock.calls.find(
+        (call) => call[0] === '/api/test'
+      );
       expect(getCall?.[1]?.credentials).toBe('include');
     });
   });

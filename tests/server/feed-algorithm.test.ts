@@ -24,7 +24,10 @@ vi.mock('../../server/services/cache', () => ({
   },
 }));
 
-import { FeedAlgorithmService, feedAlgorithm } from '../../server/services/feed-algorithm';
+import {
+  FeedAlgorithmService,
+  feedAlgorithm,
+} from '../../server/services/feed-algorithm';
 import type { Post } from '../../shared/schema';
 
 describe('FeedAlgorithmService', () => {
@@ -131,14 +134,15 @@ describe('FeedAlgorithmService', () => {
   });
 
   describe('applyAlgorithm', () => {
-    const createPost = (uri: string, hoursAgo: number): Post => ({
-      uri,
-      cid: `cid-${uri}`,
-      authorDid: `did:plc:author-${uri}`,
-      text: `Post ${uri}`,
-      indexedAt: new Date(Date.now() - hoursAgo * 60 * 60 * 1000),
-      createdAt: new Date(Date.now() - hoursAgo * 60 * 60 * 1000),
-    } as Post);
+    const createPost = (uri: string, hoursAgo: number): Post =>
+      ({
+        uri,
+        cid: `cid-${uri}`,
+        authorDid: `did:plc:author-${uri}`,
+        text: `Post ${uri}`,
+        indexedAt: new Date(Date.now() - hoursAgo * 60 * 60 * 1000),
+        createdAt: new Date(Date.now() - hoursAgo * 60 * 60 * 1000),
+      }) as Post;
 
     it('should use reverse-chronological by default', async () => {
       const posts = [
@@ -156,22 +160,19 @@ describe('FeedAlgorithmService', () => {
     });
 
     it('should handle reverse-chronological algorithm explicitly', async () => {
-      const posts = [
-        createPost('old', 5),
-        createPost('new', 1),
-      ];
+      const posts = [createPost('old', 5), createPost('new', 1)];
 
-      const result = await service.applyAlgorithm(posts, 'reverse-chronological');
+      const result = await service.applyAlgorithm(
+        posts,
+        'reverse-chronological'
+      );
 
       expect(result[0].uri).toBe('new');
       expect(result[1].uri).toBe('old');
     });
 
     it('should handle engagement algorithm', async () => {
-      const posts = [
-        createPost('post1', 1),
-        createPost('post2', 2),
-      ];
+      const posts = [createPost('post1', 1), createPost('post2', 2)];
 
       const result = await service.applyAlgorithm(posts, 'engagement');
 
@@ -191,10 +192,7 @@ describe('FeedAlgorithmService', () => {
     });
 
     it('should default to reverse-chronological for unknown algorithm', async () => {
-      const posts = [
-        createPost('post1', 2),
-        createPost('post2', 1),
-      ];
+      const posts = [createPost('post1', 2), createPost('post2', 1)];
 
       // TypeScript won't allow this, but test runtime behavior
       const result = await service.applyAlgorithm(posts, 'unknown' as any);

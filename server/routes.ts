@@ -200,11 +200,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     firehoseClient.connect(workerId, totalWorkers);
 
     // Connect to additional relay sources (blacksky.app, etc.)
-    const { initializeAdditionalRelays, additionalRelays } = require('./services/firehose');
+    const {
+      initializeAdditionalRelays,
+      additionalRelays,
+    } = require('./services/firehose');
     initializeAdditionalRelays();
 
     if (additionalRelays.length > 0) {
-      console.log(`[FIREHOSE] Connecting to ${additionalRelays.length} additional relay sources...`);
+      console.log(
+        `[FIREHOSE] Connecting to ${additionalRelays.length} additional relay sources...`
+      );
       additionalRelays.forEach((relay: any, index: number) => {
         relay.connect(workerId, totalWorkers);
         console.log(`[FIREHOSE] Additional relay ${index + 1} connected`);
@@ -3623,13 +3628,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     xrpcOrchestrator.getSuggestions.bind(xrpcOrchestrator)
   );
   // Preferences endpoints - proxy to user's PDS
-  app.get('/xrpc/app.bsky.actor.getPreferences',
+  app.get(
+    '/xrpc/app.bsky.actor.getPreferences',
     xrpcOrchestrator.getPreferences.bind(xrpcOrchestrator)
   );
-  app.post('/xrpc/app.bsky.actor.putPreferences',
+  app.post(
+    '/xrpc/app.bsky.actor.putPreferences',
     xrpcOrchestrator.putPreferences.bind(xrpcOrchestrator)
   );
-  app.put('/xrpc/app.bsky.actor.putPreferences',
+  app.put(
+    '/xrpc/app.bsky.actor.putPreferences',
     xrpcOrchestrator.putPreferences.bind(xrpcOrchestrator)
   );
 
@@ -4352,26 +4360,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         success: true,
         message: 'Stats refreshed successfully',
-        stats
+        stats,
       });
     } catch (err) {
       console.error('[METRICS] Error refreshing stats:', err);
-      res.status(500).json({ error: 'InternalServerError', message: 'Failed to refresh stats' });
+      res.status(500).json({
+        error: 'InternalServerError',
+        message: 'Failed to refresh stats',
+      });
     }
   });
 
   app.post('/api/cache/clear-hydration', async (_req, res) => {
     try {
-      const { optimizedHydrator } = await import('./services/hydration/optimized-hydrator');
+      const { optimizedHydrator } = await import(
+        './services/hydration/optimized-hydrator'
+      );
       await optimizedHydrator.clearCache();
 
       res.json({
         success: true,
-        message: 'Hydration cache cleared successfully'
+        message: 'Hydration cache cleared successfully',
       });
     } catch (err) {
       console.error('[CACHE] Error clearing hydration cache:', err);
-      res.status(500).json({ error: 'InternalServerError', message: 'Failed to clear hydration cache' });
+      res.status(500).json({
+        error: 'InternalServerError',
+        message: 'Failed to clear hydration cache',
+      });
     }
   });
 

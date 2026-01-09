@@ -245,7 +245,7 @@ describe('RequestQueue behavior', () => {
     const operation = async () => {
       concurrentCount++;
       maxConcurrent = Math.max(maxConcurrent, concurrentCount);
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
       concurrentCount--;
       return 'done';
     };
@@ -267,9 +267,18 @@ describe('RequestQueue behavior', () => {
     const results: number[] = [];
 
     const promises = [
-      queue.enqueue(async () => { results.push(1); return 1; }),
-      queue.enqueue(async () => { results.push(2); return 2; }),
-      queue.enqueue(async () => { results.push(3); return 3; }),
+      queue.enqueue(async () => {
+        results.push(1);
+        return 1;
+      }),
+      queue.enqueue(async () => {
+        results.push(2);
+        return 2;
+      }),
+      queue.enqueue(async () => {
+        results.push(3);
+        return 3;
+      }),
     ];
 
     await Promise.all(promises);
@@ -284,7 +293,9 @@ describe('RequestQueue behavior', () => {
     await queue.enqueue(async () => 'success');
 
     try {
-      await queue.enqueue(async () => { throw new Error('fail'); });
+      await queue.enqueue(async () => {
+        throw new Error('fail');
+      });
     } catch {}
 
     const stats = queue.getStats();
@@ -297,9 +308,19 @@ describe('RequestQueue behavior', () => {
     const results: string[] = [];
 
     const promises = [
-      queue.enqueue(async () => { results.push('ok1'); return 'ok'; }),
-      queue.enqueue(async () => { throw new Error('fail'); }).catch(() => results.push('err')),
-      queue.enqueue(async () => { results.push('ok2'); return 'ok'; }),
+      queue.enqueue(async () => {
+        results.push('ok1');
+        return 'ok';
+      }),
+      queue
+        .enqueue(async () => {
+          throw new Error('fail');
+        })
+        .catch(() => results.push('err')),
+      queue.enqueue(async () => {
+        results.push('ok2');
+        return 'ok';
+      }),
     ];
 
     await Promise.all(promises);

@@ -59,7 +59,9 @@ describe('ServiceContainer', () => {
       await container.initialize();
       await container.initialize();
 
-      expect(console.warn).toHaveBeenCalledWith('[CONTAINER] Already initialized');
+      expect(console.warn).toHaveBeenCalledWith(
+        '[CONTAINER] Already initialized'
+      );
     });
 
     it('should accept custom storage for testing', async () => {
@@ -81,7 +83,9 @@ describe('ServiceContainer', () => {
       const { ServiceContainer } = await import('../../server/container');
       const container = new ServiceContainer();
 
-      expect(() => container.storage).toThrow('[CONTAINER] Storage not initialized');
+      expect(() => container.storage).toThrow(
+        '[CONTAINER] Storage not initialized'
+      );
     });
 
     it('should return storage after initialization', async () => {
@@ -103,7 +107,9 @@ describe('ServiceContainer', () => {
       const { ServiceContainer } = await import('../../server/container');
       const container = new ServiceContainer();
 
-      expect(() => container.db).toThrow('[CONTAINER] Database not initialized');
+      expect(() => container.db).toThrow(
+        '[CONTAINER] Database not initialized'
+      );
     });
   });
 

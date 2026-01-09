@@ -202,7 +202,8 @@ export class BoundedArrayMap<K, V> extends BoundedMap<K, V[]> {
       arrayCount: this.size,
       totalItems,
       avgItemsPerArray: arrays.length > 0 ? totalItems / arrays.length : 0,
-      maxItems: arrays.length > 0 ? Math.max(...arrays.map((a) => a.length)) : 0,
+      maxItems:
+        arrays.length > 0 ? Math.max(...arrays.map((a) => a.length)) : 0,
       utilization: this.getUtilization(),
     };
   }

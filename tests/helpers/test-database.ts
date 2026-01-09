@@ -7,7 +7,7 @@ import * as schema from '../../shared/schema';
 // Create an in-memory PostgreSQL database for testing
 export function createTestDb(): NodePgDatabase<typeof schema> {
   const mem = newDb();
-  
+
   // Register common functions that pg-mem might not have
   mem.public.registerFunction({
     name: 'current_timestamp',
@@ -15,33 +15,33 @@ export function createTestDb(): NodePgDatabase<typeof schema> {
     returns: 'timestamp',
     implementation: () => new Date(),
   });
-  
+
   mem.public.registerFunction({
     name: 'now',
     args: [],
     returns: 'timestamp',
     implementation: () => new Date(),
   });
-  
+
   // Get a pg-compatible adapter
   const pg = mem.adapters.createPg();
-  
+
   // Create drizzle instance with the in-memory database
   const db = drizzle(pg, { schema });
-  
+
   return db;
 }
 
 // Mock database module
 export function mockDatabase() {
   const testDb = createTestDb();
-  
+
   vi.mock('../../server/db', () => ({
     db: testDb,
     pool: {},
     createDbPool: () => testDb,
   }));
-  
+
   return testDb;
 }
 
@@ -55,18 +55,18 @@ export function createMockStorage() {
   const blocks = new Map();
   const mutes = new Map();
   const sessions = new Map();
-  
+
   return {
     // User operations
     getUser: vi.fn((did: string) => users.get(did)),
-    getUserByHandle: vi.fn((handle: string) => 
+    getUserByHandle: vi.fn((handle: string) =>
       Array.from(users.values()).find((u: any) => u.handle === handle)
     ),
     upsertUser: vi.fn((user: any) => {
       users.set(user.did, user);
       return user;
     }),
-    
+
     // Post operations
     getPost: vi.fn((uri: string) => posts.get(uri)),
     upsertPost: vi.fn((post: any) => {
@@ -74,7 +74,7 @@ export function createMockStorage() {
       return post;
     }),
     deletePost: vi.fn((uri: string) => posts.delete(uri)),
-    
+
     // Like operations
     getLike: vi.fn((uri: string) => likes.get(uri)),
     upsertLike: vi.fn((like: any) => {
@@ -82,7 +82,7 @@ export function createMockStorage() {
       return like;
     }),
     deleteLike: vi.fn((uri: string) => likes.delete(uri)),
-    
+
     // Repost operations
     getRepost: vi.fn((uri: string) => reposts.get(uri)),
     upsertRepost: vi.fn((repost: any) => {
@@ -90,7 +90,7 @@ export function createMockStorage() {
       return repost;
     }),
     deleteRepost: vi.fn((uri: string) => reposts.delete(uri)),
-    
+
     // Follow operations
     getFollow: vi.fn((uri: string) => follows.get(uri)),
     upsertFollow: vi.fn((follow: any) => {
@@ -98,7 +98,7 @@ export function createMockStorage() {
       return follow;
     }),
     deleteFollow: vi.fn((uri: string) => follows.delete(uri)),
-    
+
     // Block operations
     getBlock: vi.fn((uri: string) => blocks.get(uri)),
     upsertBlock: vi.fn((block: any) => {
@@ -106,7 +106,7 @@ export function createMockStorage() {
       return block;
     }),
     deleteBlock: vi.fn((uri: string) => blocks.delete(uri)),
-    
+
     // Mute operations
     getMute: vi.fn((targetDid: string, actorDid: string) =>
       mutes.get(`${actorDid}:${targetDid}`)
@@ -118,7 +118,7 @@ export function createMockStorage() {
     deleteMute: vi.fn((targetDid: string, actorDid: string) =>
       mutes.delete(`${actorDid}:${targetDid}`)
     ),
-    
+
     // Session operations
     getUserSessions: vi.fn((did: string) => {
       return Array.from(sessions.values()).filter((s: any) => s.did === did);
@@ -128,11 +128,11 @@ export function createMockStorage() {
       return session;
     }),
     deleteSession: vi.fn((id: string) => sessions.delete(id)),
-    
+
     // Feed operations
     getTimeline: vi.fn(() => []),
     getAuthorFeed: vi.fn(() => []),
-    
+
     // Aggregations
     getPostAggregations: vi.fn(() => ({
       likeCount: 0,
@@ -140,7 +140,7 @@ export function createMockStorage() {
       replyCount: 0,
       quoteCount: 0,
     })),
-    
+
     // Test helpers
     _users: users,
     _posts: posts,

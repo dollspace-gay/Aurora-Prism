@@ -22,7 +22,9 @@ describe('CacheManager', () => {
     });
 
     it('should cache and retrieve preferences', () => {
-      const prefs = [{ $type: 'app.bsky.actor.defs#savedFeedsPref', saved: [] }];
+      const prefs = [
+        { $type: 'app.bsky.actor.defs#savedFeedsPref', saved: [] },
+      ];
       cacheManager.setPreferences('did:plc:user1', prefs);
 
       const result = cacheManager.getPreferences('did:plc:user1');
@@ -194,32 +196,54 @@ describe('CacheManager', () => {
       cacheManager.setPreferences('did:plc:user2', [{ type: 2 }]);
       cacheManager.setPreferences('did:plc:user3', [{ type: 3 }]);
 
-      expect(cacheManager.getPreferences('did:plc:user1')).toEqual([{ type: 1 }]);
-      expect(cacheManager.getPreferences('did:plc:user2')).toEqual([{ type: 2 }]);
-      expect(cacheManager.getPreferences('did:plc:user3')).toEqual([{ type: 3 }]);
+      expect(cacheManager.getPreferences('did:plc:user1')).toEqual([
+        { type: 1 },
+      ]);
+      expect(cacheManager.getPreferences('did:plc:user2')).toEqual([
+        { type: 2 },
+      ]);
+      expect(cacheManager.getPreferences('did:plc:user3')).toEqual([
+        { type: 3 },
+      ]);
     });
 
     it('should handle multiple handle resolutions', () => {
       cacheManager.cacheHandleResolution('alice.bsky.social', 'did:plc:alice');
       cacheManager.cacheHandleResolution('bob.bsky.social', 'did:plc:bob');
 
-      expect(cacheManager.getResolvedHandle('alice.bsky.social')).toBe('did:plc:alice');
-      expect(cacheManager.getResolvedHandle('bob.bsky.social')).toBe('did:plc:bob');
+      expect(cacheManager.getResolvedHandle('alice.bsky.social')).toBe(
+        'did:plc:alice'
+      );
+      expect(cacheManager.getResolvedHandle('bob.bsky.social')).toBe(
+        'did:plc:bob'
+      );
     });
 
     it('should handle multiple PDS endpoints', () => {
-      cacheManager.cachePdsEndpoint('did:plc:user1', 'https://pds1.example.com');
-      cacheManager.cachePdsEndpoint('did:plc:user2', 'https://pds2.example.com');
+      cacheManager.cachePdsEndpoint(
+        'did:plc:user1',
+        'https://pds1.example.com'
+      );
+      cacheManager.cachePdsEndpoint(
+        'did:plc:user2',
+        'https://pds2.example.com'
+      );
 
-      expect(cacheManager.getPdsEndpoint('did:plc:user1')).toBe('https://pds1.example.com');
-      expect(cacheManager.getPdsEndpoint('did:plc:user2')).toBe('https://pds2.example.com');
+      expect(cacheManager.getPdsEndpoint('did:plc:user1')).toBe(
+        'https://pds1.example.com'
+      );
+      expect(cacheManager.getPdsEndpoint('did:plc:user2')).toBe(
+        'https://pds2.example.com'
+      );
     });
 
     it('should update existing entries', () => {
       cacheManager.setPreferences('did:plc:user1', [{ old: true }]);
       cacheManager.setPreferences('did:plc:user1', [{ new: true }]);
 
-      expect(cacheManager.getPreferences('did:plc:user1')).toEqual([{ new: true }]);
+      expect(cacheManager.getPreferences('did:plc:user1')).toEqual([
+        { new: true },
+      ]);
     });
   });
 });

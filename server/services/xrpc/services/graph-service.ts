@@ -14,7 +14,7 @@ import {
   getKnownFollowersSchema,
   getFollowsSchema,
 } from '../schemas';
-import { getProfiles } from "../utils/profile-builder";
+import { getProfiles } from '../utils/profile-builder';
 
 /**
  * Get relationships between an actor and other actors

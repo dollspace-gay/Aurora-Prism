@@ -36,197 +36,214 @@ describe('use-toast', () => {
   });
 
   describe('reducer', () => {
-  describe('ADD_TOAST', () => {
-    it('should add toast to empty state', () => {
-      const state = { toasts: [] };
-      const toast = { id: '1', title: 'Test', open: true };
+    describe('ADD_TOAST', () => {
+      it('should add toast to empty state', () => {
+        const state = { toasts: [] };
+        const toast = { id: '1', title: 'Test', open: true };
 
-      const newState = reducer(state, { type: 'ADD_TOAST', toast: toast as any });
+        const newState = reducer(state, {
+          type: 'ADD_TOAST',
+          toast: toast as any,
+        });
 
-      expect(newState.toasts).toHaveLength(1);
-      expect(newState.toasts[0]).toEqual(toast);
-    });
-
-    it('should prepend toast to existing toasts (limited by TOAST_LIMIT)', () => {
-      const existingToast = { id: '1', title: 'Existing', open: true };
-      const state = { toasts: [existingToast as any] };
-      const newToast = { id: '2', title: 'New', open: true };
-
-      const newState = reducer(state, { type: 'ADD_TOAST', toast: newToast as any });
-
-      // TOAST_LIMIT is 1, so new toast replaces old one
-      expect(newState.toasts).toHaveLength(1);
-      expect(newState.toasts[0].id).toBe('2');
-    });
-
-    it('should limit toasts to TOAST_LIMIT (1)', () => {
-      const existingToast = { id: '1', title: 'Existing', open: true };
-      const state = { toasts: [existingToast as any] };
-      const newToast = { id: '2', title: 'New', open: true };
-
-      const newState = reducer(state, { type: 'ADD_TOAST', toast: newToast as any });
-
-      // TOAST_LIMIT is 1, so only the newest toast should remain
-      expect(newState.toasts).toHaveLength(1);
-      expect(newState.toasts[0].id).toBe('2');
-    });
-  });
-
-  describe('UPDATE_TOAST', () => {
-    it('should update matching toast', () => {
-      const toast = { id: '1', title: 'Original', description: 'Desc', open: true };
-      const state = { toasts: [toast as any] };
-
-      const newState = reducer(state, {
-        type: 'UPDATE_TOAST',
-        toast: { id: '1', title: 'Updated' },
+        expect(newState.toasts).toHaveLength(1);
+        expect(newState.toasts[0]).toEqual(toast);
       });
 
-      expect(newState.toasts[0].title).toBe('Updated');
-      expect(newState.toasts[0].description).toBe('Desc'); // Preserved
-    });
+      it('should prepend toast to existing toasts (limited by TOAST_LIMIT)', () => {
+        const existingToast = { id: '1', title: 'Existing', open: true };
+        const state = { toasts: [existingToast as any] };
+        const newToast = { id: '2', title: 'New', open: true };
 
-    it('should not modify non-matching toasts', () => {
-      const toast1 = { id: '1', title: 'Toast 1', open: true };
-      const toast2 = { id: '2', title: 'Toast 2', open: true };
-      const state = { toasts: [toast1 as any, toast2 as any] };
+        const newState = reducer(state, {
+          type: 'ADD_TOAST',
+          toast: newToast as any,
+        });
 
-      const newState = reducer(state, {
-        type: 'UPDATE_TOAST',
-        toast: { id: '1', title: 'Updated 1' },
+        // TOAST_LIMIT is 1, so new toast replaces old one
+        expect(newState.toasts).toHaveLength(1);
+        expect(newState.toasts[0].id).toBe('2');
       });
 
-      expect(newState.toasts[0].title).toBe('Updated 1');
-      expect(newState.toasts[1].title).toBe('Toast 2'); // Unchanged
+      it('should limit toasts to TOAST_LIMIT (1)', () => {
+        const existingToast = { id: '1', title: 'Existing', open: true };
+        const state = { toasts: [existingToast as any] };
+        const newToast = { id: '2', title: 'New', open: true };
+
+        const newState = reducer(state, {
+          type: 'ADD_TOAST',
+          toast: newToast as any,
+        });
+
+        // TOAST_LIMIT is 1, so only the newest toast should remain
+        expect(newState.toasts).toHaveLength(1);
+        expect(newState.toasts[0].id).toBe('2');
+      });
     });
 
-    it('should handle updating non-existent toast', () => {
-      const toast = { id: '1', title: 'Toast', open: true };
-      const state = { toasts: [toast as any] };
+    describe('UPDATE_TOAST', () => {
+      it('should update matching toast', () => {
+        const toast = {
+          id: '1',
+          title: 'Original',
+          description: 'Desc',
+          open: true,
+        };
+        const state = { toasts: [toast as any] };
 
-      const newState = reducer(state, {
-        type: 'UPDATE_TOAST',
-        toast: { id: 'nonexistent', title: 'Updated' },
+        const newState = reducer(state, {
+          type: 'UPDATE_TOAST',
+          toast: { id: '1', title: 'Updated' },
+        });
+
+        expect(newState.toasts[0].title).toBe('Updated');
+        expect(newState.toasts[0].description).toBe('Desc'); // Preserved
       });
 
-      expect(newState.toasts).toHaveLength(1);
-      expect(newState.toasts[0].title).toBe('Toast'); // Unchanged
-    });
-  });
+      it('should not modify non-matching toasts', () => {
+        const toast1 = { id: '1', title: 'Toast 1', open: true };
+        const toast2 = { id: '2', title: 'Toast 2', open: true };
+        const state = { toasts: [toast1 as any, toast2 as any] };
 
-  describe('DISMISS_TOAST', () => {
-    it('should set open to false for specific toast', () => {
-      const toast = { id: '1', title: 'Toast', open: true };
-      const state = { toasts: [toast as any] };
+        const newState = reducer(state, {
+          type: 'UPDATE_TOAST',
+          toast: { id: '1', title: 'Updated 1' },
+        });
 
-      const newState = reducer(state, {
-        type: 'DISMISS_TOAST',
-        toastId: '1',
+        expect(newState.toasts[0].title).toBe('Updated 1');
+        expect(newState.toasts[1].title).toBe('Toast 2'); // Unchanged
       });
 
-      expect(newState.toasts[0].open).toBe(false);
+      it('should handle updating non-existent toast', () => {
+        const toast = { id: '1', title: 'Toast', open: true };
+        const state = { toasts: [toast as any] };
+
+        const newState = reducer(state, {
+          type: 'UPDATE_TOAST',
+          toast: { id: 'nonexistent', title: 'Updated' },
+        });
+
+        expect(newState.toasts).toHaveLength(1);
+        expect(newState.toasts[0].title).toBe('Toast'); // Unchanged
+      });
     });
 
-    it('should dismiss all toasts when no toastId provided', () => {
-      const toast1 = { id: '1', title: 'Toast 1', open: true };
-      const toast2 = { id: '2', title: 'Toast 2', open: true };
-      const state = { toasts: [toast1 as any, toast2 as any] };
+    describe('DISMISS_TOAST', () => {
+      it('should set open to false for specific toast', () => {
+        const toast = { id: '1', title: 'Toast', open: true };
+        const state = { toasts: [toast as any] };
 
-      const newState = reducer(state, {
-        type: 'DISMISS_TOAST',
-        toastId: undefined,
+        const newState = reducer(state, {
+          type: 'DISMISS_TOAST',
+          toastId: '1',
+        });
+
+        expect(newState.toasts[0].open).toBe(false);
       });
 
-      expect(newState.toasts[0].open).toBe(false);
-      expect(newState.toasts[1].open).toBe(false);
-    });
+      it('should dismiss all toasts when no toastId provided', () => {
+        const toast1 = { id: '1', title: 'Toast 1', open: true };
+        const toast2 = { id: '2', title: 'Toast 2', open: true };
+        const state = { toasts: [toast1 as any, toast2 as any] };
 
-    it('should not affect other toasts when dismissing specific one', () => {
-      const toast1 = { id: '1', title: 'Toast 1', open: true };
-      const toast2 = { id: '2', title: 'Toast 2', open: true };
-      const state = { toasts: [toast1 as any, toast2 as any] };
+        const newState = reducer(state, {
+          type: 'DISMISS_TOAST',
+          toastId: undefined,
+        });
 
-      const newState = reducer(state, {
-        type: 'DISMISS_TOAST',
-        toastId: '1',
+        expect(newState.toasts[0].open).toBe(false);
+        expect(newState.toasts[1].open).toBe(false);
       });
 
-      expect(newState.toasts[0].open).toBe(false);
-      expect(newState.toasts[1].open).toBe(true); // Not affected
+      it('should not affect other toasts when dismissing specific one', () => {
+        const toast1 = { id: '1', title: 'Toast 1', open: true };
+        const toast2 = { id: '2', title: 'Toast 2', open: true };
+        const state = { toasts: [toast1 as any, toast2 as any] };
+
+        const newState = reducer(state, {
+          type: 'DISMISS_TOAST',
+          toastId: '1',
+        });
+
+        expect(newState.toasts[0].open).toBe(false);
+        expect(newState.toasts[1].open).toBe(true); // Not affected
+      });
     });
-  });
 
-  describe('REMOVE_TOAST', () => {
-    it('should remove specific toast', () => {
-      const toast1 = { id: '1', title: 'Toast 1', open: true };
-      const toast2 = { id: '2', title: 'Toast 2', open: true };
-      const state = { toasts: [toast1 as any, toast2 as any] };
+    describe('REMOVE_TOAST', () => {
+      it('should remove specific toast', () => {
+        const toast1 = { id: '1', title: 'Toast 1', open: true };
+        const toast2 = { id: '2', title: 'Toast 2', open: true };
+        const state = { toasts: [toast1 as any, toast2 as any] };
 
-      const newState = reducer(state, {
-        type: 'REMOVE_TOAST',
-        toastId: '1',
+        const newState = reducer(state, {
+          type: 'REMOVE_TOAST',
+          toastId: '1',
+        });
+
+        expect(newState.toasts).toHaveLength(1);
+        expect(newState.toasts[0].id).toBe('2');
       });
 
-      expect(newState.toasts).toHaveLength(1);
-      expect(newState.toasts[0].id).toBe('2');
-    });
+      it('should remove all toasts when no toastId provided', () => {
+        const toast1 = { id: '1', title: 'Toast 1', open: true };
+        const toast2 = { id: '2', title: 'Toast 2', open: true };
+        const state = { toasts: [toast1 as any, toast2 as any] };
 
-    it('should remove all toasts when no toastId provided', () => {
-      const toast1 = { id: '1', title: 'Toast 1', open: true };
-      const toast2 = { id: '2', title: 'Toast 2', open: true };
-      const state = { toasts: [toast1 as any, toast2 as any] };
+        const newState = reducer(state, {
+          type: 'REMOVE_TOAST',
+          toastId: undefined,
+        });
 
-      const newState = reducer(state, {
-        type: 'REMOVE_TOAST',
-        toastId: undefined,
+        expect(newState.toasts).toHaveLength(0);
       });
 
-      expect(newState.toasts).toHaveLength(0);
+      it('should handle removing non-existent toast', () => {
+        const toast = { id: '1', title: 'Toast', open: true };
+        const state = { toasts: [toast as any] };
+
+        const newState = reducer(state, {
+          type: 'REMOVE_TOAST',
+          toastId: 'nonexistent',
+        });
+
+        expect(newState.toasts).toHaveLength(1);
+      });
     });
 
-    it('should handle removing non-existent toast', () => {
-      const toast = { id: '1', title: 'Toast', open: true };
-      const state = { toasts: [toast as any] };
+    describe('state immutability', () => {
+      it('should not mutate original state on ADD_TOAST', () => {
+        const originalState = { toasts: [] };
+        const toast = { id: '1', title: 'Test', open: true };
 
-      const newState = reducer(state, {
-        type: 'REMOVE_TOAST',
-        toastId: 'nonexistent',
+        reducer(originalState, { type: 'ADD_TOAST', toast: toast as any });
+
+        expect(originalState.toasts).toHaveLength(0);
       });
 
-      expect(newState.toasts).toHaveLength(1);
-    });
-  });
+      it('should not mutate original state on UPDATE_TOAST', () => {
+        const originalToast = { id: '1', title: 'Original', open: true };
+        const originalState = { toasts: [originalToast as any] };
 
-  describe('state immutability', () => {
-    it('should not mutate original state on ADD_TOAST', () => {
-      const originalState = { toasts: [] };
-      const toast = { id: '1', title: 'Test', open: true };
+        reducer(originalState, {
+          type: 'UPDATE_TOAST',
+          toast: { id: '1', title: 'Updated' },
+        });
 
-      reducer(originalState, { type: 'ADD_TOAST', toast: toast as any });
-
-      expect(originalState.toasts).toHaveLength(0);
-    });
-
-    it('should not mutate original state on UPDATE_TOAST', () => {
-      const originalToast = { id: '1', title: 'Original', open: true };
-      const originalState = { toasts: [originalToast as any] };
-
-      reducer(originalState, {
-        type: 'UPDATE_TOAST',
-        toast: { id: '1', title: 'Updated' },
+        expect(originalState.toasts[0].title).toBe('Original');
       });
 
-      expect(originalState.toasts[0].title).toBe('Original');
+      it('should return new state object', () => {
+        const state = { toasts: [] };
+        const toast = { id: '1', title: 'Test', open: true };
+
+        const newState = reducer(state, {
+          type: 'ADD_TOAST',
+          toast: toast as any,
+        });
+
+        expect(newState).not.toBe(state);
+      });
     });
-
-    it('should return new state object', () => {
-      const state = { toasts: [] };
-      const toast = { id: '1', title: 'Test', open: true };
-
-      const newState = reducer(state, { type: 'ADD_TOAST', toast: toast as any });
-
-      expect(newState).not.toBe(state);
-    });
-  });
   });
 });

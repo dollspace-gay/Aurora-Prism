@@ -48,7 +48,10 @@ export function createMockDidResolver() {
 
     resolveHandle: vi.fn(async (handle: string) => {
       // Generate deterministic DID from handle
-      const did = `did:plc:${handle.replace(/[^a-z0-9]/gi, '').slice(0, 24).padEnd(24, '0')}`;
+      const did = `did:plc:${handle
+        .replace(/[^a-z0-9]/gi, '')
+        .slice(0, 24)
+        .padEnd(24, '0')}`;
       return did;
     }),
 
@@ -70,43 +73,63 @@ export function createMockPdsClient() {
 
   return {
     // Record operations
-    getRecord: vi.fn(async (params: { repo: string; collection: string; rkey: string }) => {
-      const key = `${params.repo}/${params.collection}/${params.rkey}`;
-      const record = records.get(key);
-      if (!record) {
-        throw new Error('Record not found');
-      }
-      return { uri: `at://${key}`, cid: 'bafyreia...', value: record };
-    }),
-
-    listRecords: vi.fn(async (params: { repo: string; collection: string; limit?: number }) => {
-      const prefix = `${params.repo}/${params.collection}/`;
-      const matching: any[] = [];
-      records.forEach((value, key) => {
-        if (key.startsWith(prefix)) {
-          matching.push({ uri: `at://${key}`, cid: 'bafyreia...', value });
+    getRecord: vi.fn(
+      async (params: { repo: string; collection: string; rkey: string }) => {
+        const key = `${params.repo}/${params.collection}/${params.rkey}`;
+        const record = records.get(key);
+        if (!record) {
+          throw new Error('Record not found');
         }
-      });
-      return { records: matching.slice(0, params.limit || 50) };
-    }),
+        return { uri: `at://${key}`, cid: 'bafyreia...', value: record };
+      }
+    ),
 
-    createRecord: vi.fn(async (params: { repo: string; collection: string; record: any; rkey?: string }) => {
-      const rkey = params.rkey || Date.now().toString(36);
-      const key = `${params.repo}/${params.collection}/${rkey}`;
-      records.set(key, params.record);
-      return { uri: `at://${key}`, cid: 'bafyreia...' };
-    }),
+    listRecords: vi.fn(
+      async (params: { repo: string; collection: string; limit?: number }) => {
+        const prefix = `${params.repo}/${params.collection}/`;
+        const matching: any[] = [];
+        records.forEach((value, key) => {
+          if (key.startsWith(prefix)) {
+            matching.push({ uri: `at://${key}`, cid: 'bafyreia...', value });
+          }
+        });
+        return { records: matching.slice(0, params.limit || 50) };
+      }
+    ),
 
-    deleteRecord: vi.fn(async (params: { repo: string; collection: string; rkey: string }) => {
-      const key = `${params.repo}/${params.collection}/${params.rkey}`;
-      records.delete(key);
-    }),
+    createRecord: vi.fn(
+      async (params: {
+        repo: string;
+        collection: string;
+        record: any;
+        rkey?: string;
+      }) => {
+        const rkey = params.rkey || Date.now().toString(36);
+        const key = `${params.repo}/${params.collection}/${rkey}`;
+        records.set(key, params.record);
+        return { uri: `at://${key}`, cid: 'bafyreia...' };
+      }
+    ),
+
+    deleteRecord: vi.fn(
+      async (params: { repo: string; collection: string; rkey: string }) => {
+        const key = `${params.repo}/${params.collection}/${params.rkey}`;
+        records.delete(key);
+      }
+    ),
 
     // Blob operations
     uploadBlob: vi.fn(async (data: Buffer, mimeType: string) => {
       const cid = `bafkrei${Date.now().toString(36)}`;
       blobs.set(cid, data);
-      return { blob: { $type: 'blob', ref: { $link: cid }, mimeType, size: data.length } };
+      return {
+        blob: {
+          $type: 'blob',
+          ref: { $link: cid },
+          mimeType,
+          size: data.length,
+        },
+      };
     }),
 
     getBlob: vi.fn(async (params: { did: string; cid: string }) => {
@@ -123,7 +146,11 @@ export function createMockPdsClient() {
         handle: 'user.bsky.social',
         did: params.repo,
         didDoc: createMockDidDocument(params.repo),
-        collections: ['app.bsky.feed.post', 'app.bsky.feed.like', 'app.bsky.graph.follow'],
+        collections: [
+          'app.bsky.feed.post',
+          'app.bsky.feed.like',
+          'app.bsky.graph.follow',
+        ],
         handleIsCorrect: true,
       };
     }),
@@ -131,7 +158,12 @@ export function createMockPdsClient() {
     // Test helpers
     _records: records,
     _blobs: blobs,
-    _setRecord: (repo: string, collection: string, rkey: string, value: any) => {
+    _setRecord: (
+      repo: string,
+      collection: string,
+      rkey: string,
+      value: any
+    ) => {
       records.set(`${repo}/${collection}/${rkey}`, value);
     },
     _clear: () => {
@@ -143,7 +175,10 @@ export function createMockPdsClient() {
 
 // Mock Auth Service
 export function createMockAuthService() {
-  const sessions = new Map<string, { did: string; handle: string; accessJwt: string; refreshJwt: string }>();
+  const sessions = new Map<
+    string,
+    { did: string; handle: string; accessJwt: string; refreshJwt: string }
+  >();
   const tokens = new Map<string, string>(); // token -> did
 
   return {
@@ -151,8 +186,13 @@ export function createMockAuthService() {
       // Simple mock - accept any password
       const did = identifier.startsWith('did:')
         ? identifier
-        : `did:plc:${identifier.replace(/[^a-z0-9]/gi, '').slice(0, 24).padEnd(24, '0')}`;
-      const handle = identifier.startsWith('did:') ? 'user.bsky.social' : identifier;
+        : `did:plc:${identifier
+            .replace(/[^a-z0-9]/gi, '')
+            .slice(0, 24)
+            .padEnd(24, '0')}`;
+      const handle = identifier.startsWith('did:')
+        ? 'user.bsky.social'
+        : identifier;
 
       const accessJwt = `access_${Date.now()}_${Math.random().toString(36).slice(2)}`;
       const refreshJwt = `refresh_${Date.now()}_${Math.random().toString(36).slice(2)}`;
@@ -178,7 +218,12 @@ export function createMockAuthService() {
       tokens.set(accessJwt, did);
       tokens.set(newRefreshJwt, did);
 
-      return { did, handle: 'user.bsky.social', accessJwt, refreshJwt: newRefreshJwt };
+      return {
+        did,
+        handle: 'user.bsky.social',
+        accessJwt,
+        refreshJwt: newRefreshJwt,
+      };
     }),
 
     deleteSession: vi.fn(async (accessJwt: string) => {
@@ -219,7 +264,9 @@ export function createMockRequest(overrides: Partial<any> = {}) {
     params: {},
     body: {},
     ip: '127.0.0.1',
-    get: vi.fn((header: string) => (overrides.headers as any)?.[header.toLowerCase()]),
+    get: vi.fn(
+      (header: string) => (overrides.headers as any)?.[header.toLowerCase()]
+    ),
     ...overrides,
   };
 }
@@ -231,41 +278,46 @@ export function createMockResponse() {
     headers: {} as Record<string, string>,
     body: null,
 
-    status: vi.fn(function(this: any, code: number) {
+    status: vi.fn(function (this: any, code: number) {
       this.statusCode = code;
       return this;
     }),
-    json: vi.fn(function(this: any, data: any) {
+    json: vi.fn(function (this: any, data: any) {
       this.body = data;
       return this;
     }),
-    send: vi.fn(function(this: any, data: any) {
+    send: vi.fn(function (this: any, data: any) {
       this.body = data;
       return this;
     }),
-    end: vi.fn(function(this: any) {
+    end: vi.fn(function (this: any) {
       return this;
     }),
-    setHeader: vi.fn(function(this: any, name: string, value: string) {
+    setHeader: vi.fn(function (this: any, name: string, value: string) {
       this.headers[name] = value;
       return this;
     }),
-    set: vi.fn(function(this: any, name: string, value: string) {
+    set: vi.fn(function (this: any, name: string, value: string) {
       this.headers[name] = value;
       return this;
     }),
-    cookie: vi.fn(function(this: any, name: string, value: string, options?: any) {
+    cookie: vi.fn(function (
+      this: any,
+      name: string,
+      value: string,
+      options?: any
+    ) {
       return this;
     }),
-    clearCookie: vi.fn(function(this: any, name: string) {
+    clearCookie: vi.fn(function (this: any, name: string) {
       return this;
     }),
-    redirect: vi.fn(function(this: any, url: string) {
+    redirect: vi.fn(function (this: any, url: string) {
       this.statusCode = 302;
       this.headers['Location'] = url;
       return this;
     }),
-    type: vi.fn(function(this: any, type: string) {
+    type: vi.fn(function (this: any, type: string) {
       this.headers['Content-Type'] = type;
       return this;
     }),
@@ -275,7 +327,10 @@ export function createMockResponse() {
 }
 
 // Mock Firehose Event
-export function createMockFirehoseEvent(type: 'commit' | 'identity' | 'account' | 'handle', overrides: any = {}) {
+export function createMockFirehoseEvent(
+  type: 'commit' | 'identity' | 'account' | 'handle',
+  overrides: any = {}
+) {
   const baseEvent = {
     seq: Math.floor(Math.random() * 1000000),
     time: new Date().toISOString(),
@@ -374,7 +429,10 @@ export function createMockFollowRecord(subjectDid: string) {
 }
 
 // Mock Repost Record
-export function createMockRepostRecord(subjectUri: string, subjectCid?: string) {
+export function createMockRepostRecord(
+  subjectUri: string,
+  subjectCid?: string
+) {
   return {
     $type: 'app.bsky.feed.repost',
     subject: {

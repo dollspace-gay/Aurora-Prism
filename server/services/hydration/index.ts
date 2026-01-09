@@ -333,7 +333,9 @@ export class EnhancedHydrator {
       };
     }
 
-    console.log(`[HYDRATION] Cache miss for ${postUris.length} posts - performing full hydration`);
+    console.log(
+      `[HYDRATION] Cache miss for ${postUris.length} posts - performing full hydration`
+    );
 
     // Perform full hydration
     const state = await this.hydratePosts(postUris, viewerDid);

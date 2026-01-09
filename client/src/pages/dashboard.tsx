@@ -143,7 +143,10 @@ export default function Dashboard() {
 
             // Trim buffer to MAX_EVENT_BUFFER to prevent unbounded growth
             if (eventBufferRef.current.length > MAX_EVENT_BUFFER) {
-              eventBufferRef.current = eventBufferRef.current.slice(0, MAX_EVENT_BUFFER);
+              eventBufferRef.current = eventBufferRef.current.slice(
+                0,
+                MAX_EVENT_BUFFER
+              );
             }
 
             // Update UI with latest DISPLAY_EVENT_COUNT events

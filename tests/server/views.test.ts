@@ -10,7 +10,9 @@ describe('Views Service', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
-  const createHydrationState = (overrides: Partial<HydrationState> = {}): HydrationState => ({
+  const createHydrationState = (
+    overrides: Partial<HydrationState> = {}
+  ): HydrationState => ({
     posts: new Map(),
     reposts: new Map(),
     profileViewers: new Map(),
@@ -35,13 +37,16 @@ describe('Views Service', () => {
       const item: FeedItem = { post: { uri: 'at://post1' } };
       const state = createHydrationState({
         posts: new Map([
-          ['at://post1', {
-            uri: 'at://post1',
-            cid: 'cid1',
-            record: { text: 'Hello world' },
-            author: { did: 'did:plc:author1' },
-            indexedAt: '2024-01-01T00:00:00Z',
-          }],
+          [
+            'at://post1',
+            {
+              uri: 'at://post1',
+              cid: 'cid1',
+              record: { text: 'Hello world' },
+              author: { did: 'did:plc:author1' },
+              indexedAt: '2024-01-01T00:00:00Z',
+            },
+          ],
         ]),
       });
 
@@ -58,22 +63,28 @@ describe('Views Service', () => {
       const item: FeedItem = { post: { uri: 'at://post1' } };
       const state = createHydrationState({
         posts: new Map([
-          ['at://post1', {
-            uri: 'at://post1',
-            cid: 'cid1',
-            record: { text: 'Hello' },
-            author: { did: 'did:plc:author1' },
-            indexedAt: '2024-01-01T00:00:00Z',
-          }],
+          [
+            'at://post1',
+            {
+              uri: 'at://post1',
+              cid: 'cid1',
+              record: { text: 'Hello' },
+              author: { did: 'did:plc:author1' },
+              indexedAt: '2024-01-01T00:00:00Z',
+            },
+          ],
         ]),
         aggregations: new Map([
-          ['at://post1', {
-            replyCount: 5,
-            repostCount: 10,
-            likeCount: 100,
-            bookmarkCount: 2,
-            quoteCount: 3,
-          }],
+          [
+            'at://post1',
+            {
+              replyCount: 5,
+              repostCount: 10,
+              likeCount: 100,
+              bookmarkCount: 2,
+              quoteCount: 3,
+            },
+          ],
         ]),
       });
 
@@ -90,24 +101,30 @@ describe('Views Service', () => {
       const item: FeedItem = { post: { uri: 'at://post1' } };
       const state = createHydrationState({
         posts: new Map([
-          ['at://post1', {
-            uri: 'at://post1',
-            cid: 'cid1',
-            record: { text: 'Hello' },
-            author: { did: 'did:plc:author1' },
-            indexedAt: '2024-01-01T00:00:00Z',
-          }],
+          [
+            'at://post1',
+            {
+              uri: 'at://post1',
+              cid: 'cid1',
+              record: { text: 'Hello' },
+              author: { did: 'did:plc:author1' },
+              indexedAt: '2024-01-01T00:00:00Z',
+            },
+          ],
         ]),
         viewerStates: new Map([
-          ['at://post1', {
-            likeUri: 'at://like1',
-            repostUri: 'at://repost1',
-            bookmarked: true,
-            threadMuted: false,
-            replyDisabled: false,
-            embeddingDisabled: false,
-            pinned: true,
-          }],
+          [
+            'at://post1',
+            {
+              likeUri: 'at://like1',
+              repostUri: 'at://repost1',
+              bookmarked: true,
+              threadMuted: false,
+              replyDisabled: false,
+              embeddingDisabled: false,
+              pinned: true,
+            },
+          ],
         ]),
       });
 
@@ -124,13 +141,16 @@ describe('Views Service', () => {
       const labels = [{ val: 'spam', src: 'did:plc:labeler' }];
       const state = createHydrationState({
         posts: new Map([
-          ['at://post1', {
-            uri: 'at://post1',
-            cid: 'cid1',
-            record: { text: 'Hello' },
-            author: { did: 'did:plc:author1' },
-            indexedAt: '2024-01-01T00:00:00Z',
-          }],
+          [
+            'at://post1',
+            {
+              uri: 'at://post1',
+              cid: 'cid1',
+              record: { text: 'Hello' },
+              author: { did: 'did:plc:author1' },
+              indexedAt: '2024-01-01T00:00:00Z',
+            },
+          ],
         ]),
         labels: new Map([['at://post1', labels]]),
       });
@@ -147,28 +167,37 @@ describe('Views Service', () => {
       };
       const state = createHydrationState({
         posts: new Map([
-          ['at://original-post', {
-            uri: 'at://original-post',
-            cid: 'cid1',
-            record: { text: 'Original post' },
-            author: { did: 'did:plc:author1' },
-            indexedAt: '2024-01-01T00:00:00Z',
-          }],
+          [
+            'at://original-post',
+            {
+              uri: 'at://original-post',
+              cid: 'cid1',
+              record: { text: 'Original post' },
+              author: { did: 'did:plc:author1' },
+              indexedAt: '2024-01-01T00:00:00Z',
+            },
+          ],
         ]),
         reposts: new Map([
-          ['at://repost1', {
-            uri: 'at://repost1',
-            cid: 'repost-cid',
-            userDid: 'did:plc:reposter',
-            record: { subject: { uri: 'at://original-post' } },
-            indexedAt: '2024-01-02T00:00:00Z',
-          }],
+          [
+            'at://repost1',
+            {
+              uri: 'at://repost1',
+              cid: 'repost-cid',
+              userDid: 'did:plc:reposter',
+              record: { subject: { uri: 'at://original-post' } },
+              indexedAt: '2024-01-02T00:00:00Z',
+            },
+          ],
         ]),
         profileViewers: new Map([
-          ['did:plc:reposter', {
-            handle: 'reposter.bsky.social',
-            displayName: 'Reposter',
-          }],
+          [
+            'did:plc:reposter',
+            {
+              handle: 'reposter.bsky.social',
+              displayName: 'Reposter',
+            },
+          ],
         ]),
       });
 
@@ -187,13 +216,16 @@ describe('Views Service', () => {
       };
       const state = createHydrationState({
         posts: new Map([
-          ['at://original-post', {
-            uri: 'at://original-post',
-            cid: 'cid1',
-            record: { text: 'Original post' },
-            author: { did: 'did:plc:author1' },
-            indexedAt: '2024-01-01T00:00:00Z',
-          }],
+          [
+            'at://original-post',
+            {
+              uri: 'at://original-post',
+              cid: 'cid1',
+              record: { text: 'Original post' },
+              author: { did: 'did:plc:author1' },
+              indexedAt: '2024-01-01T00:00:00Z',
+            },
+          ],
         ]),
       });
 
@@ -209,21 +241,27 @@ describe('Views Service', () => {
       };
       const state = createHydrationState({
         posts: new Map([
-          ['at://original-post', {
-            uri: 'at://original-post',
-            cid: 'cid1',
-            record: { text: 'Original post' },
-            author: { did: 'did:plc:author1' },
-            indexedAt: '2024-01-01T00:00:00Z',
-          }],
+          [
+            'at://original-post',
+            {
+              uri: 'at://original-post',
+              cid: 'cid1',
+              record: { text: 'Original post' },
+              author: { did: 'did:plc:author1' },
+              indexedAt: '2024-01-01T00:00:00Z',
+            },
+          ],
         ]),
         reposts: new Map([
-          ['at://repost1', {
-            uri: 'at://repost1',
-            cid: 'repost-cid',
-            record: { subject: { uri: 'at://different-post' } }, // Different post
-            indexedAt: '2024-01-02T00:00:00Z',
-          }],
+          [
+            'at://repost1',
+            {
+              uri: 'at://repost1',
+              cid: 'repost-cid',
+              record: { subject: { uri: 'at://different-post' } }, // Different post
+              indexedAt: '2024-01-02T00:00:00Z',
+            },
+          ],
         ]),
       });
 
@@ -239,19 +277,25 @@ describe('Views Service', () => {
       };
       const state = createHydrationState({
         posts: new Map([
-          ['at://post1', {
-            uri: 'at://post1',
-            cid: 'cid1',
-            record: { text: 'Pinned post' },
-            author: { did: 'did:plc:author1' },
-            indexedAt: '2024-01-01T00:00:00Z',
-          }],
+          [
+            'at://post1',
+            {
+              uri: 'at://post1',
+              cid: 'cid1',
+              record: { text: 'Pinned post' },
+              author: { did: 'did:plc:author1' },
+              indexedAt: '2024-01-01T00:00:00Z',
+            },
+          ],
         ]),
         profileViewers: new Map([
-          ['did:plc:author1', {
-            handle: 'author.bsky.social',
-            displayName: 'Author',
-          }],
+          [
+            'did:plc:author1',
+            {
+              handle: 'author.bsky.social',
+              displayName: 'Author',
+            },
+          ],
         ]),
       });
 
@@ -266,31 +310,40 @@ describe('Views Service', () => {
       const item: FeedItem = { post: { uri: 'at://reply-post' } };
       const state = createHydrationState({
         posts: new Map([
-          ['at://root-post', {
-            uri: 'at://root-post',
-            cid: 'root-cid',
-            record: { text: 'Root post' },
-            author: { did: 'did:plc:author1' },
-            indexedAt: '2024-01-01T00:00:00Z',
-          }],
-          ['at://parent-post', {
-            uri: 'at://parent-post',
-            cid: 'parent-cid',
-            record: { text: 'Parent post' },
-            author: { did: 'did:plc:author2' },
-            indexedAt: '2024-01-01T01:00:00Z',
-          }],
-          ['at://reply-post', {
-            uri: 'at://reply-post',
-            cid: 'reply-cid',
-            record: { text: 'Reply post' },
-            author: { did: 'did:plc:author3' },
-            indexedAt: '2024-01-01T02:00:00Z',
-            reply: {
-              root: { uri: 'at://root-post' },
-              parent: { uri: 'at://parent-post' },
+          [
+            'at://root-post',
+            {
+              uri: 'at://root-post',
+              cid: 'root-cid',
+              record: { text: 'Root post' },
+              author: { did: 'did:plc:author1' },
+              indexedAt: '2024-01-01T00:00:00Z',
             },
-          }],
+          ],
+          [
+            'at://parent-post',
+            {
+              uri: 'at://parent-post',
+              cid: 'parent-cid',
+              record: { text: 'Parent post' },
+              author: { did: 'did:plc:author2' },
+              indexedAt: '2024-01-01T01:00:00Z',
+            },
+          ],
+          [
+            'at://reply-post',
+            {
+              uri: 'at://reply-post',
+              cid: 'reply-cid',
+              record: { text: 'Reply post' },
+              author: { did: 'did:plc:author3' },
+              indexedAt: '2024-01-01T02:00:00Z',
+              reply: {
+                root: { uri: 'at://root-post' },
+                parent: { uri: 'at://parent-post' },
+              },
+            },
+          ],
         ]),
       });
 
@@ -306,17 +359,20 @@ describe('Views Service', () => {
       const item: FeedItem = { post: { uri: 'at://reply-post' } };
       const state = createHydrationState({
         posts: new Map([
-          ['at://reply-post', {
-            uri: 'at://reply-post',
-            cid: 'reply-cid',
-            record: { text: 'Reply post' },
-            author: { did: 'did:plc:author3' },
-            indexedAt: '2024-01-01T02:00:00Z',
-            reply: {
-              root: { uri: 'at://root-post' },
-              parent: { uri: 'at://missing-parent' },
+          [
+            'at://reply-post',
+            {
+              uri: 'at://reply-post',
+              cid: 'reply-cid',
+              record: { text: 'Reply post' },
+              author: { did: 'did:plc:author3' },
+              indexedAt: '2024-01-01T02:00:00Z',
+              reply: {
+                root: { uri: 'at://root-post' },
+                parent: { uri: 'at://missing-parent' },
+              },
             },
-          }],
+          ],
         ]),
       });
 
@@ -330,18 +386,24 @@ describe('Views Service', () => {
       const item: FeedItem = { post: { uri: 'at://post1' } };
       const state = createHydrationState({
         posts: new Map([
-          ['at://post1', {
-            uri: 'at://post1',
-            cid: 'cid1',
-            record: { text: 'Hello' },
-            author: { did: 'did:plc:author1' },
-            indexedAt: '2024-01-01T00:00:00Z',
-          }],
+          [
+            'at://post1',
+            {
+              uri: 'at://post1',
+              cid: 'cid1',
+              record: { text: 'Hello' },
+              author: { did: 'did:plc:author1' },
+              indexedAt: '2024-01-01T00:00:00Z',
+            },
+          ],
         ]),
         threadContexts: new Map([
-          ['at://post1', {
-            rootAuthorLikeUri: 'at://root-like',
-          }],
+          [
+            'at://post1',
+            {
+              rootAuthorLikeUri: 'at://root-like',
+            },
+          ],
         ]),
       });
 
@@ -357,14 +419,15 @@ describe('Views Service', () => {
       const item: FeedItem = { post: { uri: 'at://post1' } };
       const state = createHydrationState({
         posts: new Map([
-          ['at://post1', {
-            uri: 'at://post1',
-            author: { did: 'did:plc:author1' },
-          }],
+          [
+            'at://post1',
+            {
+              uri: 'at://post1',
+              author: { did: 'did:plc:author1' },
+            },
+          ],
         ]),
-        profileViewers: new Map([
-          ['did:plc:author1', {}],
-        ]),
+        profileViewers: new Map([['did:plc:author1', {}]]),
       });
 
       const result = views.feedItemBlocksAndMutes(item, state);
@@ -379,14 +442,15 @@ describe('Views Service', () => {
       const item: FeedItem = { post: { uri: 'at://post1' } };
       const state = createHydrationState({
         posts: new Map([
-          ['at://post1', {
-            uri: 'at://post1',
-            author: { did: 'did:plc:author1' },
-          }],
+          [
+            'at://post1',
+            {
+              uri: 'at://post1',
+              author: { did: 'did:plc:author1' },
+            },
+          ],
         ]),
-        profileViewers: new Map([
-          ['did:plc:author1', { blocking: true }],
-        ]),
+        profileViewers: new Map([['did:plc:author1', { blocking: true }]]),
       });
 
       const result = views.feedItemBlocksAndMutes(item, state);
@@ -398,14 +462,15 @@ describe('Views Service', () => {
       const item: FeedItem = { post: { uri: 'at://post1' } };
       const state = createHydrationState({
         posts: new Map([
-          ['at://post1', {
-            uri: 'at://post1',
-            author: { did: 'did:plc:author1' },
-          }],
+          [
+            'at://post1',
+            {
+              uri: 'at://post1',
+              author: { did: 'did:plc:author1' },
+            },
+          ],
         ]),
-        profileViewers: new Map([
-          ['did:plc:author1', { muting: true }],
-        ]),
+        profileViewers: new Map([['did:plc:author1', { muting: true }]]),
       });
 
       const result = views.feedItemBlocksAndMutes(item, state);

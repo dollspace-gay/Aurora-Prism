@@ -82,7 +82,9 @@ export class OnDemandBackfill {
       const response = await fetch(plcUrl);
 
       if (!response.ok) {
-        console.warn(`[ON_DEMAND_BACKFILL] Failed to resolve DID ${did}: ${response.status}`);
+        console.warn(
+          `[ON_DEMAND_BACKFILL] Failed to resolve DID ${did}: ${response.status}`
+        );
         return null;
       }
 
@@ -94,7 +96,9 @@ export class OnDemandBackfill {
       );
 
       if (!pdsService?.serviceEndpoint) {
-        console.warn(`[ON_DEMAND_BACKFILL] No PDS service found in DID document for ${did}`);
+        console.warn(
+          `[ON_DEMAND_BACKFILL] No PDS service found in DID document for ${did}`
+        );
         return null;
       }
 
@@ -103,7 +107,10 @@ export class OnDemandBackfill {
 
       return pdsUrl;
     } catch (error) {
-      console.error(`[ON_DEMAND_BACKFILL] Error resolving PDS for ${did}:`, error);
+      console.error(
+        `[ON_DEMAND_BACKFILL] Error resolving PDS for ${did}:`,
+        error
+      );
       return null;
     }
   }
@@ -122,8 +129,12 @@ export class OnDemandBackfill {
       const handle = describeData.handle;
       const collections = describeData.collections || [];
 
-      console.log(`[ON_DEMAND_BACKFILL] Backfilling ${handle} (${did}) from ${pdsUrl}`);
-      console.log(`[ON_DEMAND_BACKFILL] Collections: ${collections.join(', ')}`);
+      console.log(
+        `[ON_DEMAND_BACKFILL] Backfilling ${handle} (${did}) from ${pdsUrl}`
+      );
+      console.log(
+        `[ON_DEMAND_BACKFILL] Collections: ${collections.join(', ')}`
+      );
 
       // Process handle/identity first
       await redisQueue.push({
@@ -148,7 +159,11 @@ export class OnDemandBackfill {
     }
   }
 
-  private async backfillCollection(did: string, pdsUrl: string, collection: string) {
+  private async backfillCollection(
+    did: string,
+    pdsUrl: string,
+    collection: string
+  ) {
     try {
       let cursor: string | undefined = undefined;
       let totalRecords = 0;
@@ -204,18 +219,23 @@ export class OnDemandBackfill {
 
         // Don't backfill more than 1000 records per collection (prevent abuse)
         if (totalRecords >= 1000) {
-          console.log(`[ON_DEMAND_BACKFILL] Reached limit of 1000 records for ${collection}, stopping`);
+          console.log(
+            `[ON_DEMAND_BACKFILL] Reached limit of 1000 records for ${collection}, stopping`
+          );
           break;
         }
-
       } while (cursor);
 
       if (totalRecords > 0) {
-        console.log(`[ON_DEMAND_BACKFILL] Backfilled ${totalRecords} records from ${collection}`);
+        console.log(
+          `[ON_DEMAND_BACKFILL] Backfilled ${totalRecords} records from ${collection}`
+        );
       }
-
     } catch (error) {
-      console.error(`[ON_DEMAND_BACKFILL] Error backfilling collection ${collection}:`, error);
+      console.error(
+        `[ON_DEMAND_BACKFILL] Error backfilling collection ${collection}:`,
+        error
+      );
       throw error;
     }
   }

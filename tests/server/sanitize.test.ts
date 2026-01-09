@@ -119,18 +119,12 @@ describe('removeNullBytesFromObject', () => {
 
   it('should handle mixed arrays and objects', () => {
     const input = {
-      items: [
-        { name: 'Item1\u0000' },
-        { name: 'Item2\u0000' },
-      ],
+      items: [{ name: 'Item1\u0000' }, { name: 'Item2\u0000' }],
       tags: ['tag1\u0000', 'tag2\u0000'],
     };
     const output = removeNullBytesFromObject(input);
     expect(output).toEqual({
-      items: [
-        { name: 'Item1' },
-        { name: 'Item2' },
-      ],
+      items: [{ name: 'Item1' }, { name: 'Item2' }],
       tags: ['tag1', 'tag2'],
     });
   });

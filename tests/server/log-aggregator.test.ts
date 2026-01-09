@@ -168,7 +168,9 @@ describe('LogAggregator', () => {
       aggregator.flush();
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('[LOG_AGGREGATOR] Flushing 3 aggregated log entries')
+        expect.stringContaining(
+          '[LOG_AGGREGATOR] Flushing 3 aggregated log entries'
+        )
       );
     });
 

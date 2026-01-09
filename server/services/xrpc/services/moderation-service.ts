@@ -19,7 +19,7 @@ import {
   queryLabelsSchema,
   createReportSchema,
 } from '../schemas';
-import { getProfiles } from "../utils/profile-builder";
+import { getProfiles } from '../utils/profile-builder';
 
 /**
  * Get blocked actors

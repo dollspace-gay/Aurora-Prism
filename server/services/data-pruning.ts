@@ -604,12 +604,12 @@ export class DataPruningService {
 
       console.log(
         `[DATA_PRUNING] Completed - Deleted ${totalStats.total} total records:\n` +
-        `  Posts: ${totalStats.posts}, Likes: ${totalStats.likes}, Reposts: ${totalStats.reposts}, Notifications: ${totalStats.notifications}\n` +
-        `  Quotes: ${totalStats.quotes}, Bookmarks: ${totalStats.bookmarks}, Blocks: ${totalStats.blocks}, Mutes: ${totalStats.mutes}\n` +
-        `  Feed Items: ${totalStats.feedItems}, Post Aggs: ${totalStats.postAggregations}, Thread Gates: ${totalStats.threadGates}, Post Gates: ${totalStats.postGates}\n` +
-        `  Users: ${totalStats.users}, Follows: ${totalStats.follows}, Feed Generators: ${totalStats.feedGenerators}\n` +
-        `  Starter Packs: ${totalStats.starterPacks}, Lists: ${totalStats.lists}, List Items: ${totalStats.listItems}\n` +
-        `  Protected ${protectedDids.size} DIDs from pruning.`
+          `  Posts: ${totalStats.posts}, Likes: ${totalStats.likes}, Reposts: ${totalStats.reposts}, Notifications: ${totalStats.notifications}\n` +
+          `  Quotes: ${totalStats.quotes}, Bookmarks: ${totalStats.bookmarks}, Blocks: ${totalStats.blocks}, Mutes: ${totalStats.mutes}\n` +
+          `  Feed Items: ${totalStats.feedItems}, Post Aggs: ${totalStats.postAggregations}, Thread Gates: ${totalStats.threadGates}, Post Gates: ${totalStats.postGates}\n` +
+          `  Users: ${totalStats.users}, Follows: ${totalStats.follows}, Feed Generators: ${totalStats.feedGenerators}\n` +
+          `  Starter Packs: ${totalStats.starterPacks}, Lists: ${totalStats.lists}, List Items: ${totalStats.listItems}\n` +
+          `  Protected ${protectedDids.size} DIDs from pruning.`
       );
       logCollector.success(
         `Data pruning completed - ${totalStats.total} records deleted, ${protectedDids.size} DIDs protected`,

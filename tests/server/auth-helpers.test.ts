@@ -20,7 +20,10 @@ import {
   requireAuthDid,
   getUserSessionForDid,
 } from '../../server/services/xrpc/utils/auth-helpers';
-import { authService, validateAndRefreshSession } from '../../server/services/auth';
+import {
+  authService,
+  validateAndRefreshSession,
+} from '../../server/services/auth';
 import { storage } from '../../server/storage';
 
 describe('auth-helpers', () => {
@@ -170,7 +173,9 @@ describe('auth-helpers', () => {
 
     it('should return null on token verification error', async () => {
       vi.mocked(authService.extractToken).mockReturnValue('bad-token');
-      vi.mocked(authService.verifyToken).mockRejectedValue(new Error('Invalid token'));
+      vi.mocked(authService.verifyToken).mockRejectedValue(
+        new Error('Invalid token')
+      );
 
       const mockReq = { path: '/xrpc/test' } as any;
       const result = await getAuthenticatedDid(mockReq);

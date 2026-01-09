@@ -30,7 +30,8 @@ function getListAvatarUrl(
 ): string | undefined {
   if (!avatarCid || typeof avatarCid !== 'string') return undefined;
   const trimmed = avatarCid.trim();
-  if (trimmed === '' || trimmed === 'null' || trimmed === 'undefined') return undefined;
+  if (trimmed === '' || trimmed === 'null' || trimmed === 'undefined')
+    return undefined;
 
   // If already a full URL, return as-is
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
@@ -56,7 +57,9 @@ export async function getList(req: Request, res: Response): Promise<void> {
 
     if (!list) {
       // Try to discover the list from PDS
-      console.log(`[XRPC] List not found in database, attempting discovery: ${params.list}`);
+      console.log(
+        `[XRPC] List not found in database, attempting discovery: ${params.list}`
+      );
 
       try {
         // Parse the URI to get the creator DID
@@ -67,7 +70,9 @@ export async function getList(req: Request, res: Response): Promise<void> {
         // Ensure the creator user exists first
         const creator = await storage.getUser(creatorDid);
         if (!creator) {
-          console.log(`[XRPC] Creator ${creatorDid} not found, creating placeholder`);
+          console.log(
+            `[XRPC] Creator ${creatorDid} not found, creating placeholder`
+          );
           await storage.createUser({
             did: creatorDid,
             handle: 'handle.invalid', // Will be updated by PDS fetcher
@@ -98,10 +103,19 @@ export async function getList(req: Request, res: Response): Promise<void> {
               createdAt: value.createdAt,
             };
             // Only include avatar if it's a valid blob reference
-            if (value.avatar && typeof value.avatar === 'object' && value.avatar.ref) {
+            if (
+              value.avatar &&
+              typeof value.avatar === 'object' &&
+              value.avatar.ref
+            ) {
               listRecord.avatar = value.avatar;
             }
-            await eventProcessor.processRecord(params.list, cid, creatorDid, listRecord);
+            await eventProcessor.processRecord(
+              params.list,
+              cid,
+              creatorDid,
+              listRecord
+            );
 
             // Try fetching again after indexing
             list = await storage.getList(params.list);
@@ -129,10 +143,7 @@ export async function getList(req: Request, res: Response): Promise<void> {
       );
 
     // Hydrate creator profile
-    const creatorProfiles = await getProfiles(
-      [list.creatorDid],
-      req
-    );
+    const creatorProfiles = await getProfiles([list.creatorDid], req);
     const creator = creatorProfiles[0];
 
     if (!creator) {
@@ -310,7 +321,9 @@ export async function getLists(req: Request, res: Response): Promise<void> {
         name: list.name,
         purpose: list.purpose,
         description: list.description || undefined,
-        ...(getListAvatarUrl(list.avatarUrl, list.creatorDid, req) && { avatar: getListAvatarUrl(list.avatarUrl, list.creatorDid, req) }),
+        ...(getListAvatarUrl(list.avatarUrl, list.creatorDid, req) && {
+          avatar: getListAvatarUrl(list.avatarUrl, list.creatorDid, req),
+        }),
         listItemCount,
         indexedAt: list.indexedAt.toISOString(),
         ...(viewer && { viewer }),
@@ -339,7 +352,9 @@ export async function getListFeed(req: Request, res: Response): Promise<void> {
 
     if (!list) {
       // Try to discover the list from PDS
-      console.log(`[XRPC] List not found for feed, attempting discovery: ${params.list}`);
+      console.log(
+        `[XRPC] List not found for feed, attempting discovery: ${params.list}`
+      );
 
       try {
         // Parse the URI to get the creator DID
@@ -350,7 +365,9 @@ export async function getListFeed(req: Request, res: Response): Promise<void> {
         // Ensure the creator user exists first
         const creator = await storage.getUser(creatorDid);
         if (!creator) {
-          console.log(`[XRPC] Creator ${creatorDid} not found, creating placeholder`);
+          console.log(
+            `[XRPC] Creator ${creatorDid} not found, creating placeholder`
+          );
           await storage.createUser({
             did: creatorDid,
             handle: 'handle.invalid', // Will be updated by PDS fetcher
@@ -381,10 +398,19 @@ export async function getListFeed(req: Request, res: Response): Promise<void> {
               createdAt: value.createdAt,
             };
             // Only include avatar if it's a valid blob reference
-            if (value.avatar && typeof value.avatar === 'object' && value.avatar.ref) {
+            if (
+              value.avatar &&
+              typeof value.avatar === 'object' &&
+              value.avatar.ref
+            ) {
               listRecord.avatar = value.avatar;
             }
-            await eventProcessor.processRecord(params.list, cid, creatorDid, listRecord);
+            await eventProcessor.processRecord(
+              params.list,
+              cid,
+              creatorDid,
+              listRecord
+            );
 
             // Try fetching again after indexing
             list = await storage.getList(params.list);
@@ -415,11 +441,7 @@ export async function getListFeed(req: Request, res: Response): Promise<void> {
     // Use serializePosts for proper post hydration with viewer context
     // This handles: embeds, author profiles, viewer state (likes/reposts),
     // reply counts, repost counts, quote counts, labels, and thread context
-    const serialized = await serializePosts(
-      posts,
-      viewerDid || undefined,
-      req
-    );
+    const serialized = await serializePosts(posts, viewerDid || undefined, req);
 
     // Generate cursor from last post if results exist
     const cursor =
@@ -493,10 +515,7 @@ export async function getListsWithMembership(
     };
 
     // Build creator ProfileView (will be same for all lists)
-    const creatorProfiles = await getProfiles(
-      [sessionDid],
-      req
-    );
+    const creatorProfiles = await getProfiles([sessionDid], req);
     const creatorView = creatorProfiles[0];
 
     if (!creatorView) {
@@ -565,7 +584,9 @@ export async function getListsWithMembership(
         name: list.name,
         purpose: list.purpose,
         description: list.description || undefined,
-        ...(getListAvatarUrl(list.avatarUrl, list.creatorDid, req) && { avatar: getListAvatarUrl(list.avatarUrl, list.creatorDid, req) }),
+        ...(getListAvatarUrl(list.avatarUrl, list.creatorDid, req) && {
+          avatar: getListAvatarUrl(list.avatarUrl, list.creatorDid, req),
+        }),
         listItemCount,
         indexedAt: list.indexedAt.toISOString(),
         ...(viewer && { viewer }),
@@ -653,10 +674,7 @@ export async function getListMutes(req: Request, res: Response): Promise<void> {
     ];
 
     // Batch fetch all creator profiles
-    const creatorProfiles = await getProfiles(
-      creatorDids,
-      req
-    );
+    const creatorProfiles = await getProfiles(creatorDids, req);
     const creatorMap = new Map(creatorProfiles.map((p: any) => [p.did, p]));
 
     // Batch fetch list item counts
@@ -688,7 +706,9 @@ export async function getListMutes(req: Request, res: Response): Promise<void> {
           name: list.name,
           purpose: list.purpose,
           description: list.description || undefined,
-          ...(list.avatarUrl && typeof list.avatarUrl === 'string' && list.avatarUrl.trim() !== '' && { avatar: list.avatarUrl }),
+          ...(list.avatarUrl &&
+            typeof list.avatarUrl === 'string' &&
+            list.avatarUrl.trim() !== '' && { avatar: list.avatarUrl }),
           listItemCount,
           indexedAt: list.indexedAt.toISOString(),
           viewer,
@@ -758,10 +778,7 @@ export async function getListBlocks(
     ];
 
     // Batch fetch all creator profiles
-    const creatorProfiles = await getProfiles(
-      creatorDids,
-      req
-    );
+    const creatorProfiles = await getProfiles(creatorDids, req);
     const creatorMap = new Map(creatorProfiles.map((p: any) => [p.did, p]));
 
     // Batch fetch list item counts
@@ -793,7 +810,9 @@ export async function getListBlocks(
           name: list.name,
           purpose: list.purpose,
           description: list.description || undefined,
-          ...(list.avatarUrl && typeof list.avatarUrl === 'string' && list.avatarUrl.trim() !== '' && { avatar: list.avatarUrl }),
+          ...(list.avatarUrl &&
+            typeof list.avatarUrl === 'string' &&
+            list.avatarUrl.trim() !== '' && { avatar: list.avatarUrl }),
           listItemCount,
           indexedAt: list.indexedAt.toISOString(),
           viewer,

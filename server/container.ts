@@ -13,8 +13,14 @@
 import { type DbConnection, createDbPool } from './db';
 import { type IStorage, DatabaseStorage, createStorage } from './storage';
 import { type LabelService, createLabelService } from './services/label';
-import { type ModerationService, createModerationService } from './services/moderation';
-import { type EventProcessor, createEventProcessor } from './services/event-processor';
+import {
+  type ModerationService,
+  createModerationService,
+} from './services/moderation';
+import {
+  type EventProcessor,
+  createEventProcessor,
+} from './services/event-processor';
 
 // Forward declarations for service types
 // These will be imported as services are refactored
@@ -82,7 +88,9 @@ export class ServiceContainer {
 
     // Initialize database connection (unless skipped for testing)
     if (!this.config.skipDb) {
-      const poolSize = this.config.dbPoolSize ?? parseInt(process.env.DB_POOL_SIZE || '20', 10);
+      const poolSize =
+        this.config.dbPoolSize ??
+        parseInt(process.env.DB_POOL_SIZE || '20', 10);
       const poolLabel = this.config.dbPoolLabel ?? 'container';
       this._db = createDbPool(poolSize, poolLabel);
     }
@@ -114,7 +122,9 @@ export class ServiceContainer {
    */
   get db(): DbConnection {
     if (!this._db) {
-      throw new Error('[CONTAINER] Database not initialized. Call initialize() first.');
+      throw new Error(
+        '[CONTAINER] Database not initialized. Call initialize() first.'
+      );
     }
     return this._db;
   }
@@ -125,7 +135,9 @@ export class ServiceContainer {
    */
   get storage(): IStorage {
     if (!this._storage) {
-      throw new Error('[CONTAINER] Storage not initialized. Call initialize() first.');
+      throw new Error(
+        '[CONTAINER] Storage not initialized. Call initialize() first.'
+      );
     }
     return this._storage;
   }
@@ -158,7 +170,10 @@ export class ServiceContainer {
     if (!this._moderationService) {
       if (this._storage) {
         // Create with injected dependencies
-        this._moderationService = createModerationService(this._storage, this.labelService);
+        this._moderationService = createModerationService(
+          this._storage,
+          this.labelService
+        );
       } else {
         // Fallback to global singleton if container not initialized with storage
         const { moderationService } = require('./services/moderation');
@@ -312,7 +327,9 @@ export function getContainer(): ServiceContainer {
  * Initialize the global container
  * @deprecated Prefer creating and managing container explicitly
  */
-export async function initializeContainer(config?: ContainerConfig): Promise<ServiceContainer> {
+export async function initializeContainer(
+  config?: ContainerConfig
+): Promise<ServiceContainer> {
   globalContainer = new ServiceContainer(config);
   await globalContainer.initialize();
   return globalContainer;

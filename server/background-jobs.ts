@@ -14,11 +14,16 @@ import { logAllPoolStatus } from './pool-metrics';
  */
 async function cleanupExpiredSessions(): Promise<void> {
   try {
-    console.log('[BackgroundJobs] Starting expired session cleanup (90+ days old)...');
+    console.log(
+      '[BackgroundJobs] Starting expired session cleanup (90+ days old)...'
+    );
     await storage.deleteExpiredSessions();
     console.log('[BackgroundJobs] Expired session cleanup completed');
   } catch (error) {
-    console.error('[BackgroundJobs] Error cleaning up expired sessions:', error);
+    console.error(
+      '[BackgroundJobs] Error cleaning up expired sessions:',
+      error
+    );
   }
 }
 
@@ -55,7 +60,9 @@ function logPoolStatus(): void {
  */
 export function startBackgroundJobs(): void {
   if (process.env.NODE_ENV === 'test') {
-    console.log('[BackgroundJobs] Skipping background jobs in test environment');
+    console.log(
+      '[BackgroundJobs] Skipping background jobs in test environment'
+    );
     return;
   }
 

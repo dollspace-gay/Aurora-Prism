@@ -41,7 +41,9 @@ function createMockPost(overrides: Partial<Post> = {}): Post {
 }
 
 // Helper to create mock user settings
-function createMockSettings(overrides: Partial<UserSettings> = {}): UserSettings {
+function createMockSettings(
+  overrides: Partial<UserSettings> = {}
+): UserSettings {
   return {
     userDid: 'did:plc:viewer',
     blockedKeywords: [],
@@ -252,7 +254,10 @@ describe('ContentFilterService', () => {
 
       vi.mocked(labelService.getActiveLabelsForSubjects).mockResolvedValue(
         new Map([
-          [post.authorDid, [createMockLabel({ val: 'spam', subject: post.authorDid })]],
+          [
+            post.authorDid,
+            [createMockLabel({ val: 'spam', subject: post.authorDid })],
+          ],
         ])
       );
 
@@ -306,7 +311,9 @@ describe('ContentFilterService', () => {
       const settings = createMockSettings();
 
       vi.mocked(labelService.getActiveLabelsForSubjects).mockResolvedValue(
-        new Map([['post1', [createMockLabel({ val: 'spam', subject: 'post1' })]]])
+        new Map([
+          ['post1', [createMockLabel({ val: 'spam', subject: 'post1' })]],
+        ])
       );
 
       const result = await contentFilter.filterPostsWithLabels(posts, settings);
@@ -325,9 +332,7 @@ describe('ContentFilterService', () => {
       ];
       const settings = createMockSettings();
 
-      const rules = [
-        contentFilter.createRule('keyword', 'hide', 'forbidden'),
-      ];
+      const rules = [contentFilter.createRule('keyword', 'hide', 'forbidden')];
 
       const result = contentFilter.filterPostsWithRules(posts, settings, rules);
 
@@ -362,7 +367,11 @@ describe('ContentFilterService', () => {
       const settings = createMockSettings();
 
       const rules = [
-        contentFilter.createRule('custom', 'hide', (post: Post) => post.text.length > 20),
+        contentFilter.createRule(
+          'custom',
+          'hide',
+          (post: Post) => post.text.length > 20
+        ),
       ];
 
       const result = contentFilter.filterPostsWithRules(posts, settings, rules);
@@ -375,7 +384,9 @@ describe('ContentFilterService', () => {
     });
 
     it('should handle errors in custom function rules gracefully', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       const posts = [createMockPost({ uri: 'post1' })];
       const settings = createMockSettings();
@@ -424,7 +435,11 @@ describe('ContentFilterService', () => {
       const posts = [
         createMockPost({ uri: 'post1', authorDid: 'did:plc:muteduser' }),
         createMockPost({ uri: 'post2', text: 'Contains spam' }),
-        createMockPost({ uri: 'post3', authorDid: 'did:plc:muteduser', text: 'spam' }),
+        createMockPost({
+          uri: 'post3',
+          authorDid: 'did:plc:muteduser',
+          text: 'spam',
+        }),
         createMockPost({ uri: 'post4' }),
       ];
       const settings = createMockSettings({
@@ -461,10 +476,15 @@ describe('ContentFilterService', () => {
       const settings = createMockSettings();
 
       vi.mocked(labelService.getActiveLabelsForSubjects).mockResolvedValue(
-        new Map([['post2', [createMockLabel({ val: 'spam', subject: 'post2' })]]])
+        new Map([
+          ['post2', [createMockLabel({ val: 'spam', subject: 'post2' })]],
+        ])
       );
 
-      const stats = await contentFilter.getFilterStatsWithLabels(posts, settings);
+      const stats = await contentFilter.getFilterStatsWithLabels(
+        posts,
+        settings
+      );
 
       expect(stats.total).toBe(3);
       expect(stats.filtered).toBe(1);
@@ -525,7 +545,9 @@ describe('ContentFilterService', () => {
     });
 
     it('should handle mixed case and whitespace', () => {
-      expect(contentFilter.sanitizeKeyword('  HELLO World  ')).toBe('hello world');
+      expect(contentFilter.sanitizeKeyword('  HELLO World  ')).toBe(
+        'hello world'
+      );
     });
   });
 

@@ -42,7 +42,11 @@ describe('resolvers', () => {
         id: 'did:plc:test123',
         alsoKnownAs: ['at://test.bsky.social'],
         service: [
-          { id: '#atproto_pds', type: 'AtprotoPersonalDataServer', serviceEndpoint: 'https://bsky.social' },
+          {
+            id: '#atproto_pds',
+            type: 'AtprotoPersonalDataServer',
+            serviceEndpoint: 'https://bsky.social',
+          },
         ],
       };
 
@@ -54,7 +58,9 @@ describe('resolvers', () => {
       const result = await resolveDidDocument('did:plc:test123');
 
       expect(result).toEqual(mockDidDoc);
-      expect(mockFetch).toHaveBeenCalledWith('https://plc.directory/did:plc:test123');
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://plc.directory/did:plc:test123'
+      );
     });
 
     it('should return null when PLC resolution fails with non-ok response', async () => {
@@ -84,7 +90,9 @@ describe('resolvers', () => {
 
       await resolveDidDocument('did:plc:abc123');
 
-      expect(mockFetch).toHaveBeenCalledWith('https://plc.directory/did:plc:abc123');
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://plc.directory/did:plc:abc123'
+      );
     });
 
     it('should handle did:web DIDs', async () => {

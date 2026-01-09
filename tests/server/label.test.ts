@@ -222,7 +222,10 @@ describe('LabelService', () => {
       ];
       vi.mocked(storage.getLabelsForSubjects).mockResolvedValue(mockLabels);
 
-      const result = await labelService.getLabelsForSubjects([subject1, subject2]);
+      const result = await labelService.getLabelsForSubjects([
+        subject1,
+        subject2,
+      ]);
 
       expect(result.get(subject1)?.length).toBe(2);
       expect(result.get(subject2)?.length).toBe(1);
@@ -259,9 +262,24 @@ describe('LabelService', () => {
     it('should filter out negated labels', async () => {
       const subject = 'at://did:plc:user/app.bsky.feed.post/1';
       const mockLabels = [
-        createMockLabel({ subject, val: 'spam', neg: false, createdAt: new Date('2024-01-01') }),
-        createMockLabel({ subject, val: 'spam', neg: true, createdAt: new Date('2024-01-02') }),
-        createMockLabel({ subject, val: 'nsfw', neg: false, createdAt: new Date('2024-01-01') }),
+        createMockLabel({
+          subject,
+          val: 'spam',
+          neg: false,
+          createdAt: new Date('2024-01-01'),
+        }),
+        createMockLabel({
+          subject,
+          val: 'spam',
+          neg: true,
+          createdAt: new Date('2024-01-02'),
+        }),
+        createMockLabel({
+          subject,
+          val: 'nsfw',
+          neg: false,
+          createdAt: new Date('2024-01-01'),
+        }),
       ];
       vi.mocked(storage.getLabelsForSubject).mockResolvedValue(mockLabels);
 
@@ -275,8 +293,18 @@ describe('LabelService', () => {
     it('should keep label if negation comes before application', async () => {
       const subject = 'at://did:plc:user/app.bsky.feed.post/1';
       const mockLabels = [
-        createMockLabel({ subject, val: 'spam', neg: true, createdAt: new Date('2024-01-01') }),
-        createMockLabel({ subject, val: 'spam', neg: false, createdAt: new Date('2024-01-02') }),
+        createMockLabel({
+          subject,
+          val: 'spam',
+          neg: true,
+          createdAt: new Date('2024-01-01'),
+        }),
+        createMockLabel({
+          subject,
+          val: 'spam',
+          neg: false,
+          createdAt: new Date('2024-01-02'),
+        }),
       ];
       vi.mocked(storage.getLabelsForSubject).mockResolvedValue(mockLabels);
 
@@ -295,13 +323,31 @@ describe('LabelService', () => {
       const subject2 = 'at://did:plc:user2/app.bsky.feed.post/2';
 
       const mockLabels = [
-        createMockLabel({ subject: subject1, val: 'spam', neg: false, createdAt: new Date('2024-01-01') }),
-        createMockLabel({ subject: subject1, val: 'spam', neg: true, createdAt: new Date('2024-01-02') }),
-        createMockLabel({ subject: subject2, val: 'nsfw', neg: false, createdAt: new Date('2024-01-01') }),
+        createMockLabel({
+          subject: subject1,
+          val: 'spam',
+          neg: false,
+          createdAt: new Date('2024-01-01'),
+        }),
+        createMockLabel({
+          subject: subject1,
+          val: 'spam',
+          neg: true,
+          createdAt: new Date('2024-01-02'),
+        }),
+        createMockLabel({
+          subject: subject2,
+          val: 'nsfw',
+          neg: false,
+          createdAt: new Date('2024-01-01'),
+        }),
       ];
       vi.mocked(storage.getLabelsForSubjects).mockResolvedValue(mockLabels);
 
-      const result = await labelService.getActiveLabelsForSubjects([subject1, subject2]);
+      const result = await labelService.getActiveLabelsForSubjects([
+        subject1,
+        subject2,
+      ]);
 
       expect(result.get(subject1)?.length).toBe(0); // spam was negated
       expect(result.get(subject2)?.length).toBe(1); // nsfw is active
@@ -319,7 +365,9 @@ describe('LabelService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      vi.mocked(storage.createLabelDefinition).mockResolvedValue(mockDefinition);
+      vi.mocked(storage.createLabelDefinition).mockResolvedValue(
+        mockDefinition
+      );
 
       const result = await labelService.createLabelDefinition({
         value: 'custom-label',
@@ -356,10 +404,28 @@ describe('LabelService', () => {
 
     it('should get all label definitions', async () => {
       const mockDefinitions = [
-        { id: 1, value: 'spam', description: '', severity: 'warn' as const, localizedStrings: {}, createdAt: new Date(), updatedAt: new Date() },
-        { id: 2, value: 'nsfw', description: '', severity: 'alert' as const, localizedStrings: {}, createdAt: new Date(), updatedAt: new Date() },
+        {
+          id: 1,
+          value: 'spam',
+          description: '',
+          severity: 'warn' as const,
+          localizedStrings: {},
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 2,
+          value: 'nsfw',
+          description: '',
+          severity: 'alert' as const,
+          localizedStrings: {},
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ];
-      vi.mocked(storage.getAllLabelDefinitions).mockResolvedValue(mockDefinitions);
+      vi.mocked(storage.getAllLabelDefinitions).mockResolvedValue(
+        mockDefinitions
+      );
 
       const result = await labelService.getAllLabelDefinitions();
 
@@ -376,7 +442,9 @@ describe('LabelService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      vi.mocked(storage.updateLabelDefinition).mockResolvedValue(mockDefinition);
+      vi.mocked(storage.updateLabelDefinition).mockResolvedValue(
+        mockDefinition
+      );
 
       const result = await labelService.updateLabelDefinition('spam', {
         description: 'Updated description',

@@ -716,10 +716,16 @@ export const additionalRelays: FirehoseClient[] = [];
 
 // Initialize additional relay clients from environment variable
 export function initializeAdditionalRelays() {
-  const additionalRelayUrls = process.env.ADDITIONAL_RELAY_URLS?.split(',').map(url => url.trim()).filter(Boolean) || [];
+  const additionalRelayUrls =
+    process.env.ADDITIONAL_RELAY_URLS?.split(',')
+      .map((url) => url.trim())
+      .filter(Boolean) || [];
 
   if (additionalRelayUrls.length > 0) {
-    console.log(`[FIREHOSE] Initializing ${additionalRelayUrls.length} additional relay sources:`, additionalRelayUrls);
+    console.log(
+      `[FIREHOSE] Initializing ${additionalRelayUrls.length} additional relay sources:`,
+      additionalRelayUrls
+    );
 
     for (const relayUrl of additionalRelayUrls) {
       const client = new FirehoseClient(relayUrl);

@@ -15,7 +15,9 @@ describe('vite server utilities', () => {
       log('Test message');
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringMatching(/\d{1,2}:\d{2}:\d{2}\s[AP]M\s\[express\]\sTest message/)
+        expect.stringMatching(
+          /\d{1,2}:\d{2}:\d{2}\s[AP]M\s\[express\]\sTest message/
+        )
       );
     });
 

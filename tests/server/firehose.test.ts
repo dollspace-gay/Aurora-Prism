@@ -180,7 +180,10 @@ describe('Firehose Client', () => {
       }
 
       private processNext() {
-        if (this.activeProcessing < this.maxConcurrent && this.processingQueue.length > 0) {
+        if (
+          this.activeProcessing < this.maxConcurrent &&
+          this.processingQueue.length > 0
+        ) {
           const next = this.processingQueue.shift();
           if (next) this.processTask(next);
         }
@@ -307,20 +310,30 @@ describe('Firehose Client', () => {
   describe('Event Type Detection', () => {
     it('should identify commit events', () => {
       const isCommitEvent = (event: any): boolean => {
-        return event.$type === 'com.atproto.sync.subscribeRepos#commit' || event.commit !== undefined;
+        return (
+          event.$type === 'com.atproto.sync.subscribeRepos#commit' ||
+          event.commit !== undefined
+        );
       };
 
-      expect(isCommitEvent({ $type: 'com.atproto.sync.subscribeRepos#commit' })).toBe(true);
+      expect(
+        isCommitEvent({ $type: 'com.atproto.sync.subscribeRepos#commit' })
+      ).toBe(true);
       expect(isCommitEvent({ commit: {} })).toBe(true);
       expect(isCommitEvent({ identity: {} })).toBe(false);
     });
 
     it('should identify identity events', () => {
       const isIdentityEvent = (event: any): boolean => {
-        return event.$type === 'com.atproto.sync.subscribeRepos#identity' || event.handle !== undefined;
+        return (
+          event.$type === 'com.atproto.sync.subscribeRepos#identity' ||
+          event.handle !== undefined
+        );
       };
 
-      expect(isIdentityEvent({ $type: 'com.atproto.sync.subscribeRepos#identity' })).toBe(true);
+      expect(
+        isIdentityEvent({ $type: 'com.atproto.sync.subscribeRepos#identity' })
+      ).toBe(true);
       expect(isIdentityEvent({ handle: 'user.bsky.social' })).toBe(true);
       expect(isIdentityEvent({ commit: {} })).toBe(false);
     });
@@ -330,7 +343,9 @@ describe('Firehose Client', () => {
         return event.$type === 'com.atproto.sync.subscribeRepos#account';
       };
 
-      expect(isAccountEvent({ $type: 'com.atproto.sync.subscribeRepos#account' })).toBe(true);
+      expect(
+        isAccountEvent({ $type: 'com.atproto.sync.subscribeRepos#account' })
+      ).toBe(true);
       expect(isAccountEvent({ commit: {} })).toBe(false);
     });
   });
@@ -352,7 +367,9 @@ describe('Firehose Client', () => {
 
       expect(shouldProcessCollection('app.bsky.feed.post')).toBe(true);
       expect(shouldProcessCollection('app.bsky.feed.like')).toBe(true);
-      expect(shouldProcessCollection('app.bsky.unknown.collection')).toBe(false);
+      expect(shouldProcessCollection('app.bsky.unknown.collection')).toBe(
+        false
+      );
     });
 
     it('should extract collection from path', () => {
@@ -364,8 +381,12 @@ describe('Firehose Client', () => {
         return null;
       };
 
-      expect(extractCollection('app.bsky.feed.post/abc123')).toBe('app.bsky.feed.post');
-      expect(extractCollection('app.bsky.graph.follow/xyz')).toBe('app.bsky.graph.follow');
+      expect(extractCollection('app.bsky.feed.post/abc123')).toBe(
+        'app.bsky.feed.post'
+      );
+      expect(extractCollection('app.bsky.graph.follow/xyz')).toBe(
+        'app.bsky.graph.follow'
+      );
     });
   });
 });
@@ -448,7 +469,8 @@ describe('Backfill Service', () => {
 
       const cutoff = calculateCutoff(7);
       const now = new Date();
-      const daysDiff = (now.getTime() - cutoff.getTime()) / (24 * 60 * 60 * 1000);
+      const daysDiff =
+        (now.getTime() - cutoff.getTime()) / (24 * 60 * 60 * 1000);
 
       expect(Math.round(daysDiff)).toBe(7);
     });

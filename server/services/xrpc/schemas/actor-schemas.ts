@@ -23,7 +23,10 @@ export const getProfilesSchema = z.object({
       // Handle single string (could be comma-separated)
       if (typeof val === 'string') {
         // Split by comma and filter empty values
-        const items = val.split(',').map((s) => s.trim()).filter((s) => s !== '');
+        const items = val
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s !== '');
         return items.length > 0 ? items : [val.trim()];
       }
       return [];

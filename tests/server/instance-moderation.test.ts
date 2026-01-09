@@ -10,7 +10,12 @@ vi.mock('../../server/config/instance-moderation', () => ({
     autoHideThreshold: 10,
   },
   getEnabledLabels: vi.fn().mockReturnValue([
-    { value: 'spam', severity: 'warn', reason: 'quality', description: 'Spam' },
+    {
+      value: 'spam',
+      severity: 'warn',
+      reason: 'quality',
+      description: 'Spam',
+    },
   ]),
   getLabelConfig: vi.fn().mockReturnValue({
     value: 'spam',

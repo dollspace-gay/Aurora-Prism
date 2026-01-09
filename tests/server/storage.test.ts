@@ -53,8 +53,16 @@ describe('Storage Operations', () => {
     });
 
     it('should store multiple users', () => {
-      const user1 = { ...testUser, did: 'did:plc:user1', handle: 'user1.bsky.social' };
-      const user2 = { ...testUser, did: 'did:plc:user2', handle: 'user2.bsky.social' };
+      const user1 = {
+        ...testUser,
+        did: 'did:plc:user1',
+        handle: 'user1.bsky.social',
+      };
+      const user2 = {
+        ...testUser,
+        did: 'did:plc:user2',
+        handle: 'user2.bsky.social',
+      };
 
       mockStorage.upsertUser(user1);
       mockStorage.upsertUser(user2);
@@ -248,7 +256,10 @@ describe('Storage Operations', () => {
     it('should create and retrieve a mute', () => {
       mockStorage.upsertMute(testMute);
 
-      const retrieved = mockStorage.getMute(testMute.targetDid, testMute.actorDid);
+      const retrieved = mockStorage.getMute(
+        testMute.targetDid,
+        testMute.actorDid
+      );
       expect(retrieved).toEqual(testMute);
     });
 
@@ -323,8 +334,15 @@ describe('Storage Operations', () => {
 
   describe('Clear Operations', () => {
     it('should clear all data', () => {
-      mockStorage.upsertUser({ did: 'did:plc:test', handle: 'test.bsky.social' });
-      mockStorage.upsertPost({ uri: 'at://test', cid: 'cid', authorDid: 'did:plc:test' });
+      mockStorage.upsertUser({
+        did: 'did:plc:test',
+        handle: 'test.bsky.social',
+      });
+      mockStorage.upsertPost({
+        uri: 'at://test',
+        cid: 'cid',
+        authorDid: 'did:plc:test',
+      });
       mockStorage.upsertLike({ uri: 'at://like', userDid: 'did:plc:test' });
 
       mockStorage._clear();
@@ -358,14 +376,23 @@ describe('Storage Mock Verification', () => {
   });
 
   it('should allow implementation overrides', () => {
-    mockStorage.getUser.mockReturnValue({ did: 'did:plc:custom', handle: 'custom.bsky.social' });
+    mockStorage.getUser.mockReturnValue({
+      did: 'did:plc:custom',
+      handle: 'custom.bsky.social',
+    });
 
     const result = mockStorage.getUser('any-did');
-    expect(result).toEqual({ did: 'did:plc:custom', handle: 'custom.bsky.social' });
+    expect(result).toEqual({
+      did: 'did:plc:custom',
+      handle: 'custom.bsky.social',
+    });
   });
 
   it('should support async mock implementations', async () => {
-    mockStorage.getTimeline.mockResolvedValue([{ uri: 'at://post1' }, { uri: 'at://post2' }]);
+    mockStorage.getTimeline.mockResolvedValue([
+      { uri: 'at://post1' },
+      { uri: 'at://post2' },
+    ]);
 
     const timeline = await mockStorage.getTimeline();
     expect(timeline).toHaveLength(2);

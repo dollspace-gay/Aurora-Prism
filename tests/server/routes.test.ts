@@ -344,7 +344,10 @@ describe('Route Handlers', () => {
         };
 
         mockRes.setHeader('Content-Type', 'image/jpeg');
-        mockRes.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        mockRes.setHeader(
+          'Cache-Control',
+          'public, max-age=31536000, immutable'
+        );
         mockRes.send(Buffer.from('fake-image-data'));
 
         expect(mockRes.headers['Content-Type']).toBe('image/jpeg');
@@ -539,7 +542,9 @@ describe('Request/Response Mock Behavior', () => {
     res.cookie('session', 'abc123', { httpOnly: true });
     res.clearCookie('old_session');
 
-    expect(res.cookie).toHaveBeenCalledWith('session', 'abc123', { httpOnly: true });
+    expect(res.cookie).toHaveBeenCalledWith('session', 'abc123', {
+      httpOnly: true,
+    });
     expect(res.clearCookie).toHaveBeenCalledWith('old_session');
   });
 
@@ -600,7 +605,10 @@ describe('Auth Service Mock', () => {
   });
 
   it('should create session', async () => {
-    const session = await mockAuth.createSession('user.bsky.social', 'password');
+    const session = await mockAuth.createSession(
+      'user.bsky.social',
+      'password'
+    );
 
     expect(session.did).toMatch(/^did:plc:/);
     expect(session.accessJwt).toBeTruthy();
@@ -608,7 +616,10 @@ describe('Auth Service Mock', () => {
   });
 
   it('should refresh session', async () => {
-    const session = await mockAuth.createSession('user.bsky.social', 'password');
+    const session = await mockAuth.createSession(
+      'user.bsky.social',
+      'password'
+    );
     const refreshed = await mockAuth.refreshSession(session.refreshJwt);
 
     expect(refreshed.did).toBe(session.did);
@@ -616,14 +627,20 @@ describe('Auth Service Mock', () => {
   });
 
   it('should validate token', async () => {
-    const session = await mockAuth.createSession('user.bsky.social', 'password');
+    const session = await mockAuth.createSession(
+      'user.bsky.social',
+      'password'
+    );
     const did = await mockAuth.validateToken(session.accessJwt);
 
     expect(did).toBe(session.did);
   });
 
   it('should delete session', async () => {
-    const session = await mockAuth.createSession('user.bsky.social', 'password');
+    const session = await mockAuth.createSession(
+      'user.bsky.social',
+      'password'
+    );
     await mockAuth.deleteSession(session.accessJwt);
 
     const retrieved = await mockAuth.getSession(session.accessJwt);
@@ -631,7 +648,9 @@ describe('Auth Service Mock', () => {
   });
 
   it('should reject invalid refresh token', async () => {
-    await expect(mockAuth.refreshSession('invalid-token')).rejects.toThrow('Invalid refresh token');
+    await expect(mockAuth.refreshSession('invalid-token')).rejects.toThrow(
+      'Invalid refresh token'
+    );
   });
 });
 
@@ -768,7 +787,14 @@ describe('Redis Mock', () => {
 
   describe('Stream Operations', () => {
     it('should add to stream', async () => {
-      const id = await mockRedis.xadd('stream', '*', 'field1', 'value1', 'field2', 'value2');
+      const id = await mockRedis.xadd(
+        'stream',
+        '*',
+        'field1',
+        'value1',
+        'field2',
+        'value2'
+      );
 
       expect(id).toMatch(/\d+-0/);
     });

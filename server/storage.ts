@@ -731,9 +731,7 @@ export class DatabaseStorage implements IStorage {
    * @param fn Async function that receives a transaction object
    * @returns Result of the transaction function
    */
-  async transaction<T>(
-    fn: (tx: DbConnection) => Promise<T>
-  ): Promise<T> {
+  async transaction<T>(fn: (tx: DbConnection) => Promise<T>): Promise<T> {
     return await this.db.transaction(fn);
   }
 
@@ -3961,12 +3959,16 @@ export class DatabaseStorage implements IStorage {
       return data;
     }
 
-    console.log('[STORAGE] No Redis counts, falling back to PostgreSQL COUNT queries');
+    console.log(
+      '[STORAGE] No Redis counts, falling back to PostgreSQL COUNT queries'
+    );
 
     // No Redis counts - fallback to PostgreSQL query (only on first load)
     if (this.statsQueryInProgress && this.statsQueryPromise) {
       // Another request is already fetching, wait for it instead of returning zeros
-      console.log('[STORAGE] Stats query already in progress, waiting for result...');
+      console.log(
+        '[STORAGE] Stats query already in progress, waiting for result...'
+      );
       return this.statsQueryPromise;
     }
 
@@ -4024,7 +4026,9 @@ export class DatabaseStorage implements IStorage {
         this.statsCache = { data, timestamp: Date.now() };
 
         // Update Redis counters with accurate counts
-        const { redisQueue: redisQueueUpdate } = await import('./services/redis-queue');
+        const { redisQueue: redisQueueUpdate } = await import(
+          './services/redis-queue'
+        );
         await Promise.all([
           redisQueueUpdate.setRecordCount('users', data.totalUsers),
           redisQueueUpdate.setRecordCount('posts', data.totalPosts),

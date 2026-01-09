@@ -127,7 +127,10 @@ describe('Notification Service', () => {
     });
 
     it('should exclude self-notifications', () => {
-      const shouldNotify = (actorDid: string, recipientDid: string): boolean => {
+      const shouldNotify = (
+        actorDid: string,
+        recipientDid: string
+      ): boolean => {
         return actorDid !== recipientDid;
       };
 
@@ -158,7 +161,9 @@ describe('Notification Service', () => {
 
   describe('Unread Count', () => {
     it('should count unread notifications', () => {
-      const countUnread = (notifications: Array<{ isRead: boolean }>): number => {
+      const countUnread = (
+        notifications: Array<{ isRead: boolean }>
+      ): number => {
         return notifications.filter((n) => !n.isRead).length;
       };
 
@@ -177,9 +182,8 @@ describe('Notification Service', () => {
         notifications: Array<{ isRead: boolean; indexedAt: Date }>,
         seenAt: Date
       ): number => {
-        return notifications.filter(
-          (n) => !n.isRead && n.indexedAt > seenAt
-        ).length;
+        return notifications.filter((n) => !n.isRead && n.indexedAt > seenAt)
+          .length;
       };
 
       const seenAt = new Date('2024-01-01T12:00:00Z');
@@ -274,7 +278,12 @@ describe('Moderation Service', () => {
   });
 
   describe('Report Status', () => {
-    const REPORT_STATUSES = ['pending', 'reviewed', 'resolved', 'escalated'] as const;
+    const REPORT_STATUSES = [
+      'pending',
+      'reviewed',
+      'resolved',
+      'escalated',
+    ] as const;
 
     it('should validate report status', () => {
       const isValidStatus = (status: string): boolean => {
@@ -482,7 +491,10 @@ describe('Label Service', () => {
 describe('Content Filter', () => {
   describe('Visibility Rules', () => {
     it('should determine content visibility', () => {
-      const getVisibility = (labels: string[], userPrefs: Record<string, string>): string => {
+      const getVisibility = (
+        labels: string[],
+        userPrefs: Record<string, string>
+      ): string => {
         for (const label of labels) {
           const pref = userPrefs[label];
           if (pref === 'hide') return 'hidden';
@@ -499,12 +511,24 @@ describe('Content Filter', () => {
     });
 
     it('should apply most restrictive rule', () => {
-      const getMostRestrictive = (labels: string[], prefs: Record<string, string>): string => {
-        const priorities: Record<string, number> = { hidden: 3, warned: 2, visible: 1 };
+      const getMostRestrictive = (
+        labels: string[],
+        prefs: Record<string, string>
+      ): string => {
+        const priorities: Record<string, number> = {
+          hidden: 3,
+          warned: 2,
+          visible: 1,
+        };
         let result = 'visible';
 
         for (const label of labels) {
-          const visibility = prefs[label] === 'hide' ? 'hidden' : prefs[label] === 'warn' ? 'warned' : 'visible';
+          const visibility =
+            prefs[label] === 'hide'
+              ? 'hidden'
+              : prefs[label] === 'warn'
+                ? 'warned'
+                : 'visible';
           if (priorities[visibility] > priorities[result]) {
             result = visibility;
           }
@@ -520,9 +544,14 @@ describe('Content Filter', () => {
 
   describe('User Age Verification', () => {
     it('should check adult content eligibility', () => {
-      const canViewAdultContent = (birthDate: Date | null, minAge: number = 18): boolean => {
+      const canViewAdultContent = (
+        birthDate: Date | null,
+        minAge: number = 18
+      ): boolean => {
         if (!birthDate) return false;
-        const age = Math.floor((Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+        const age = Math.floor(
+          (Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
+        );
         return age >= minAge;
       };
 
@@ -553,7 +582,11 @@ describe('Mute/Block Logic', () => {
     });
 
     it('should allow viewing muted profiles directly', () => {
-      const canViewProfile = (targetDid: string, viewerMutes: Set<string>, isDirect: boolean): boolean => {
+      const canViewProfile = (
+        targetDid: string,
+        viewerMutes: Set<string>,
+        isDirect: boolean
+      ): boolean => {
         if (isDirect) return true; // Can always view directly
         return !viewerMutes.has(targetDid);
       };
@@ -567,11 +600,17 @@ describe('Mute/Block Logic', () => {
 
   describe('Block Behavior', () => {
     it('should hide blocked users completely', () => {
-      const isBlocked = (viewerDid: string, targetDid: string, blocks: Map<string, Set<string>>): boolean => {
+      const isBlocked = (
+        viewerDid: string,
+        targetDid: string,
+        blocks: Map<string, Set<string>>
+      ): boolean => {
         return blocks.get(viewerDid)?.has(targetDid) || false;
       };
 
-      const blocks = new Map([['did:plc:viewer', new Set(['did:plc:blocked'])]]);
+      const blocks = new Map([
+        ['did:plc:viewer', new Set(['did:plc:blocked'])],
+      ]);
 
       expect(isBlocked('did:plc:viewer', 'did:plc:blocked', blocks)).toBe(true);
       expect(isBlocked('did:plc:viewer', 'did:plc:other', blocks)).toBe(false);
@@ -587,9 +626,7 @@ describe('Mute/Block Logic', () => {
         blockedBy: blocks.get(did2)?.has(did1) || false,
       });
 
-      const blocks = new Map([
-        ['did:plc:user1', new Set(['did:plc:user2'])],
-      ]);
+      const blocks = new Map([['did:plc:user1', new Set(['did:plc:user2'])]]);
 
       const result = hasBlock('did:plc:user1', 'did:plc:user2', blocks);
       expect(result.blocking).toBe(true);
@@ -611,8 +648,16 @@ describe('Mute/Block Logic', () => {
 
       const mutedThreads = new Set(['at://did:plc:user/post/root']);
 
-      expect(isThreadMuted('at://did:plc:user/post/reply', 'at://did:plc:user/post/root', mutedThreads)).toBe(true);
-      expect(isThreadMuted('at://did:plc:user/post/other', null, mutedThreads)).toBe(false);
+      expect(
+        isThreadMuted(
+          'at://did:plc:user/post/reply',
+          'at://did:plc:user/post/root',
+          mutedThreads
+        )
+      ).toBe(true);
+      expect(
+        isThreadMuted('at://did:plc:user/post/other', null, mutedThreads)
+      ).toBe(false);
     });
   });
 });

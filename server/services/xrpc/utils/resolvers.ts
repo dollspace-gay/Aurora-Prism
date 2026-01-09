@@ -288,7 +288,9 @@ export async function resolveActor(
   let user = await storage.getUserByHandle(handle);
 
   if (!user) {
-    console.log(`[RESOLVE_ACTOR] User not found in database: ${actor}, attempting to fetch from network`);
+    console.log(
+      `[RESOLVE_ACTOR] User not found in database: ${actor}, attempting to fetch from network`
+    );
 
     try {
       // Resolve handle to DID
@@ -296,7 +298,9 @@ export async function resolveActor(
       const did = await didResolver.resolveHandle(handle);
 
       if (did) {
-        console.log(`[RESOLVE_ACTOR] Resolved ${handle} to ${did}, fetching profile from PDS`);
+        console.log(
+          `[RESOLVE_ACTOR] Resolved ${handle} to ${did}, fetching profile from PDS`
+        );
 
         // Fetch user from their PDS
         const { pdsDataFetcher } = await import('../../pds-data-fetcher');
@@ -306,7 +310,9 @@ export async function resolveActor(
         user = await storage.getUserByHandle(handle);
 
         if (user) {
-          console.log(`[RESOLVE_ACTOR] Successfully fetched and indexed user: ${handle} -> ${user.did}`);
+          console.log(
+            `[RESOLVE_ACTOR] Successfully fetched and indexed user: ${handle} -> ${user.did}`
+          );
         }
       }
     } catch (error) {
@@ -314,7 +320,9 @@ export async function resolveActor(
     }
 
     if (!user) {
-      console.log(`[RESOLVE_ACTOR] User not found even after fetch attempt: ${actor}`);
+      console.log(
+        `[RESOLVE_ACTOR] User not found even after fetch attempt: ${actor}`
+      );
       res.status(404).json({ error: 'NotFound', message: 'Actor not found' });
       return null;
     }

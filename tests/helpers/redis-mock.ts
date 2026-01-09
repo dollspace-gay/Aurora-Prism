@@ -5,7 +5,10 @@ import { vi } from 'vitest';
  */
 export function createMockRedis() {
   const store = new Map<string, string>();
-  const streams = new Map<string, Array<{ id: string; fields: Record<string, string> }>>();
+  const streams = new Map<
+    string,
+    Array<{ id: string; fields: Record<string, string> }>
+  >();
   const consumerGroups = new Map<string, Set<string>>();
 
   return {
@@ -69,7 +72,9 @@ export function createMockRedis() {
       }
       return Promise.resolve('OK');
     }),
-    xlen: vi.fn((stream: string) => Promise.resolve(streams.get(stream)?.length || 0)),
+    xlen: vi.fn((stream: string) =>
+      Promise.resolve(streams.get(stream)?.length || 0)
+    ),
     xtrim: vi.fn(() => Promise.resolve(0)),
     xinfo: vi.fn(() => Promise.resolve([])),
 
@@ -141,7 +146,10 @@ export function createMockRedisQueue() {
 
     // Test helpers
     _messages: messages,
-    _simulateMessage: async (msg: any, handler: (msg: any) => Promise<void>) => {
+    _simulateMessage: async (
+      msg: any,
+      handler: (msg: any) => Promise<void>
+    ) => {
       await handler(msg);
     },
     _clear: () => {

@@ -37,8 +37,14 @@ describe('LexiconValidator', () => {
         text: 'Reply to something',
         createdAt: '2024-01-01T00:00:00.000Z',
         reply: {
-          root: { uri: 'at://did:plc:root/app.bsky.feed.post/abc', cid: 'cidroot' },
-          parent: { uri: 'at://did:plc:parent/app.bsky.feed.post/def', cid: 'cidparent' },
+          root: {
+            uri: 'at://did:plc:root/app.bsky.feed.post/abc',
+            cid: 'cidroot',
+          },
+          parent: {
+            uri: 'at://did:plc:parent/app.bsky.feed.post/def',
+            cid: 'cidparent',
+          },
         },
       };
       expect(() => postSchema.parse(post)).not.toThrow();
@@ -189,9 +195,7 @@ describe('LexiconValidator', () => {
         $type: 'app.bsky.graph.starterpack',
         name: 'My Starter Pack',
         description: 'Great accounts to follow',
-        feeds: [
-          { uri: 'at://did:plc:abc/app.bsky.feed.generator/123' },
-        ],
+        feeds: [{ uri: 'at://did:plc:abc/app.bsky.feed.generator/123' }],
         createdAt: '2024-01-01T00:00:00.000Z',
       };
       expect(() => starterPackSchema.parse(pack)).not.toThrow();
@@ -294,7 +298,9 @@ describe('LexiconValidator', () => {
         displayName: 'My Feed',
         createdAt: '2024-01-01T00:00:00.000Z',
       };
-      expect(validator.validate('app.bsky.feed.generator', generator)).toBe(true);
+      expect(validator.validate('app.bsky.feed.generator', generator)).toBe(
+        true
+      );
     });
 
     it('should validate starterpack records', () => {
@@ -332,7 +338,9 @@ describe('LexiconValidator', () => {
         policies: {},
         createdAt: '2024-01-01T00:00:00.000Z',
       };
-      expect(validator.validate('app.bsky.labeler.service', labeler)).toBe(true);
+      expect(validator.validate('app.bsky.labeler.service', labeler)).toBe(
+        true
+      );
     });
 
     it('should pass through unknown record types', () => {

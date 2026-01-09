@@ -64,7 +64,9 @@ vi.mock('../../server/transaction-utils', () => ({
 describe('Event Processor Utility Functions', () => {
   describe('sanitizeText', () => {
     it('should return undefined for null input', () => {
-      const sanitizeText = (text: string | null | undefined): string | undefined => {
+      const sanitizeText = (
+        text: string | null | undefined
+      ): string | undefined => {
         if (!text) return undefined;
         return text.replace(/\u0000/g, '');
       };
@@ -74,7 +76,9 @@ describe('Event Processor Utility Functions', () => {
     });
 
     it('should return undefined for empty string', () => {
-      const sanitizeText = (text: string | null | undefined): string | undefined => {
+      const sanitizeText = (
+        text: string | null | undefined
+      ): string | undefined => {
         if (!text) return undefined;
         return text.replace(/\u0000/g, '');
       };
@@ -83,7 +87,9 @@ describe('Event Processor Utility Functions', () => {
     });
 
     it('should remove null bytes from text', () => {
-      const sanitizeText = (text: string | null | undefined): string | undefined => {
+      const sanitizeText = (
+        text: string | null | undefined
+      ): string | undefined => {
         if (!text) return undefined;
         return text.replace(/\u0000/g, '');
       };
@@ -93,7 +99,9 @@ describe('Event Processor Utility Functions', () => {
     });
 
     it('should return text as-is if no null bytes', () => {
-      const sanitizeText = (text: string | null | undefined): string | undefined => {
+      const sanitizeText = (
+        text: string | null | undefined
+      ): string | undefined => {
         if (!text) return undefined;
         return text.replace(/\u0000/g, '');
       };
@@ -104,7 +112,9 @@ describe('Event Processor Utility Functions', () => {
 
   describe('sanitizeRequiredText', () => {
     it('should return empty string for null/undefined', () => {
-      const sanitizeRequiredText = (text: string | null | undefined): string => {
+      const sanitizeRequiredText = (
+        text: string | null | undefined
+      ): string => {
         if (!text) return '';
         return text.replace(/\u0000/g, '');
       };
@@ -114,7 +124,9 @@ describe('Event Processor Utility Functions', () => {
     });
 
     it('should remove null bytes and return text', () => {
-      const sanitizeRequiredText = (text: string | null | undefined): string => {
+      const sanitizeRequiredText = (
+        text: string | null | undefined
+      ): string => {
         if (!text) return '';
         return text.replace(/\u0000/g, '');
       };
@@ -195,8 +207,10 @@ describe('Event Processor Utility Functions', () => {
       if (!blob) return null;
       if (typeof blob === 'string') return blob === 'undefined' ? null : blob;
       if (blob.ref) {
-        if (typeof blob.ref === 'string') return blob.ref !== 'undefined' ? blob.ref : null;
-        if (blob.ref.$link) return blob.ref.$link !== 'undefined' ? blob.ref.$link : null;
+        if (typeof blob.ref === 'string')
+          return blob.ref !== 'undefined' ? blob.ref : null;
+        if (blob.ref.$link)
+          return blob.ref.$link !== 'undefined' ? blob.ref.$link : null;
       }
       if (blob.cid) return blob.cid !== 'undefined' ? blob.cid : null;
       return null;
@@ -208,7 +222,10 @@ describe('Event Processor Utility Functions', () => {
       const normalized = { ...embed };
 
       // Handle external embeds with thumbnails
-      if (normalized.$type === 'app.bsky.embed.external' && normalized.external) {
+      if (
+        normalized.$type === 'app.bsky.embed.external' &&
+        normalized.external
+      ) {
         normalized.external = { ...normalized.external };
         if (normalized.external.thumb) {
           const thumbCid = extractBlobCid(normalized.external.thumb);
@@ -219,7 +236,10 @@ describe('Event Processor Utility Functions', () => {
       }
 
       // Handle image embeds
-      if (normalized.$type === 'app.bsky.embed.images' && Array.isArray(normalized.images)) {
+      if (
+        normalized.$type === 'app.bsky.embed.images' &&
+        Array.isArray(normalized.images)
+      ) {
         normalized.images = normalized.images
           .map((img: any) => {
             if (!img.image) return null;
@@ -235,7 +255,10 @@ describe('Event Processor Utility Functions', () => {
       }
 
       // Handle recordWithMedia
-      if (normalized.$type === 'app.bsky.embed.recordWithMedia' && normalized.media) {
+      if (
+        normalized.$type === 'app.bsky.embed.recordWithMedia' &&
+        normalized.media
+      ) {
         normalized.media = normalizeEmbed(normalized.media);
         if (!normalized.media) {
           return {
@@ -314,10 +337,7 @@ describe('Event Processor Utility Functions', () => {
     it('should return null if all images are invalid', () => {
       const embed = {
         $type: 'app.bsky.embed.images',
-        images: [
-          { image: null },
-          { image: { ref: { $link: 'undefined' } } },
-        ],
+        images: [{ image: null }, { image: { ref: { $link: 'undefined' } } }],
       };
 
       const result = normalizeEmbed(embed);
@@ -377,7 +397,9 @@ describe('EventProcessor Class', () => {
   describe('Configuration', () => {
     it('should allow setting skip PDS fetching flag', async () => {
       // This tests the setSkipPdsFetching method
-      const { EventProcessor } = await import('../../server/services/event-processor');
+      const { EventProcessor } = await import(
+        '../../server/services/event-processor'
+      );
       const processor = new EventProcessor(mockStorage as any);
 
       // No error should be thrown
@@ -386,7 +408,9 @@ describe('EventProcessor Class', () => {
     });
 
     it('should allow setting skip data collection check flag', async () => {
-      const { EventProcessor } = await import('../../server/services/event-processor');
+      const { EventProcessor } = await import(
+        '../../server/services/event-processor'
+      );
       const processor = new EventProcessor(mockStorage as any);
 
       // No error should be thrown
@@ -395,7 +419,9 @@ describe('EventProcessor Class', () => {
     });
 
     it('should allow invalidating data collection cache', async () => {
-      const { EventProcessor } = await import('../../server/services/event-processor');
+      const { EventProcessor } = await import(
+        '../../server/services/event-processor'
+      );
       const processor = new EventProcessor(mockStorage as any);
 
       // No error should be thrown
@@ -405,7 +431,9 @@ describe('EventProcessor Class', () => {
 
   describe('Initialization', () => {
     it('should create processor with default storage', async () => {
-      const { EventProcessor } = await import('../../server/services/event-processor');
+      const { EventProcessor } = await import(
+        '../../server/services/event-processor'
+      );
       const processor = new EventProcessor(mockStorage as any);
 
       // Processor should be created without throwing
@@ -435,7 +463,10 @@ describe('AT Protocol Record Type Detection', () => {
   Object.entries(COLLECTION_TYPES).forEach(([collection, type]) => {
     it(`should identify ${collection} as ${type}`, () => {
       const getRecordType = (collection: string) => {
-        return COLLECTION_TYPES[collection as keyof typeof COLLECTION_TYPES] || 'unknown';
+        return (
+          COLLECTION_TYPES[collection as keyof typeof COLLECTION_TYPES] ||
+          'unknown'
+        );
       };
 
       expect(getRecordType(collection)).toBe(type);
@@ -444,7 +475,10 @@ describe('AT Protocol Record Type Detection', () => {
 
   it('should return unknown for unrecognized collection', () => {
     const getRecordType = (collection: string) => {
-      return COLLECTION_TYPES[collection as keyof typeof COLLECTION_TYPES] || 'unknown';
+      return (
+        COLLECTION_TYPES[collection as keyof typeof COLLECTION_TYPES] ||
+        'unknown'
+      );
     };
 
     expect(getRecordType('com.unknown.collection')).toBe('unknown');
@@ -597,7 +631,10 @@ describe('Facet Parsing', () => {
     const mentions: string[] = [];
     for (const facet of facets) {
       for (const feature of facet.features) {
-        if (feature.$type === 'app.bsky.richtext.facet#mention' && feature.did) {
+        if (
+          feature.$type === 'app.bsky.richtext.facet#mention' &&
+          feature.did
+        ) {
           mentions.push(feature.did);
         }
       }
@@ -669,9 +706,7 @@ describe('Facet Parsing', () => {
     const facets: Facet[] = [
       {
         index: { byteStart: 0, byteEnd: 10 },
-        features: [
-          { $type: 'app.bsky.richtext.facet#tag', tag: 'atproto' },
-        ],
+        features: [{ $type: 'app.bsky.richtext.facet#tag', tag: 'atproto' }],
       },
     ];
 

@@ -62,8 +62,9 @@ async function fixFutureDatedPosts() {
     console.log(`[FIX] Updated ${feedItemsResult.rowCount} feed items`);
 
     console.log('[FIX] ✓ Future-dated posts have been fixed!');
-    console.log('[FIX] These posts will now appear in the correct chronological order.');
-
+    console.log(
+      '[FIX] These posts will now appear in the correct chronological order.'
+    );
   } catch (error) {
     console.error('[FIX] Error fixing future-dated posts:', error);
     throw error;

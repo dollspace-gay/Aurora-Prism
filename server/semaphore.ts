@@ -141,7 +141,8 @@ export async function acquireWithTimeout(
       }),
       new Promise<never>((_, reject) => {
         timeoutHandle = setTimeout(
-          () => reject(new Error(`Semaphore acquire timeout after ${timeoutMs}ms`)),
+          () =>
+            reject(new Error(`Semaphore acquire timeout after ${timeoutMs}ms`)),
           timeoutMs
         );
       }),

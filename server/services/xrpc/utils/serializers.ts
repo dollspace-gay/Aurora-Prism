@@ -340,9 +340,7 @@ export async function serializePosts(
     viewerDid ? storage.getPostViewerStates(postUris, viewerDid) : new Map(),
     labelService.getActiveLabelsForSubjects(postUris),
     labelService.getActiveLabelsForSubjects(authorDids),
-    viewerDid
-      ? storage.getListMutesForUsers(viewerDid, authorDids)
-      : new Map(),
+    viewerDid ? storage.getListMutesForUsers(viewerDid, authorDids) : new Map(),
     viewerDid
       ? storage.getListBlocksForUsers(viewerDid, authorDids)
       : new Map(),
@@ -480,11 +478,7 @@ export async function serializePosts(
 
       if (post.embed) {
         // Ensure embed has proper $type field and is an object
-        if (
-          post.embed &&
-          typeof post.embed === 'object' &&
-          post.embed.$type
-        ) {
+        if (post.embed && typeof post.embed === 'object' && post.embed.$type) {
           // Transform blob references to CDN URLs
           const transformedEmbed = { ...post.embed };
 
@@ -588,8 +582,7 @@ export async function serializePosts(
               $type: 'app.bsky.actor.defs#profileAssociated',
               lists: authorCounts.get(post.authorDid)?.lists || 0,
               feedgens: authorCounts.get(post.authorDid)?.feedgens || 0,
-              starterPacks:
-                authorCounts.get(post.authorDid)?.starterPacks || 0,
+              starterPacks: authorCounts.get(post.authorDid)?.starterPacks || 0,
               labeler: authorCounts.get(post.authorDid)?.isLabeler || false,
               chat: undefined, // TODO: Implement chat settings when chat functionality is added
               activitySubscription: undefined, // TODO: Implement activity subscription

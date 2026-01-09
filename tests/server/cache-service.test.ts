@@ -37,19 +37,26 @@ describe('CacheService', () => {
     it('should do nothing when not initialized', async () => {
       const aggregations = new Map([['uri1', { replyCount: 5 }]]);
       // Should not throw
-      await expect(cacheService.setPostAggregations(aggregations)).resolves.toBeUndefined();
+      await expect(
+        cacheService.setPostAggregations(aggregations)
+      ).resolves.toBeUndefined();
     });
   });
 
   describe('invalidatePostAggregation - not initialized', () => {
     it('should do nothing when not initialized', async () => {
-      await expect(cacheService.invalidatePostAggregation('uri1')).resolves.toBeUndefined();
+      await expect(
+        cacheService.invalidatePostAggregation('uri1')
+      ).resolves.toBeUndefined();
     });
   });
 
   describe('getPostViewerStates - not initialized', () => {
     it('should return null when not initialized', async () => {
-      const result = await cacheService.getPostViewerStates(['uri1'], 'viewer1');
+      const result = await cacheService.getPostViewerStates(
+        ['uri1'],
+        'viewer1'
+      );
       expect(result).toBeNull();
     });
   });
@@ -57,13 +64,17 @@ describe('CacheService', () => {
   describe('setPostViewerStates - not initialized', () => {
     it('should do nothing when not initialized', async () => {
       const viewerStates = new Map([['uri1', { liked: true }]]);
-      await expect(cacheService.setPostViewerStates(viewerStates, 'viewer1')).resolves.toBeUndefined();
+      await expect(
+        cacheService.setPostViewerStates(viewerStates, 'viewer1')
+      ).resolves.toBeUndefined();
     });
   });
 
   describe('invalidatePostViewerState - not initialized', () => {
     it('should do nothing when not initialized', async () => {
-      await expect(cacheService.invalidatePostViewerState('uri1', 'viewer1')).resolves.toBeUndefined();
+      await expect(
+        cacheService.invalidatePostViewerState('uri1', 'viewer1')
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -77,7 +88,9 @@ describe('CacheService', () => {
   describe('setThreadContexts - not initialized', () => {
     it('should do nothing when not initialized', async () => {
       const contexts = new Map([['uri1', { parentUri: 'at://parent' }]]);
-      await expect(cacheService.setThreadContexts(contexts)).resolves.toBeUndefined();
+      await expect(
+        cacheService.setThreadContexts(contexts)
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -113,7 +126,9 @@ describe('CacheService', () => {
         embeds: new Map(),
         labels: new Map(),
       };
-      await expect(cacheService.setHydrationState('key1', state)).resolves.toBeUndefined();
+      await expect(
+        cacheService.setHydrationState('key1', state)
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -126,7 +141,9 @@ describe('CacheService', () => {
 
   describe('generic set - not initialized', () => {
     it('should do nothing when not initialized', async () => {
-      await expect(cacheService.set('mykey', { foo: 'bar' })).resolves.toBeUndefined();
+      await expect(
+        cacheService.set('mykey', { foo: 'bar' })
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -138,7 +155,9 @@ describe('CacheService', () => {
 
   describe('invalidatePattern - not initialized', () => {
     it('should do nothing when not initialized', async () => {
-      await expect(cacheService.invalidatePattern('test:*')).resolves.toBeUndefined();
+      await expect(
+        cacheService.invalidatePattern('test:*')
+      ).resolves.toBeUndefined();
     });
   });
 

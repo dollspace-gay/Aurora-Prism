@@ -16,7 +16,7 @@ import {
   getStarterPacksWithMembershipSchema,
   getOnboardingSuggestedStarterPacksSchema,
 } from '../schemas';
-import { getProfiles } from "../utils/profile-builder";
+import { getProfiles } from '../utils/profile-builder';
 
 /**
  * Get a single starter pack by URI
@@ -47,10 +47,7 @@ export async function getStarterPack(
     };
 
     // Use _getProfiles for complete creator profileViewBasic
-    const creatorProfiles = await getProfiles(
-      [packData.creatorDid],
-      req
-    );
+    const creatorProfiles = await getProfiles([packData.creatorDid], req);
 
     if (creatorProfiles.length === 0) {
       return res.status(500).json({
@@ -122,10 +119,7 @@ export async function getStarterPacks(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(packs.map((p) => p.creatorDid))];
-    const creatorProfiles = await getProfiles(
-      creatorDids,
-      req
-    );
+    const creatorProfiles = await getProfiles(creatorDids, req);
 
     // Create map for quick lookup
     const profileMap = new Map(creatorProfiles.map((p: any) => [p.did, p]));
@@ -338,10 +332,7 @@ export async function getStarterPacksWithMembership(
     }
 
     // Use _getProfiles for both creator and actor profiles
-    const profiles = await getProfiles(
-      [sessionDid, actorDid],
-      req
-    );
+    const profiles = await getProfiles([sessionDid, actorDid], req);
 
     if (profiles.length === 0) {
       res.status(500).json({
@@ -504,10 +495,7 @@ export async function getOnboardingSuggestedStarterPacks(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(starterPacks.map((p) => p.creatorDid))];
-    const creatorProfiles = await getProfiles(
-      creatorDids,
-      req
-    );
+    const creatorProfiles = await getProfiles(creatorDids, req);
 
     // Create map for quick lookup
     const profileMap = new Map(creatorProfiles.map((p: any) => [p.did, p]));

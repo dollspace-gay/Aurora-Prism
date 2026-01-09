@@ -23,7 +23,9 @@ describe('Feed Types', () => {
     });
 
     it('should have POSTS_AND_AUTHOR_THREADS', () => {
-      expect(FeedType.POSTS_AND_AUTHOR_THREADS).toBe('posts_and_author_threads');
+      expect(FeedType.POSTS_AND_AUTHOR_THREADS).toBe(
+        'posts_and_author_threads'
+      );
     });
 
     it('should have POSTS_WITH_VIDEO', () => {

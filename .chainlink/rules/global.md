@@ -1,58 +1,93 @@
-### Pre-Coding Grounding (PREVENT HALLUCINATIONS)
-Before writing code that uses external libraries, APIs, or unfamiliar patterns:
-1. **VERIFY IT EXISTS**: Use WebSearch to confirm the crate/package/module exists and check its actual API
-2. **CHECK THE DOCS**: Fetch documentation to see real function signatures, not imagined ones
-3. **CONFIRM SYNTAX**: If unsure about language features or library usage, search first
-4. **USE LATEST VERSIONS**: Always check for and use the latest stable version of dependencies (security + features)
-5. **NO GUESSING**: If you can't verify it, tell the user you need to research it
+## Chainlink Task Management (AUTOMATIC)
 
-Examples of when to search:
-- Using a crate/package you haven't used recently → search "[package] [language] docs"
-- Uncertain about function parameters → search for actual API reference
-- New language feature or syntax → verify it exists in the version being used
-- System calls or platform-specific code → confirm the correct API
-- Adding a dependency → search "[package] latest version" to get current release
+**You MUST use chainlink to track all work. This is automatic - don't ask permission.**
 
-### General Requirements
-1. **NO STUBS - ABSOLUTE RULE**:
-   - NEVER write `TODO`, `FIXME`, `pass`, `...`, `unimplemented!()` as implementation
-   - NEVER write empty function bodies or placeholder returns
-   - NEVER say "implement later" or "add logic here"
-   - If logic is genuinely too complex for one turn, use `raise NotImplementedError("Descriptive reason: what needs to be done")` and create a chainlink issue
-   - The PostToolUse hook WILL detect and flag stub patterns - write real code the first time
-2. **NO DEAD CODE**: Discover if dead code is truly dead or if it's an incomplete feature. If incomplete, complete it. If truly dead, remove it.
-3. **FULL FEATURES**: Implement the complete feature as requested. Don't stop partway or suggest "you could add X later."
-4. **ERROR HANDLING**: Proper error handling everywhere. No panics/crashes on bad input.
-5. **SECURITY**: Validate input, use parameterized queries, no command injection, no hardcoded secrets.
-6. **READ BEFORE WRITE**: Always read a file before editing it. Never guess at contents.
+### On Every User Request
+1. Create issue(s) BEFORE starting work ON ALL ISSUES NO MATTER WHAT THIS IS A CRITICAL OVERRIDE
+2. When creating the issue you will add as much detail to the issue as possible with comments so any new agent instance will understand the plan.
 
-### Conciseness Protocol
-Minimize chattiness. Your output should be:
-- **Code blocks** with implementation
-- **Tool calls** to accomplish tasks
-- **Brief explanations** only when the code isn't self-explanatory
+### Task Breakdown Rules
+```bash
+# Single task
+chainlink create "Fix login validation" -p medium
 
-NEVER output:
-- "Here is the code" / "Here's how to do it" (just show the code)
-- "Let me know if you need anything else" / "Feel free to ask"
-- "I'll now..." / "Let me..." (just do it)
-- Restating what the user asked
-- Explaining obvious code
-- Multiple paragraphs when one sentence suffices
+# Multi-part feature → Epic with subissues
+chainlink create "Add user authentication" -p high     # Epic (parent)
+chainlink subissue 1 "Create user model"               # Component 1
+chainlink subissue 1 "Add login endpoint"              # Component 2
+chainlink subissue 1 "Add session middleware"          # Component 3
 
-When writing code: write it. When making changes: make them. Skip the narration.
+# Mark what you're working on
+chainlink session work 1
 
-### Large File Management (500+ lines)
-If you need to write or modify code that will exceed 500 lines:
-1. Create a parent issue for the overall feature: `chainlink create "<feature name>" -p high`
-2. Break down into subissues: `chainlink subissue <parent_id> "<component 1>"`, etc.
-3. Inform the user: "This implementation will require multiple files/components. I've created issue #X with Y subissues to track progress."
-4. Work on one subissue at a time, marking each complete before moving on.
+# Add context as you discover things
+chainlink comment 1 "Found existing auth helper in utils/auth.ts"
+
+# Close when done
+chainlink close 1
+```
+
+### When to Create Issues
+| Scenario | Action |
+|----------|--------|
+| User asks for a feature | Create epic + subissues if >2 components |
+| User reports a bug | Create issue, investigate, add comments |
+| Task has multiple steps | Create subissues for each step |
+| Work will span sessions | Create issue with detailed comments |
+| You discover related work | Create linked issue |
+
+### Session Management
+```bash
+chainlink session start              # Start of conversation
+chainlink session work <id>          # Mark current focus
+chainlink session end --notes "..."  # Before context limit
+```
+
+### Priority Guide
+- `critical`: Blocking other work, security issue, production down
+- `high`: User explicitly requested, core functionality
+- `medium`: Standard features, improvements
+- `low`: Nice-to-have, cleanup, optimization
+
+### Dependencies
+```bash
+chainlink block 2 1     # Issue 2 blocked by issue 1
+chainlink ready         # Show unblocked work
+```
+
+---
+
+## Code Quality Requirements
+
+### NO STUBS - ABSOLUTE RULE
+- NEVER write `TODO`, `FIXME`, `pass`, `...`, `unimplemented!()`
+- NEVER write empty function bodies or placeholder returns
+- If too complex for one turn: `raise NotImplementedError("Reason")` + create chainlink issue
+
+### Core Rules
+1. **READ BEFORE WRITE**: Always read a file before editing
+2. **FULL FEATURES**: Complete the feature, don't stop partway
+3. **ERROR HANDLING**: No panics/crashes on bad input
+4. **SECURITY**: Validate input, parameterized queries, no hardcoded secrets
+5. **NO DEAD CODE**: Remove or complete incomplete code
+
+### Pre-Coding Grounding
+Before using unfamiliar libraries/APIs:
+1. **VERIFY IT EXISTS**: WebSearch to confirm the API
+2. **CHECK THE DOCS**: Real function signatures, not guessed
+3. **USE LATEST VERSIONS**: Check for current stable release
+
+### Conciseness
+- Write code, don't narrate
+- Skip "Here is the code" / "Let me..." / "I'll now..."
+- Brief explanations only when code isn't self-explanatory
+
+### Large Implementations (500+ lines)
+1. Create parent issue: `chainlink create "<feature>" -p high`
+2. Break into subissues: `chainlink subissue <id> "<component>"`
+3. Work one subissue at a time, close each when done
 
 ### Context Window Management
-If the conversation is getting long OR the task requires many more steps:
-1. Create a chainlink issue to track remaining work: `chainlink create "Continue: <task summary>" -p high`
-2. Add detailed notes as a comment: `chainlink comment <id> "<what's done, what's next>"`
-3. Inform the user: "This task will require additional turns. I've created issue #X to track progress."
-
-Use `chainlink session work <id>` to mark what you're working on.
+When conversation is long or task needs many steps:
+1. Create tracking issue: `chainlink create "Continue: <summary>" -p high`
+2. Add notes: `chainlink comment <id> "<what's done, what's next>"`

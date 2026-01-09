@@ -13,6 +13,8 @@ export default [
       'dist/**',
       'node_modules/**',
       'build/**',
+      'docs/**',
+      'coverage/**',
       '*.config.js',
       '*.config.ts',
       'vite.config.ts',
@@ -69,6 +71,10 @@ export default [
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
+      // Disable no-undef for TypeScript - TS handles this better
+      'no-undef': 'off',
+      // Allow constant expressions in conditionals (common in config code)
+      'no-constant-binary-expression': 'off',
       
       // React rules
       'react/react-in-jsx-scope': 'off', // Not needed in React 17+
@@ -112,6 +118,15 @@ export default [
     files: ['server/**/*.ts'],
     rules: {
       '@typescript-eslint/no-var-requires': 'off',
+    },
+  },
+  {
+    files: ['tests/**/*.ts', 'tests/**/*.tsx'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
     },
   },
 ];

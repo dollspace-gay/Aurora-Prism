@@ -47,42 +47,26 @@ describe('DataLoader Middleware', () => {
 
   describe('dataLoaderMiddleware', () => {
     it('should create a DataLoader and attach it to the request', () => {
-      dataLoaderMiddleware(
-        mockReq as Request,
-        mockRes as Response,
-        nextFn
-      );
+      dataLoaderMiddleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(createDataLoader).toHaveBeenCalledTimes(1);
       expect(mockReq.dataLoader).toBeDefined();
     });
 
     it('should call next() after attaching the DataLoader', () => {
-      dataLoaderMiddleware(
-        mockReq as Request,
-        mockRes as Response,
-        nextFn
-      );
+      dataLoaderMiddleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(nextFn).toHaveBeenCalledTimes(1);
     });
 
     it('should register a finish handler on the response', () => {
-      dataLoaderMiddleware(
-        mockReq as Request,
-        mockRes as Response,
-        nextFn
-      );
+      dataLoaderMiddleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(mockRes.on).toHaveBeenCalledWith('finish', expect.any(Function));
     });
 
     it('should clean up DataLoader on response finish', () => {
-      dataLoaderMiddleware(
-        mockReq as Request,
-        mockRes as Response,
-        nextFn
-      );
+      dataLoaderMiddleware(mockReq as Request, mockRes as Response, nextFn);
 
       const dataLoader = mockReq.dataLoader;
       expect(dataLoader).toBeDefined();
@@ -95,11 +79,7 @@ describe('DataLoader Middleware', () => {
     });
 
     it('should handle finish when dataLoader is already undefined', () => {
-      dataLoaderMiddleware(
-        mockReq as Request,
-        mockRes as Response,
-        nextFn
-      );
+      dataLoaderMiddleware(mockReq as Request, mockRes as Response, nextFn);
 
       // Manually clear the dataLoader before finish
       mockReq.dataLoader = undefined;

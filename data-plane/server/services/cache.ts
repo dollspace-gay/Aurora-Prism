@@ -14,7 +14,7 @@ import type { ThreadRecord, PostRecord } from '../types';
 class CacheService {
   private redis: Redis | null = null;
   private isInitialized = false;
-  
+
   // Cache metrics
   private hits = 0;
   private misses = 0;

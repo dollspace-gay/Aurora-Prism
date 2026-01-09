@@ -17,7 +17,7 @@ import {
   getPopularFeedGeneratorsSchema,
   getSuggestedFeedsUnspeccedSchema,
 } from '../schemas';
-import { getProfiles } from "../utils/profile-builder";
+import { getProfiles } from '../utils/profile-builder';
 
 /**
  * Helper to serialize a feed generator view
@@ -93,10 +93,7 @@ export async function getFeedGenerator(
     };
 
     // Use _getProfiles for complete creator profileView
-    const creatorProfiles = await getProfiles(
-      [generatorData.creatorDid],
-      req
-    );
+    const creatorProfiles = await getProfiles([generatorData.creatorDid], req);
 
     if (creatorProfiles.length === 0) {
       return res.status(500).json({
@@ -150,10 +147,7 @@ export async function getFeedGenerators(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(generators.map((g) => g.creatorDid))];
-    const creatorProfiles = await getProfiles(
-      creatorDids,
-      req
-    );
+    const creatorProfiles = await getProfiles(creatorDids, req);
 
     // Create map for quick lookup
     const profileMap = new Map(creatorProfiles.map((p: any) => [p.did, p]));
@@ -218,10 +212,7 @@ export async function getActorFeeds(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(generators.map((g) => g.creatorDid))];
-    const creatorProfiles = await getProfiles(
-      creatorDids,
-      req
-    );
+    const creatorProfiles = await getProfiles(creatorDids, req);
 
     // Create map for quick lookup
     const profileMap = new Map(creatorProfiles.map((p: any) => [p.did, p]));
@@ -282,10 +273,7 @@ export async function getSuggestedFeeds(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(generators.map((g) => g.creatorDid))];
-    const creatorProfiles = await getProfiles(
-      creatorDids,
-      req
-    );
+    const creatorProfiles = await getProfiles(creatorDids, req);
 
     // Create map for quick lookup
     const profileMap = new Map(creatorProfiles.map((p: any) => [p.did, p]));
@@ -375,7 +363,9 @@ export async function getPopularFeedGenerators(
       generators = (searchResults as { feedGenerators: typeof generators })
         .feedGenerators;
       cursor = (searchResults as { cursor?: string }).cursor;
-      console.log(`[FEED_GEN] Search for "${params.query}" returned ${generators.length} generators`);
+      console.log(
+        `[FEED_GEN] Search for "${params.query}" returned ${generators.length} generators`
+      );
     } else {
       const suggestedResults = await storage.getSuggestedFeeds(
         params.limit,
@@ -384,7 +374,9 @@ export async function getPopularFeedGenerators(
       generators = (suggestedResults as { generators: typeof generators })
         .generators;
       cursor = (suggestedResults as { cursor?: string }).cursor;
-      console.log(`[FEED_GEN] getSuggestedFeeds returned ${generators.length} generators`);
+      console.log(
+        `[FEED_GEN] getSuggestedFeeds returned ${generators.length} generators`
+      );
     }
 
     if (generators.length === 0) {
@@ -394,10 +386,7 @@ export async function getPopularFeedGenerators(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(generators.map((g) => g.creatorDid))];
-    const creatorProfiles = await getProfiles(
-      creatorDids,
-      req
-    );
+    const creatorProfiles = await getProfiles(creatorDids, req);
 
     // Create map for quick lookup
     const profileMap = new Map(creatorProfiles.map((p: any) => [p.did, p]));
@@ -457,10 +446,7 @@ export async function getSuggestedFeedsUnspecced(
 
     // Batch fetch all creator profiles
     const creatorDids = [...new Set(generators.map((g) => g.creatorDid))];
-    const creatorProfiles = await getProfiles(
-      creatorDids,
-      req
-    );
+    const creatorProfiles = await getProfiles(creatorDids, req);
 
     // Create map for quick lookup
     const profileMap = new Map(creatorProfiles.map((p: any) => [p.did, p]));

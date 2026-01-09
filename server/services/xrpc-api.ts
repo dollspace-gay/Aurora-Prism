@@ -689,7 +689,9 @@ export class XRPCApi {
       let user = await storage.getUser(did);
 
       if (!user || user.handle === 'handle.invalid') {
-        console.log(`[RESOLVE_ACTOR] User ${did} ${!user ? 'not found' : 'has invalid handle'}, fetching profile`);
+        console.log(
+          `[RESOLVE_ACTOR] User ${did} ${!user ? 'not found' : 'has invalid handle'}, fetching profile`
+        );
 
         try {
           // Fetch profile from PDS
@@ -704,7 +706,9 @@ export class XRPCApi {
 
             if (profileResponse.ok) {
               const { value, cid } = await profileResponse.json();
-              console.log(`[RESOLVE_ACTOR] Profile fetched for ${did}, indexing`);
+              console.log(
+                `[RESOLVE_ACTOR] Profile fetched for ${did}, indexing`
+              );
 
               // Process through event processor to index it
               const { eventProcessor } = await import('./event-processor');
@@ -722,7 +726,10 @@ export class XRPCApi {
             }
           }
         } catch (error) {
-          console.warn(`[RESOLVE_ACTOR] Failed to fetch profile for ${did}:`, error);
+          console.warn(
+            `[RESOLVE_ACTOR] Failed to fetch profile for ${did}:`,
+            error
+          );
         }
       }
 
@@ -745,15 +752,21 @@ export class XRPCApi {
 
     if (!user) {
       // Try to resolve and fetch the profile from PDS
-      console.log(`[RESOLVE_ACTOR] User not found in database, attempting to resolve and fetch: ${actor}`);
+      console.log(
+        `[RESOLVE_ACTOR] User not found in database, attempting to resolve and fetch: ${actor}`
+      );
 
       try {
         // Resolve handle to DID via AT Protocol
-        const didResolution = await fetch(`https://bsky.social/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(handle)}`);
+        const didResolution = await fetch(
+          `https://bsky.social/xrpc/com.atproto.identity.resolveHandle?handle=${encodeURIComponent(handle)}`
+        );
 
         if (didResolution.ok) {
           const { did } = await didResolution.json();
-          console.log(`[RESOLVE_ACTOR] Resolved ${handle} to ${did}, fetching profile`);
+          console.log(
+            `[RESOLVE_ACTOR] Resolved ${handle} to ${did}, fetching profile`
+          );
 
           // Fetch profile from PDS
           const { didResolver } = await import('./did-resolver');
@@ -767,7 +780,9 @@ export class XRPCApi {
 
             if (profileResponse.ok) {
               const { value, cid } = await profileResponse.json();
-              console.log(`[RESOLVE_ACTOR] Profile fetched, indexing: ${value.displayName || handle}`);
+              console.log(
+                `[RESOLVE_ACTOR] Profile fetched, indexing: ${value.displayName || handle}`
+              );
 
               // Process through event processor to index it
               const { eventProcessor } = await import('./event-processor');
@@ -786,11 +801,16 @@ export class XRPCApi {
           }
         }
       } catch (error) {
-        console.warn(`[RESOLVE_ACTOR] Failed to resolve and fetch profile:`, error);
+        console.warn(
+          `[RESOLVE_ACTOR] Failed to resolve and fetch profile:`,
+          error
+        );
       }
 
       if (!user) {
-        console.log(`[RESOLVE_ACTOR] User not found even after fetch attempt: ${actor}`);
+        console.log(
+          `[RESOLVE_ACTOR] User not found even after fetch attempt: ${actor}`
+        );
         res.status(404).json({ error: 'NotFound', message: 'Actor not found' });
         return null;
       }
@@ -1170,7 +1190,12 @@ export class XRPCApi {
             avatarCdn = undefined;
           }
         } else {
-          avatarCdn = this.transformBlobToCdnUrl(avatarUrl, author.did, 'avatar', req);
+          avatarCdn = this.transformBlobToCdnUrl(
+            avatarUrl,
+            author.did,
+            'avatar',
+            req
+          );
         }
       }
 
@@ -1654,21 +1679,28 @@ export class XRPCApi {
 
     // Check which users exist in database
     const existingUsers = await storage.getUsers(uniqueDids);
-    const existingDids = new Set(existingUsers.map(u => u.did));
-    const missingDids = uniqueDids.filter(did => !existingDids.has(did));
+    const existingDids = new Set(existingUsers.map((u) => u.did));
+    const missingDids = uniqueDids.filter((did) => !existingDids.has(did));
 
     // Fetch missing users from their PDSes
     if (missingDids.length > 0) {
-      console.log(`[XRPC] Fetching ${missingDids.length} missing user(s) from their PDSes`);
+      console.log(
+        `[XRPC] Fetching ${missingDids.length} missing user(s) from their PDSes`
+      );
 
       await Promise.all(
         missingDids.map(async (did) => {
           try {
             const { pdsDataFetcher } = await import('./pds-data-fetcher');
             await pdsDataFetcher.fetchUser(did);
-            console.log(`[XRPC] Successfully fetched user ${did} from their PDS`);
+            console.log(
+              `[XRPC] Successfully fetched user ${did} from their PDS`
+            );
           } catch (error) {
-            console.error(`[XRPC] Failed to fetch user ${did} from PDS:`, error);
+            console.error(
+              `[XRPC] Failed to fetch user ${did} from PDS:`,
+              error
+            );
           }
         })
       );
@@ -2421,13 +2453,21 @@ export class XRPCApi {
       let feedGen = await storage.getFeedGenerator(params.feed);
       if (!feedGen) {
         // Try to discover the feed from PDS
-        console.log(`[XRPC] Feed generator not found in database, attempting discovery: ${params.feed}`);
-        const { feedGeneratorDiscovery } = await import('./feed-generator-discovery');
-        const discovered = await feedGeneratorDiscovery.fetchFeedGeneratorByUri(params.feed);
+        console.log(
+          `[XRPC] Feed generator not found in database, attempting discovery: ${params.feed}`
+        );
+        const { feedGeneratorDiscovery } = await import(
+          './feed-generator-discovery'
+        );
+        const discovered = await feedGeneratorDiscovery.fetchFeedGeneratorByUri(
+          params.feed
+        );
 
         if (discovered) {
           // Index the discovered feed generator
-          console.log(`[XRPC] Feed discovered, indexing: ${discovered.displayName}`);
+          console.log(
+            `[XRPC] Feed discovered, indexing: ${discovered.displayName}`
+          );
 
           // Parse the URI to get the creator DID
           const parts = params.feed.split('/');
@@ -2436,7 +2476,9 @@ export class XRPCApi {
           // Ensure the creator user exists first
           const creator = await storage.getUser(creatorDid);
           if (!creator) {
-            console.log(`[XRPC] Creator ${creatorDid} not found, creating placeholder`);
+            console.log(
+              `[XRPC] Creator ${creatorDid} not found, creating placeholder`
+            );
             await storage.createUser({
               did: creatorDid,
               handle: 'handle.invalid', // Will be updated by PDS fetcher
@@ -2445,14 +2487,19 @@ export class XRPCApi {
 
           // Process through event processor to index it
           const { eventProcessor } = await import('./event-processor');
-          await eventProcessor.processRecord(params.feed, discovered.cid, creatorDid, {
-            $type: 'app.bsky.feed.generator',
-            did: discovered.did,
-            displayName: discovered.displayName,
-            description: discovered.description,
-            avatar: discovered.avatar,
-            createdAt: discovered.createdAt,
-          });
+          await eventProcessor.processRecord(
+            params.feed,
+            discovered.cid,
+            creatorDid,
+            {
+              $type: 'app.bsky.feed.generator',
+              did: discovered.did,
+              displayName: discovered.displayName,
+              description: discovered.description,
+              avatar: discovered.avatar,
+              createdAt: discovered.createdAt,
+            }
+          );
 
           // Try fetching again after indexing
           feedGen = await storage.getFeedGenerator(params.feed);
@@ -2575,13 +2622,21 @@ export class XRPCApi {
       let generator = await storage.getFeedGenerator(params.feed);
       if (!generator) {
         // Try to discover the feed from PDS
-        console.log(`[XRPC] Feed generator not found in database, attempting discovery: ${params.feed}`);
-        const { feedGeneratorDiscovery } = await import('./feed-generator-discovery');
-        const discovered = await feedGeneratorDiscovery.fetchFeedGeneratorByUri(params.feed);
+        console.log(
+          `[XRPC] Feed generator not found in database, attempting discovery: ${params.feed}`
+        );
+        const { feedGeneratorDiscovery } = await import(
+          './feed-generator-discovery'
+        );
+        const discovered = await feedGeneratorDiscovery.fetchFeedGeneratorByUri(
+          params.feed
+        );
 
         if (discovered) {
           // Index the discovered feed generator
-          console.log(`[XRPC] Feed discovered, indexing: ${discovered.displayName}`);
+          console.log(
+            `[XRPC] Feed discovered, indexing: ${discovered.displayName}`
+          );
 
           // Parse the URI to get the creator DID
           const parts = params.feed.split('/');
@@ -2590,7 +2645,9 @@ export class XRPCApi {
           // Ensure the creator user exists first
           const creator = await storage.getUser(creatorDid);
           if (!creator) {
-            console.log(`[XRPC] Creator ${creatorDid} not found, creating placeholder`);
+            console.log(
+              `[XRPC] Creator ${creatorDid} not found, creating placeholder`
+            );
             await storage.createUser({
               did: creatorDid,
               handle: 'handle.invalid', // Will be updated by PDS fetcher
@@ -2599,14 +2656,19 @@ export class XRPCApi {
 
           // Process through event processor to index it
           const { eventProcessor } = await import('./event-processor');
-          await eventProcessor.processRecord(params.feed, discovered.cid, creatorDid, {
-            $type: 'app.bsky.feed.generator',
-            did: discovered.did,
-            displayName: discovered.displayName,
-            description: discovered.description,
-            avatar: discovered.avatar,
-            createdAt: discovered.createdAt,
-          });
+          await eventProcessor.processRecord(
+            params.feed,
+            discovered.cid,
+            creatorDid,
+            {
+              $type: 'app.bsky.feed.generator',
+              did: discovered.did,
+              displayName: discovered.displayName,
+              description: discovered.description,
+              avatar: discovered.avatar,
+              createdAt: discovered.createdAt,
+            }
+          );
 
           // Try fetching again after indexing
           generator = await storage.getFeedGenerator(params.feed);
@@ -3066,7 +3128,11 @@ export class XRPCApi {
           'avatar',
           req
         );
-        if (avatarUrl && typeof avatarUrl === 'string' && avatarUrl.trim() !== '') {
+        if (
+          avatarUrl &&
+          typeof avatarUrl === 'string' &&
+          avatarUrl.trim() !== ''
+        ) {
           creatorView.avatar = avatarUrl;
         }
       }

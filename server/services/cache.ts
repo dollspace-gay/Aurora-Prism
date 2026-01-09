@@ -16,7 +16,9 @@ export class CacheService {
   private isInitialized = false;
   private readonly config: CacheConfig;
 
-  constructor(config: CacheConfig = { ttl: 3600, keyPrefix: 'atproto:cache:' }) {
+  constructor(
+    config: CacheConfig = { ttl: 3600, keyPrefix: 'atproto:cache:' }
+  ) {
     this.config = config;
   }
 
@@ -276,9 +278,7 @@ export class CacheService {
   }
 
   // Hydration State Caching
-  async getHydrationState(
-    cacheKey: string
-  ): Promise<{
+  async getHydrationState(cacheKey: string): Promise<{
     posts: Map<string, any>;
     actors: Map<string, any>;
     aggregations: Map<string, any>;

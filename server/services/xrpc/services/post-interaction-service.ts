@@ -502,11 +502,7 @@ export async function getQuotes(req: Request, res: Response): Promise<void> {
       params.limit,
       params.cursor
     );
-    const serialized = await serializePosts(
-      posts,
-      viewerDid || undefined,
-      req
-    );
+    const serialized = await serializePosts(posts, viewerDid || undefined, req);
     const oldest = posts.length ? posts[posts.length - 1] : null;
     res.json({
       posts: serialized,

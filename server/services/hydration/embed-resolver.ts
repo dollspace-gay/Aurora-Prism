@@ -339,32 +339,46 @@ export class EmbedResolver {
       }
 
       // Update parent embeds with resolved children
-      console.log(`[EMBED_RESOLVER] Updating ${result.size} parent embeds with ${childEmbeds.size} resolved children`);
+      console.log(
+        `[EMBED_RESOLVER] Updating ${result.size} parent embeds with ${childEmbeds.size} resolved children`
+      );
       for (const [uri, embed] of Array.from(result.entries())) {
         if (embed && embed.$type === 'app.bsky.embed.record#view') {
           const recordUri = embed.record?.uri;
-          console.log(`[EMBED_RESOLVER] Processing quote embed for ${uri}, recordUri: ${recordUri}`);
+          console.log(
+            `[EMBED_RESOLVER] Processing quote embed for ${uri}, recordUri: ${recordUri}`
+          );
           if (recordUri && childEmbeds.has(recordUri)) {
             const resolvedChild = childEmbeds.get(recordUri);
-            console.log(`[EMBED_RESOLVER] ✓ Found resolved child for ${recordUri}, type: ${resolvedChild?.$type}`);
+            console.log(
+              `[EMBED_RESOLVER] ✓ Found resolved child for ${recordUri}, type: ${resolvedChild?.$type}`
+            );
             embed.record = resolvedChild;
           } else {
-            console.warn(`[EMBED_RESOLVER] ✗ No resolved child found for ${recordUri}, childEmbeds has ${childEmbeds.size} items`);
+            console.warn(
+              `[EMBED_RESOLVER] ✗ No resolved child found for ${recordUri}, childEmbeds has ${childEmbeds.size} items`
+            );
           }
         } else if (
           embed &&
           embed.$type === 'app.bsky.embed.recordWithMedia#view'
         ) {
           const recordUri = embed.record?.record?.uri;
-          console.log(`[EMBED_RESOLVER] Processing recordWithMedia for ${uri}, recordUri: ${recordUri}`);
+          console.log(
+            `[EMBED_RESOLVER] Processing recordWithMedia for ${uri}, recordUri: ${recordUri}`
+          );
           if (recordUri && childEmbeds.has(recordUri)) {
             const resolvedChild = childEmbeds.get(recordUri);
-            console.log(`[EMBED_RESOLVER] ✓ Found resolved child for recordWithMedia ${recordUri}, type: ${resolvedChild?.$type}`);
+            console.log(
+              `[EMBED_RESOLVER] ✓ Found resolved child for recordWithMedia ${recordUri}, type: ${resolvedChild?.$type}`
+            );
             // For recordWithMedia, the record field is already wrapped in app.bsky.embed.record#view
             // We just need to update the nested record property
             embed.record.record = resolvedChild;
           } else {
-            console.warn(`[EMBED_RESOLVER] ✗ No resolved child found for recordWithMedia ${recordUri}`);
+            console.warn(
+              `[EMBED_RESOLVER] ✗ No resolved child found for recordWithMedia ${recordUri}`
+            );
           }
         }
       }

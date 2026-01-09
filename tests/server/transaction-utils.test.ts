@@ -48,7 +48,10 @@ describe('transaction-utils', () => {
     });
 
     it('should retry on deadlock error', async () => {
-      const deadlockError = { code: PG_ERROR_CODES.DEADLOCK, message: 'Deadlock detected' };
+      const deadlockError = {
+        code: PG_ERROR_CODES.DEADLOCK,
+        message: 'Deadlock detected',
+      };
       const operation = vi
         .fn()
         .mockRejectedValueOnce(deadlockError)
@@ -68,7 +71,10 @@ describe('transaction-utils', () => {
     });
 
     it('should retry on serialization failure', async () => {
-      const serializationError = { code: PG_ERROR_CODES.SERIALIZATION_FAILURE, message: 'Serialization failure' };
+      const serializationError = {
+        code: PG_ERROR_CODES.SERIALIZATION_FAILURE,
+        message: 'Serialization failure',
+      };
       const operation = vi
         .fn()
         .mockRejectedValueOnce(serializationError)
@@ -83,7 +89,10 @@ describe('transaction-utils', () => {
     });
 
     it('should not retry on non-retryable errors', async () => {
-      const uniqueViolationError = { code: PG_ERROR_CODES.UNIQUE_VIOLATION, message: 'Unique violation' };
+      const uniqueViolationError = {
+        code: PG_ERROR_CODES.UNIQUE_VIOLATION,
+        message: 'Unique violation',
+      };
       const operation = vi.fn().mockRejectedValue(uniqueViolationError);
 
       const promise = withRetry(operation, { maxRetries: 3 });
@@ -129,7 +138,10 @@ describe('transaction-utils', () => {
     });
 
     it('should throw after max retries exceeded', async () => {
-      const deadlockError = { code: PG_ERROR_CODES.DEADLOCK, message: 'Deadlock' };
+      const deadlockError = {
+        code: PG_ERROR_CODES.DEADLOCK,
+        message: 'Deadlock',
+      };
       const operation = vi.fn().mockRejectedValue(deadlockError);
 
       const promise = withRetry(operation, { maxRetries: 2, retryDelay: 10 });
@@ -140,7 +152,9 @@ describe('transaction-utils', () => {
       // Advance through all retries
       await vi.runAllTimersAsync();
 
-      await expect(promise).rejects.toMatchObject({ code: PG_ERROR_CODES.DEADLOCK });
+      await expect(promise).rejects.toMatchObject({
+        code: PG_ERROR_CODES.DEADLOCK,
+      });
       // Initial attempt + 2 retries = 3 calls
       expect(operation).toHaveBeenCalledTimes(3);
     });
@@ -191,14 +205,18 @@ describe('transaction-utils', () => {
         }),
       };
 
-      const promise = withTransaction(mockDb as any, mockCallback, { timeout: 5000 });
+      const promise = withTransaction(mockDb as any, mockCallback, {
+        timeout: 5000,
+      });
       await vi.runAllTimersAsync();
       const result = await promise;
 
       expect(result).toBe('transaction result');
       expect(mockDb.transaction).toHaveBeenCalled();
       expect(mockCallback).toHaveBeenCalledWith(mockTx);
-      expect(mockExecute).toHaveBeenCalledWith('SET LOCAL statement_timeout = 5000');
+      expect(mockExecute).toHaveBeenCalledWith(
+        'SET LOCAL statement_timeout = 5000'
+      );
     });
 
     it('should retry on deadlock within transaction', async () => {
@@ -302,7 +320,9 @@ describe('transaction-utils', () => {
 
       expect(result).toBe('result');
       // Default timeout is 10000
-      expect(mockExecute).toHaveBeenCalledWith('SET LOCAL statement_timeout = 10000');
+      expect(mockExecute).toHaveBeenCalledWith(
+        'SET LOCAL statement_timeout = 10000'
+      );
     });
   });
 
@@ -318,7 +338,9 @@ describe('transaction-utils', () => {
       const op2 = vi.fn().mockResolvedValue('result2');
       const op3 = vi.fn().mockResolvedValue('result3');
 
-      const promise = executeInTransaction(mockDb as any, [op1, op2, op3], { timeout: 5000 });
+      const promise = executeInTransaction(mockDb as any, [op1, op2, op3], {
+        timeout: 5000,
+      });
       await vi.runAllTimersAsync();
       const results = await promise;
 

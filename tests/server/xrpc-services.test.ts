@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createMockRequest, createMockResponse } from '../helpers/atproto-mocks';
+import {
+  createMockRequest,
+  createMockResponse,
+} from '../helpers/atproto-mocks';
 import { createMockStorage } from '../helpers/test-database';
 
 // Mock all dependencies before imports
@@ -22,7 +25,9 @@ vi.mock('../../server/services/did-resolver', () => ({
   didResolver: {
     resolve: vi.fn().mockResolvedValue({
       id: 'did:plc:test',
-      service: [{ id: '#atproto_pds', serviceEndpoint: 'https://pds.example.com' }],
+      service: [
+        { id: '#atproto_pds', serviceEndpoint: 'https://pds.example.com' },
+      ],
     }),
     resolveDIDToHandle: vi.fn().mockResolvedValue('user.bsky.social'),
   },
@@ -39,7 +44,9 @@ vi.mock('../../server/services/xrpc/utils/auth-helpers', () => ({
 
 vi.mock('../../server/services/xrpc/utils/error-handler', () => ({
   handleError: vi.fn((res, error, context) => {
-    res.status(500).json({ error: 'InternalServerError', message: error.message });
+    res
+      .status(500)
+      .json({ error: 'InternalServerError', message: error.message });
   }),
 }));
 
@@ -182,9 +189,7 @@ describe('XRPC Service Handlers', () => {
       mockReq.query = { limit: '50' };
 
       mockRes.json({
-        feed: [
-          { post: { uri: 'at://did:plc:other/post/1' } },
-        ],
+        feed: [{ post: { uri: 'at://did:plc:other/post/1' } }],
         cursor: 'timeline-cursor',
       });
 
@@ -196,7 +201,10 @@ describe('XRPC Service Handlers', () => {
 
       mockRes.json({
         likes: [
-          { actor: { did: 'did:plc:liker1' }, createdAt: new Date().toISOString() },
+          {
+            actor: { did: 'did:plc:liker1' },
+            createdAt: new Date().toISOString(),
+          },
         ],
         cursor: 'likes-cursor',
       });
@@ -208,7 +216,9 @@ describe('XRPC Service Handlers', () => {
       mockReq.query = { uri: 'at://did:plc:user/post/123' };
 
       mockRes.json({
-        repostedBy: [{ did: 'did:plc:reposter1', handle: 'reposter.bsky.social' }],
+        repostedBy: [
+          { did: 'did:plc:reposter1', handle: 'reposter.bsky.social' },
+        ],
       });
 
       expect(mockRes.body.repostedBy).toHaveLength(1);
@@ -348,9 +358,7 @@ describe('XRPC Service Handlers', () => {
       mockReq.query = { q: 'test', limit: '25' };
 
       mockRes.json({
-        actors: [
-          { did: 'did:plc:result1', handle: 'test.bsky.social' },
-        ],
+        actors: [{ did: 'did:plc:result1', handle: 'test.bsky.social' }],
         cursor: 'search-cursor',
       });
 
@@ -374,9 +382,7 @@ describe('XRPC Service Handlers', () => {
       mockReq.query = { q: 'test', limit: '8' };
 
       mockRes.json({
-        actors: [
-          { did: 'did:plc:typeahead1', handle: 'testuser.bsky.social' },
-        ],
+        actors: [{ did: 'did:plc:typeahead1', handle: 'testuser.bsky.social' }],
       });
 
       expect(mockRes.body.actors).toHaveLength(1);
@@ -388,7 +394,10 @@ describe('XRPC Service Handlers', () => {
       mockReq.method = 'POST';
       mockReq.body = {
         reasonType: 'com.atproto.moderation.defs#reasonSpam',
-        subject: { $type: 'com.atproto.admin.defs#repoRef', did: 'did:plc:spammer' },
+        subject: {
+          $type: 'com.atproto.admin.defs#repoRef',
+          did: 'did:plc:spammer',
+        },
       };
 
       mockRes.json({
@@ -404,9 +413,7 @@ describe('XRPC Service Handlers', () => {
   describe('Bookmark Service', () => {
     it('should return bookmarks', async () => {
       mockRes.json({
-        feed: [
-          { post: { uri: 'at://did:plc:user/post/bookmarked' } },
-        ],
+        feed: [{ post: { uri: 'at://did:plc:user/post/bookmarked' } }],
         cursor: 'bookmark-cursor',
       });
 
@@ -435,9 +442,7 @@ describe('XRPC Service Handlers', () => {
   describe('Timeline Service', () => {
     it('should return home timeline', async () => {
       mockRes.json({
-        feed: [
-          { post: { uri: 'at://did:plc:followed/post/1' } },
-        ],
+        feed: [{ post: { uri: 'at://did:plc:followed/post/1' } }],
         cursor: 'timeline-cursor',
       });
 
@@ -649,11 +654,17 @@ describe('XRPC Response Transformation', () => {
 
     const now = new Date();
     expect(transformDate(now)).toBe(now.toISOString());
-    expect(transformDate('2024-01-01T00:00:00.000Z')).toBe('2024-01-01T00:00:00.000Z');
+    expect(transformDate('2024-01-01T00:00:00.000Z')).toBe(
+      '2024-01-01T00:00:00.000Z'
+    );
   });
 
   it('should transform blob to CDN URL', () => {
-    const transformBlobUrl = (did: string, cid: string, baseUrl = 'https://cdn.example.com'): string => {
+    const transformBlobUrl = (
+      did: string,
+      cid: string,
+      baseUrl = 'https://cdn.example.com'
+    ): string => {
       return `${baseUrl}/blob/${did}/${cid}`;
     };
 

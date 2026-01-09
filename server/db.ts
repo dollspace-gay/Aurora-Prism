@@ -51,7 +51,11 @@ export function createDbPool(
     const neonPool = new NeonPool({
       // Statement timeout to prevent runaway queries (30 seconds default)
       // Can be overridden per-transaction using SET LOCAL statement_timeout
-      options: { statement_timeout: parseInt(process.env.STATEMENT_TIMEOUT_MS || "30000") },
+      options: {
+        statement_timeout: parseInt(
+          process.env.STATEMENT_TIMEOUT_MS || '30000'
+        ),
+      },
       connectionString: databaseUrl,
       max: poolSize,
       idleTimeoutMillis: 10000,
@@ -64,7 +68,7 @@ export function createDbPool(
   } else {
     const pgPool = new PgPool({
       // Statement timeout to prevent runaway queries
-      statement_timeout: parseInt(process.env.STATEMENT_TIMEOUT_MS || "30000"),
+      statement_timeout: parseInt(process.env.STATEMENT_TIMEOUT_MS || '30000'),
       connectionString: databaseUrl,
       max: poolSize,
       idleTimeoutMillis: 10000,

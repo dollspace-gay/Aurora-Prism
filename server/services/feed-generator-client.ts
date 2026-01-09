@@ -97,13 +97,16 @@ export class FeedGeneratorClient {
         console.error(
           `[FeedGenClient] Invalid response format from feed generator ${serviceEndpoint}:`
         );
-        console.error('[FeedGenClient] Response data:', JSON.stringify(data).substring(0, 500));
+        console.error(
+          '[FeedGenClient] Response data:',
+          JSON.stringify(data).substring(0, 500)
+        );
         console.error('[FeedGenClient] Parse error:', parseError);
 
         // Throw a more user-friendly error
         throw new Error(
           `Feed generator at ${serviceEndpoint} returned an invalid response format. ` +
-          `This may indicate the feed generator is out of date or misconfigured.`
+            `This may indicate the feed generator is out of date or misconfigured.`
         );
       }
     } catch (error) {
@@ -133,7 +136,9 @@ export class FeedGeneratorClient {
       blockedByDids = blockedByData.map((b) => b.blockerDid);
 
       if (blockedByDids.length > 0) {
-        console.log(`[FeedGenClient] Viewer ${viewerDid} is blocked by ${blockedByDids.length} users`);
+        console.log(
+          `[FeedGenClient] Viewer ${viewerDid} is blocked by ${blockedByDids.length} users`
+        );
       }
     }
 
@@ -151,7 +156,9 @@ export class FeedGeneratorClient {
 
     // Fetch missing posts from their PDSs
     if (missingUris.length > 0) {
-      console.log(`[FeedGenClient] Fetching ${missingUris.length} missing posts from PDSs`);
+      console.log(
+        `[FeedGenClient] Fetching ${missingUris.length} missing posts from PDSs`
+      );
 
       let fetchedCount = 0;
       for (const uri of missingUris) {
@@ -167,7 +174,9 @@ export class FeedGeneratorClient {
 
           // Only support post fetching for now
           if (collection !== 'app.bsky.feed.post') {
-            console.warn(`[FeedGenClient] Skipping non-post collection: ${collection}`);
+            console.warn(
+              `[FeedGenClient] Skipping non-post collection: ${collection}`
+            );
             continue;
           }
 
@@ -185,7 +194,9 @@ export class FeedGeneratorClient {
           });
 
           if (!response.ok) {
-            console.warn(`[FeedGenClient] Failed to fetch ${uri}: ${response.status}`);
+            console.warn(
+              `[FeedGenClient] Failed to fetch ${uri}: ${response.status}`
+            );
             continue;
           }
 
@@ -202,11 +213,16 @@ export class FeedGeneratorClient {
             postMap.set(uri, fetchedPost);
           }
         } catch (error) {
-          console.warn(`[FeedGenClient] Error fetching post ${uri}:`, error instanceof Error ? error.message : error);
+          console.warn(
+            `[FeedGenClient] Error fetching post ${uri}:`,
+            error instanceof Error ? error.message : error
+          );
         }
       }
 
-      console.log(`[FeedGenClient] Successfully fetched ${fetchedCount}/${missingUris.length} missing posts`);
+      console.log(
+        `[FeedGenClient] Successfully fetched ${fetchedCount}/${missingUris.length} missing posts`
+      );
     }
 
     const hydrated: HydratedFeedPost[] = [];
@@ -232,7 +248,9 @@ export class FeedGeneratorClient {
     }
 
     if (blockedCount > 0) {
-      console.log(`[FeedGenClient] Filtered out ${blockedCount} posts from users who blocked the viewer`);
+      console.log(
+        `[FeedGenClient] Filtered out ${blockedCount} posts from users who blocked the viewer`
+      );
     }
 
     console.log(
@@ -281,7 +299,10 @@ export class FeedGeneratorClient {
       viewerAuthorization: options?.viewerAuthorization,
     });
 
-    const hydrated = await this.hydrateSkeleton(skeleton.feed, options?.viewerDid);
+    const hydrated = await this.hydrateSkeleton(
+      skeleton.feed,
+      options?.viewerDid
+    );
 
     return {
       feed: hydrated,

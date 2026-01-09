@@ -252,12 +252,20 @@ export class EventProcessor {
   private cacheService: CacheServiceType;
   private pendingOps = new BoundedArrayMap<string, PendingOp>(10000, 100);
   private pendingOpIndex = new BoundedMap<string, string>(5000); // opUri -> postUri
-  private pendingUserOps = new BoundedArrayMap<string, PendingUserOp>(5000, 100); // userDid -> pending ops
+  private pendingUserOps = new BoundedArrayMap<string, PendingUserOp>(
+    5000,
+    100
+  ); // userDid -> pending ops
   private pendingUserOpIndex = new BoundedMap<string, string>(5000); // opUri -> userDid
-  private pendingListItems = new BoundedArrayMap<string, PendingListItem>(5000, 100); // listUri -> pending list items
+  private pendingListItems = new BoundedArrayMap<string, PendingListItem>(
+    5000,
+    100
+  ); // listUri -> pending list items
   private pendingListItemIndex = new BoundedMap<string, string>(5000); // itemUri -> listUri
-  private pendingUserCreationOps =
-    new BoundedArrayMap<string, PendingUserCreationOp>(5000, 100); // did -> ops
+  private pendingUserCreationOps = new BoundedArrayMap<
+    string,
+    PendingUserCreationOp
+  >(5000, 100); // did -> ops
   private readonly TTL_MS = 24 * 60 * 60 * 1000; // 24 hour TTL for cleanup
   private totalPendingCount = 0; // Running counter for performance
   private totalPendingUserOps = 0; // Counter for pending user ops
@@ -300,7 +308,9 @@ export class EventProcessor {
    * @param deps - Dependencies (all optional, defaults to global singletons)
    */
   constructor(deps: EventProcessorDependencies = {}) {
-    this.userCreationSemaphore = new Semaphore(this.MAX_CONCURRENT_USER_CREATIONS);
+    this.userCreationSemaphore = new Semaphore(
+      this.MAX_CONCURRENT_USER_CREATIONS
+    );
     this.storage = deps.storage ?? globalStorage;
     this.labelService = deps.labelService ?? globalLabelService;
     this.didResolver = deps.didResolver ?? globalDidResolver;
@@ -980,7 +990,10 @@ export class EventProcessor {
         }
       }
 
-      this.pdsDataFetcher.markIncomplete(type, did, uri, { action, constraint });
+      this.pdsDataFetcher.markIncomplete(type, did, uri, {
+        action,
+        constraint,
+      });
     } catch (error) {
       smartConsole.error(
         `[EVENT_PROCESSOR] Error marking incomplete entry:`,
@@ -2003,8 +2016,8 @@ export class EventProcessor {
 
     // If displayName is missing, try to fetch it from the creator's PDS
     let displayName = sanitizeRequiredText(record.displayName);
-    let description = sanitizeText(record.description);
-    let avatarUrl = extractBlobCid(record.avatar);
+    const description = sanitizeText(record.description);
+    const avatarUrl = extractBlobCid(record.avatar);
 
     if (!displayName || displayName.trim() === '') {
       smartConsole.log(
@@ -2012,7 +2025,12 @@ export class EventProcessor {
       );
 
       // Fetch complete metadata from PDS in the background
-      this.fetchAndUpdateFeedGeneratorMetadata(uri, cid, creatorDid, record.did);
+      this.fetchAndUpdateFeedGeneratorMetadata(
+        uri,
+        cid,
+        creatorDid,
+        record.did
+      );
 
       // Use a temporary name while we fetch the real one
       displayName = 'Loading...';
@@ -2670,6 +2688,8 @@ export const eventProcessor = new EventProcessor();
  * Factory function for creating EventProcessor with dependency injection
  * @param deps - Dependencies to inject
  */
-export function createEventProcessor(deps: EventProcessorDependencies): EventProcessor {
+export function createEventProcessor(
+  deps: EventProcessorDependencies
+): EventProcessor {
   return new EventProcessor(deps);
 }

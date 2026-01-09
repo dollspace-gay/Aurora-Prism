@@ -42,7 +42,9 @@ describe('isUrlSafeToFetch', () => {
     });
 
     it('should block data: protocol', () => {
-      expect(isUrlSafeToFetch('data:text/html,<script>alert(1)</script>')).toBe(false);
+      expect(isUrlSafeToFetch('data:text/html,<script>alert(1)</script>')).toBe(
+        false
+      );
     });
   });
 
@@ -126,7 +128,9 @@ describe('sanitizeUrlPath', () => {
   });
 
   it('should remove script tags', () => {
-    expect(sanitizeUrlPath('path<script>alert(1)</script>/file')).toBe('path/file');
+    expect(sanitizeUrlPath('path<script>alert(1)</script>/file')).toBe(
+      'path/file'
+    );
   });
 
   it('should remove javascript: protocol', () => {
@@ -289,19 +293,29 @@ describe('isValidDID', () => {
 
 describe('isValidCID', () => {
   it('should validate CIDv0 (Qm...)', () => {
-    expect(isValidCID('QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG')).toBe(true);
+    expect(isValidCID('QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG')).toBe(
+      true
+    );
   });
 
   it('should validate CIDv1 base32 (b...)', () => {
-    expect(isValidCID('bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi')).toBe(true);
+    expect(
+      isValidCID('bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi')
+    ).toBe(true);
   });
 
   it('should validate CIDv1 base58 (z...)', () => {
-    expect(isValidCID('zdpuAyvkgEDQm9TenwGkd5eNaosSxjgEYd8QatfPetgB1CdEZ')).toBe(true);
+    expect(
+      isValidCID('zdpuAyvkgEDQm9TenwGkd5eNaosSxjgEYd8QatfPetgB1CdEZ')
+    ).toBe(true);
   });
 
   it('should validate raw hex CIDs', () => {
-    expect(isValidCID('0155122090e1c1d9ae0e9a4b53a90b4f65b0bf1e4a0f0e1c1d9ae0e9a4b53a90b4f65b0bf1e4a')).toBe(true);
+    expect(
+      isValidCID(
+        '0155122090e1c1d9ae0e9a4b53a90b4f65b0bf1e4a0f0e1c1d9ae0e9a4b53a90b4f65b0bf1e4a'
+      )
+    ).toBe(true);
   });
 
   it('should reject empty or null', () => {
@@ -327,7 +341,8 @@ describe('isValidCID', () => {
 describe('buildSafeBlobUrl', () => {
   const validPds = 'https://bsky.social';
   const validDid = 'did:plc:ewvi7nxzyoun6zhxrhs64oiz';
-  const validCid = 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi';
+  const validCid =
+    'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi';
 
   it('should build valid blob URL', () => {
     const url = buildSafeBlobUrl(validPds, validDid, validCid);
@@ -368,13 +383,19 @@ describe('safeFetch', () => {
 
   it('should fetch safe URLs', async () => {
     await safeFetch('https://example.com/api');
-    expect(global.fetch).toHaveBeenCalledWith('https://example.com/api', undefined);
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://example.com/api',
+      undefined
+    );
   });
 
   it('should pass options to fetch', async () => {
     const options = { headers: { 'X-Test': 'value' } };
     await safeFetch('https://example.com/api', options);
-    expect(global.fetch).toHaveBeenCalledWith('https://example.com/api', options);
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://example.com/api',
+      options
+    );
   });
 
   it('should throw for unsafe URLs', async () => {

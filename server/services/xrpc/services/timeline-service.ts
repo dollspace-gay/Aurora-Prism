@@ -355,13 +355,21 @@ export async function getFeed(req: Request, res: Response): Promise<void> {
     let feedGen = await storage.getFeedGenerator(params.feed);
     if (!feedGen) {
       // Try to discover the feed from PDS
-      console.log(`[XRPC] Feed generator not found in database, attempting discovery: ${params.feed}`);
-      const { feedGeneratorDiscovery } = await import('../../feed-generator-discovery');
-      const discovered = await feedGeneratorDiscovery.fetchFeedGeneratorByUri(params.feed);
+      console.log(
+        `[XRPC] Feed generator not found in database, attempting discovery: ${params.feed}`
+      );
+      const { feedGeneratorDiscovery } = await import(
+        '../../feed-generator-discovery'
+      );
+      const discovered = await feedGeneratorDiscovery.fetchFeedGeneratorByUri(
+        params.feed
+      );
 
       if (discovered) {
         // Index the discovered feed generator
-        console.log(`[XRPC] Feed discovered, indexing: ${discovered.displayName}`);
+        console.log(
+          `[XRPC] Feed discovered, indexing: ${discovered.displayName}`
+        );
 
         // Parse the URI to get the creator DID
         const parts = params.feed.split('/');
@@ -370,7 +378,9 @@ export async function getFeed(req: Request, res: Response): Promise<void> {
         // Ensure the creator user exists first
         const creator = await storage.getUser(creatorDid);
         if (!creator) {
-          console.log(`[XRPC] Creator ${creatorDid} not found, creating placeholder`);
+          console.log(
+            `[XRPC] Creator ${creatorDid} not found, creating placeholder`
+          );
           await storage.createUser({
             did: creatorDid,
             handle: 'handle.invalid', // Will be updated by PDS fetcher
@@ -379,14 +389,19 @@ export async function getFeed(req: Request, res: Response): Promise<void> {
 
         // Process through event processor to index it
         const { eventProcessor } = await import('../../event-processor');
-        await eventProcessor.processRecord(params.feed, discovered.cid, creatorDid, {
-          $type: 'app.bsky.feed.generator',
-          did: discovered.did,
-          displayName: discovered.displayName,
-          description: discovered.description,
-          avatar: discovered.avatar,
-          createdAt: discovered.createdAt,
-        });
+        await eventProcessor.processRecord(
+          params.feed,
+          discovered.cid,
+          creatorDid,
+          {
+            $type: 'app.bsky.feed.generator',
+            did: discovered.did,
+            displayName: discovered.displayName,
+            description: discovered.description,
+            avatar: discovered.avatar,
+            createdAt: discovered.createdAt,
+          }
+        );
 
         // Try fetching again after indexing
         feedGen = await storage.getFeedGenerator(params.feed);

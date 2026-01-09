@@ -500,10 +500,7 @@ export class FeedGeneratorDiscovery {
         failed,
       };
 
-      smartConsole.log(
-        `[FEEDGEN_DISCOVERY] Refresh complete:`,
-        result
-      );
+      smartConsole.log(`[FEEDGEN_DISCOVERY] Refresh complete:`, result);
 
       return result;
     } catch (error) {
