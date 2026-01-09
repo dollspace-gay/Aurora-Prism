@@ -20,7 +20,7 @@ import {
   threadGates,
   postGates,
 } from '../../shared/schema';
-import { sql, gt } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import { logCollector } from './log-collector';
 
 export class DataPruningService {

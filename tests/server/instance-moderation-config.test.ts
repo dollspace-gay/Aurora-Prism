@@ -8,7 +8,6 @@ import {
   getLabelConfig,
   shouldDeleteReference,
   getLabelsByReason,
-  type InstanceLabel,
 } from '../../server/config/instance-moderation';
 
 describe('Instance Moderation Config', () => {

@@ -55,7 +55,7 @@ export function createMockDidResolver() {
       return did;
     }),
 
-    getPdsEndpoint: vi.fn(async (did: string) => {
+    getPdsEndpoint: vi.fn(async (_did: string) => {
       return 'https://pds.example.com';
     }),
 
@@ -182,7 +182,7 @@ export function createMockAuthService() {
   const tokens = new Map<string, string>(); // token -> did
 
   return {
-    createSession: vi.fn(async (identifier: string, password: string) => {
+    createSession: vi.fn(async (identifier: string, _password: string) => {
       // Simple mock - accept any password
       const did = identifier.startsWith('did:')
         ? identifier
@@ -303,13 +303,13 @@ export function createMockResponse() {
     }),
     cookie: vi.fn(function (
       this: any,
-      name: string,
-      value: string,
-      options?: any
+      _name: string,
+      _value: string,
+      _options?: any
     ) {
       return this;
     }),
-    clearCookie: vi.fn(function (this: any, name: string) {
+    clearCookie: vi.fn(function (this: any, _name: string) {
       return this;
     }),
     redirect: vi.fn(function (this: any, url: string) {

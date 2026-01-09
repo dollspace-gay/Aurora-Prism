@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock log-aggregator before importing
 vi.mock('../../server/services/log-aggregator', () => ({
@@ -12,7 +12,6 @@ vi.mock('../../server/services/log-aggregator', () => ({
 import {
   aggregatedConsole,
   smartConsole,
-  SmartConsole,
   shouldAggregateLog,
 } from '../../server/services/console-wrapper';
 import { logAggregator } from '../../server/services/log-aggregator';

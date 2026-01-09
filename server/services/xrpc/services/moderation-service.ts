@@ -5,17 +5,11 @@
 
 import type { Request, Response } from 'express';
 import { storage } from '../../../storage';
-import { requireAuthDid, getAuthenticatedDid } from '../utils/auth-helpers';
+import { requireAuthDid } from '../utils/auth-helpers';
 import { handleError } from '../utils/error-handler';
-import { resolveActor, getUserPdsEndpoint } from '../utils/resolvers';
-import { maybeAvatar } from '../utils/serializers';
+import { getUserPdsEndpoint } from '../utils/resolvers';
 import {
   getBlocksSchema,
-  getMutesSchema,
-  muteActorSchema,
-  muteActorListSchema,
-  unmuteActorListSchema,
-  muteThreadSchema,
   queryLabelsSchema,
   createReportSchema,
 } from '../schemas';

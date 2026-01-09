@@ -8,7 +8,6 @@ import { storage } from '../../../storage';
 import { requireAuthDid } from '../utils/auth-helpers';
 import { handleError } from '../utils/error-handler';
 import { resolveActor } from '../utils/resolvers';
-import { maybeAvatar } from '../utils/serializers';
 import {
   getProfileSchema,
   getProfilesSchema,

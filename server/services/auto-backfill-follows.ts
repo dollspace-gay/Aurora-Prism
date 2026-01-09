@@ -14,7 +14,6 @@ const BATCH_SIZE = 100;
 const CONCURRENT_FETCHES = 50; // Increased from 10 to 50 for faster processing
 const PDS_HOST = process.env.PDS_HOST || 'https://bsky.network';
 const BACKFILL_COOLDOWN_HOURS = 1; // Cooldown before re-running automatic backfill
-const PDS_REQUEST_TIMEOUT = 10000; // 10 second timeout per PDS request
 const MAX_FOLLOW_RECORDS_TO_CHECK = 500; // Don't paginate through more than 500 follows per user
 
 // Track ongoing backfills to prevent duplicates

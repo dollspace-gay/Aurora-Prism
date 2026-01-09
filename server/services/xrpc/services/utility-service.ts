@@ -7,7 +7,6 @@ import type { Request, Response } from 'express';
 import { storage } from '../../../storage';
 import { requireAuthDid } from '../utils/auth-helpers';
 import { handleError } from '../utils/error-handler';
-import { transformBlobToCdnUrl } from '../utils/serializers';
 import {
   getLabelerServicesSchema,
   getJobStatusSchema,

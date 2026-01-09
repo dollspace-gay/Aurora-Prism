@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { reducer, toast, useToast } from '../../client/src/hooks/use-toast';
+import { describe, it, expect } from 'vitest';
+import { reducer, toast } from '../../client/src/hooks/use-toast';
 
 describe('use-toast', () => {
   describe('toast function', () => {

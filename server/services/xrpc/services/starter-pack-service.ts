@@ -8,7 +8,6 @@ import { storage } from '../../../storage';
 import { handleError } from '../utils/error-handler';
 import { resolveActor } from '../utils/resolvers';
 import { requireAuthDid } from '../utils/auth-helpers';
-import { transformBlobToCdnUrl } from '../utils/serializers';
 import {
   getStarterPackSchema,
   getStarterPacksSchema,

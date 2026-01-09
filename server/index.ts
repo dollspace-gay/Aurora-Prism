@@ -275,6 +275,9 @@ app.use((req, res, next) => {
       console.log(
         '[BACKFILL] TypeScript backfill is permanently disabled. Use Python backfill service instead.'
       );
+
+      // Start background jobs (session cleanup, OAuth cleanup, pool status logging)
+      startBackgroundJobs();
     }
   );
 })();

@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { didResolver } from './did-resolver';
 import { storage } from '../storage';
-import { appViewJWTService } from './appview-jwt';
 import type { Post } from '@shared/schema';
 import { db } from '../db';
 import { blocks } from '@shared/schema';

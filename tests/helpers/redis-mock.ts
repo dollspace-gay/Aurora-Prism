@@ -128,7 +128,7 @@ export function createMockRedisQueue() {
       messages.push({ type, data });
       return Promise.resolve();
     }),
-    consume: vi.fn((handler: (msg: any) => Promise<void>) => {
+    consume: vi.fn((_handler: (msg: any) => Promise<void>) => {
       consuming = true;
       // Process any queued messages
       return Promise.resolve();
