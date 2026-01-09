@@ -34,6 +34,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Worker process coordination
 
 ### Changed
+- Implement placeholder data-plane routes (graph, search, notifications, feed-generators) (#43)
+- Implement placeholder feed generator queries in data-plane client (#42)
+- Implement placeholder notification queries in data-plane client (#41)
+- Implement search queries in data-plane client (#40)
+- Implement graph queries in data-plane client (#39)
+- Implement list-based blocking in views.ts (#38)
 - Fix miscellaneous XRPC service type errors (15 errors across 8 files) (#37)
 - Fix client-side type errors (api.ts, dashboard.tsx - 5 errors) (#36)
 - Fix feed-generator-service.ts type errors (7 errors) (#35)

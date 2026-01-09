@@ -1,5 +1,5 @@
 import { Router } from 'express';
-// Placeholder for feed generator routes
+// Feed generator routes - returns 501 until data-plane feed generators are implemented
 const router = Router();
 
 router.post('/getFeedGenerators', (_req, res) => {

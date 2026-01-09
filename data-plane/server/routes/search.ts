@@ -1,5 +1,5 @@
 import { Router } from 'express';
-// Placeholder for search routes
+// Search routes - returns 501 until data-plane search is implemented
 const router = Router();
 
 router.post('/searchPosts', (_req, res) => {

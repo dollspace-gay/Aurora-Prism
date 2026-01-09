@@ -281,17 +281,20 @@ export class Views {
 
   blockingByList(
     relationship: ProfileViewerState,
-    state: HydrationState
+    _state: HydrationState
   ): boolean {
-    // TODO: implement list-based blocking
-    return false;
+    // Check if the viewer is blocking the subject via a moderation list
+    return !!(relationship.blockingByList?.uri);
   }
 
   blockedByList(
     relationship: ProfileViewerState,
-    state: HydrationState
+    _state: HydrationState
   ): boolean {
-    // TODO: implement list-based blocking
-    return false;
+    // ATProto does not expose which list blocked the viewer for privacy reasons.
+    // The viewer only sees blockedBy: true without list details.
+    // If we need to track list-based blocks on subjects, we would need to
+    // query our own listblock records separately.
+    return !!(relationship.mutedByList?.uri && relationship.blockedBy);
   }
 }

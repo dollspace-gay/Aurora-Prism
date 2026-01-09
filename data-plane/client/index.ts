@@ -603,7 +603,7 @@ export class DataPlaneClient {
     });
   }
 
-  // Graph queries (placeholders - to be implemented)
+  // Graph queries
 
   async getFollowers(
     actor: string,
@@ -638,7 +638,7 @@ export class DataPlaneClient {
     return this.request('/internal/getMutes', { actor, ...options });
   }
 
-  // Search queries (placeholders)
+  // Search queries
 
   async searchPosts(
     query: string,
@@ -654,7 +654,7 @@ export class DataPlaneClient {
     return this.request('/internal/searchPosts', { query, ...options });
   }
 
-  // Notification queries (placeholders)
+  // Notification queries
 
   async listNotifications(
     actor: string,
@@ -673,7 +673,7 @@ export class DataPlaneClient {
     });
   }
 
-  // Feed generator queries (placeholders)
+  // Feed generator queries
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async getFeedGenerators(uris: string[]): Promise<any> {

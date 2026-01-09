@@ -1,5 +1,5 @@
 import { Router } from 'express';
-// Placeholder for notification routes
+// Notification routes - returns 501 until data-plane notifications are implemented
 const router = Router();
 
 router.post('/listNotifications', (_req, res) => {

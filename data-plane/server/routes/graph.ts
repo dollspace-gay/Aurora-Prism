@@ -1,5 +1,5 @@
 import { Router } from 'express';
-// Placeholder for graph routes (follows, blocks, mutes, relationships)
+// Graph routes - returns 501 until data-plane graph queries are implemented
 const router = Router();
 
 router.post('/getFollowers', (_req, res) => {
