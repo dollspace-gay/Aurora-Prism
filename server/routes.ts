@@ -219,7 +219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           index: number
         ) => {
           relay.connect(workerId, totalWorkers);
-          console.log(`[FIREHOSE] Additional relay ${index + 1} connected`);
+          console.log('[FIREHOSE] Additional relay %d connected', index + 1);
         }
       );
     }
@@ -378,7 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const retriedCount = await eventProcessor.retryPendingOperations();
         if (retriedCount > 0) {
-          console.log(`[REDIS] Retried ${retriedCount} pending operations`);
+          console.log('[REDIS] Retried %d pending operations', retriedCount);
         }
       } catch (error) {
         console.error(`[REDIS] Error during retry cycle:`, error);
@@ -472,19 +472,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Validate DID and CID format to prevent injection attacks
         if (!isValidDID(did)) {
-          console.error(`[BLOB_PROXY] Invalid DID format: ${did}`);
+          console.error('[BLOB_PROXY] Invalid DID format: %s', did);
           return res.status(400).type('text/plain').send('Invalid DID format');
         }
 
         if (!isValidCID(cid)) {
-          console.error(`[BLOB_PROXY] Invalid CID format: ${cid}`);
+          console.error('[BLOB_PROXY] Invalid CID format: %s', cid);
           return res.status(400).type('text/plain').send('Invalid CID format');
         }
 
         // Try fetching from Bluesky CDN first (fast path)
         const cdnUrl = `https://cdn.bsky.app/img/${preset}/plain/${did}/${cid}@${format}`;
 
-        console.log(`[BLOB_PROXY] Fetching from Bluesky CDN: ${cdnUrl}`);
+        console.log('[BLOB_PROXY] Fetching from Bluesky CDN: %s', cdnUrl);
 
         let response = await safeFetch(cdnUrl, {
           headers: {
@@ -508,7 +508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const blobUrl = buildSafeBlobUrl(pdsEndpoint, did, cid);
 
               if (blobUrl && isUrlSafeToFetch(blobUrl)) {
-                console.log(`[BLOB_PROXY] Fetching from PDS: ${blobUrl}`);
+                console.log('[BLOB_PROXY] Fetching from PDS: %s', blobUrl);
 
                 const pdsResponse = await safeFetch(blobUrl, {
                   headers: {
@@ -811,7 +811,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log(`[AUTH] Successfully verified token for ${verifiedDid}`);
+      console.log('[AUTH] Successfully verified token for %s', verifiedDid);
 
       const sessionId = authService.generateSessionId();
 
@@ -1069,7 +1069,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const CONCURRENT_FETCHES = 10;
             const PDS_HOST = process.env.PDS_HOST || 'https://bsky.network';
 
-            console.log(`[BACKFILL_LIKES] Starting for ${userDid}`);
+            console.log('[BACKFILL_LIKES] Starting for %s', userDid);
 
             // Get missing post URIs
             const missingPosts = await db.execute(
@@ -2078,7 +2078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        console.log(`[API] Deleted like ${uri} for ${session.userDid}`);
+        console.log('[API] Deleted like %s for %s', uri, session.userDid);
 
         res.json({ success: true });
       } catch {
@@ -2242,7 +2242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        console.log(`[API] Deleted follow ${uri} for ${session.userDid}`);
+        console.log('[API] Deleted follow %s for %s', uri, session.userDid);
 
         res.json({ success: true });
       } catch {
@@ -4065,7 +4065,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const pdsEndpoint = await didResolver.resolveDIDToPDS(userDid);
 
         if (!pdsEndpoint) {
-          console.error(`[XRPC] Could not resolve PDS for DID: ${userDid}`);
+          console.error('[XRPC] Could not resolve PDS for DID: %s', userDid);
           return res.status(400).json({
             error: 'InvalidRequest',
             message: "Could not determine user's PDS endpoint",
@@ -4168,7 +4168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const pdsEndpoint = await didResolver.resolveDIDToPDS(userDid);
 
         if (!pdsEndpoint) {
-          console.error(`[XRPC] Could not resolve PDS for DID: ${userDid}`);
+          console.error('[XRPC] Could not resolve PDS for DID: %s', userDid);
           return res.status(400).json({
             error: 'InvalidRequest',
             message: "Could not determine user's PDS endpoint",
@@ -4216,7 +4216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate DID and CID format to prevent injection attacks
       if (!isValidDID(did)) {
-        console.error(`[BLOB_FETCH] Invalid DID format: ${did}`);
+        console.error('[BLOB_FETCH] Invalid DID format: %s', did);
         return res.status(400).json({
           error: 'InvalidRequest',
           message: 'Invalid DID format',
@@ -4224,7 +4224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (!isValidCID(cid)) {
-        console.error(`[BLOB_FETCH] Invalid CID format: ${cid}`);
+        console.error('[BLOB_FETCH] Invalid CID format: %s', cid);
         return res.status(400).json({
           error: 'InvalidRequest',
           message: 'Invalid CID format',
@@ -4257,7 +4257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Additional validation: Ensure the constructed URL is safe to fetch from
       // This validates the URL is not targeting internal/private networks
       if (!isUrlSafeToFetch(blobUrl)) {
-        console.error(`[BLOB_FETCH] URL failed safety validation: ${blobUrl}`);
+        console.error('[BLOB_FETCH] URL failed safety validation: %s', blobUrl);
         return res.status(400).json({
           error: 'InvalidRequest',
           message: 'Invalid or unsafe blob URL',

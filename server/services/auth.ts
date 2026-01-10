@@ -362,7 +362,7 @@ export class AuthService {
         throw new Error(`Unsupported JWT algorithm: ${header.alg}`);
       }
 
-      console.log(`[AUTH] ✓ Signature verified for DID: ${signingDid}`);
+      console.log('[AUTH] ✓ Signature verified for DID: %s', signingDid);
       return true;
     } catch (error) {
       console.error(
@@ -404,7 +404,7 @@ export class AuthService {
   extractToken(req: Request): string | null {
     // 1. Check for cookie first (for web UI sessions)
     if (req.cookies && req.cookies.auth_token) {
-      console.log(`[AUTH] Extracted token from cookie for ${req.path}`);
+      console.log('[AUTH] Extracted token from cookie for %s', req.path);
       return req.cookies.auth_token;
     }
 

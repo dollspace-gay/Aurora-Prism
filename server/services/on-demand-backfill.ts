@@ -19,29 +19,29 @@ export class OnDemandBackfill {
   async backfillUser(did: string): Promise<boolean> {
     // Check if we're already backfilling this DID
     if (this.activeJobs.has(did)) {
-      console.log(`[ON_DEMAND_BACKFILL] Already backfilling ${did}`);
+      console.log('[ON_DEMAND_BACKFILL] Already backfilling %s', did);
       return false;
     }
 
     // Check cooldown - don't spam backfill the same user
     if (this.recentlyBackfilled.has(did)) {
-      console.log(`[ON_DEMAND_BACKFILL] ${did} recently backfilled, skipping`);
+      console.log('[ON_DEMAND_BACKFILL] %s recently backfilled, skipping', did);
       return false;
     }
 
     try {
-      console.log(`[ON_DEMAND_BACKFILL] Starting backfill for ${did}`);
+      console.log('[ON_DEMAND_BACKFILL] Starting backfill for %s', did);
       logCollector.info(`On-demand backfill started for ${did}`);
 
       // First, resolve the DID to find their PDS
       const pdsUrl = await this.resolvePDS(did);
 
       if (!pdsUrl) {
-        console.warn(`[ON_DEMAND_BACKFILL] Could not resolve PDS for ${did}`);
+        console.warn('[ON_DEMAND_BACKFILL] Could not resolve PDS for %s', did);
         return false;
       }
 
-      console.log(`[ON_DEMAND_BACKFILL] ${did} is on PDS: ${pdsUrl}`);
+      console.log('[ON_DEMAND_BACKFILL] %s is on PDS: %s', did, pdsUrl);
 
       // Mark as active
       this.activeJobs.set(did, {
@@ -62,12 +62,12 @@ export class OnDemandBackfill {
       // Remove from active jobs
       this.activeJobs.delete(did);
 
-      console.log(`[ON_DEMAND_BACKFILL] Completed backfill for ${did}`);
+      console.log('[ON_DEMAND_BACKFILL] Completed backfill for %s', did);
       logCollector.success(`On-demand backfill completed for ${did}`);
 
       return true;
     } catch (error) {
-      console.error(`[ON_DEMAND_BACKFILL] Error backfilling ${did}:`, error);
+      console.error('[ON_DEMAND_BACKFILL] Error backfilling %s:', did, error);
       logCollector.error(`On-demand backfill failed for ${did}`, { error });
       this.activeJobs.delete(did);
       metricsService.incrementError();
@@ -83,7 +83,9 @@ export class OnDemandBackfill {
 
       if (!response.ok) {
         console.warn(
-          `[ON_DEMAND_BACKFILL] Failed to resolve DID ${did}: ${response.status}`
+          '[ON_DEMAND_BACKFILL] Failed to resolve DID %s: %s',
+          did,
+          response.status
         );
         return null;
       }
@@ -98,7 +100,8 @@ export class OnDemandBackfill {
 
       if (!pdsService?.serviceEndpoint) {
         console.warn(
-          `[ON_DEMAND_BACKFILL] No PDS service found in DID document for ${did}`
+          '[ON_DEMAND_BACKFILL] No PDS service found in DID document for %s',
+          did
         );
         return null;
       }
@@ -109,7 +112,8 @@ export class OnDemandBackfill {
       return pdsUrl;
     } catch (error) {
       console.error(
-        `[ON_DEMAND_BACKFILL] Error resolving PDS for ${did}:`,
+        '[ON_DEMAND_BACKFILL] Error resolving PDS for %s:',
+        did,
         error
       );
       return null;
@@ -131,10 +135,14 @@ export class OnDemandBackfill {
       const collections = describeData.collections || [];
 
       console.log(
-        `[ON_DEMAND_BACKFILL] Backfilling ${handle} (${did}) from ${pdsUrl}`
+        '[ON_DEMAND_BACKFILL] Backfilling %s (%s) from %s',
+        handle,
+        did,
+        pdsUrl
       );
       console.log(
-        `[ON_DEMAND_BACKFILL] Collections: ${collections.join(', ')}`
+        '[ON_DEMAND_BACKFILL] Collections: %s',
+        collections.join(', ')
       );
 
       // Process handle/identity first
@@ -153,7 +161,7 @@ export class OnDemandBackfill {
         await this.backfillCollection(did, pdsUrl, collection);
       }
 
-      console.log(`[ON_DEMAND_BACKFILL] Backfilled all collections for ${did}`);
+      console.log('[ON_DEMAND_BACKFILL] Backfilled all collections for %s', did);
     } catch (error) {
       console.error(`[ON_DEMAND_BACKFILL] Error during backfill:`, error);
       throw error;
@@ -224,7 +232,8 @@ export class OnDemandBackfill {
         // Don't backfill more than 1000 records per collection (prevent abuse)
         if (totalRecords >= 1000) {
           console.log(
-            `[ON_DEMAND_BACKFILL] Reached limit of 1000 records for ${collection}, stopping`
+            '[ON_DEMAND_BACKFILL] Reached limit of 1000 records for %s, stopping',
+            collection
           );
           break;
         }
@@ -232,12 +241,15 @@ export class OnDemandBackfill {
 
       if (totalRecords > 0) {
         console.log(
-          `[ON_DEMAND_BACKFILL] Backfilled ${totalRecords} records from ${collection}`
+          '[ON_DEMAND_BACKFILL] Backfilled %d records from %s',
+          totalRecords,
+          collection
         );
       }
     } catch (error) {
       console.error(
-        `[ON_DEMAND_BACKFILL] Error backfilling collection ${collection}:`,
+        '[ON_DEMAND_BACKFILL] Error backfilling collection %s:',
+        collection,
         error
       );
       throw error;

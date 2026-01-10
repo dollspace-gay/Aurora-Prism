@@ -62,14 +62,14 @@ class InstanceModerationService {
       // Determine subject type from URI pattern
       if (subject.includes('/app.bsky.feed.post/')) {
         await storage.deletePost(subject);
-        console.log(`[INSTANCE_MOD] Deleted post reference: ${subject}`);
+        console.log('[INSTANCE_MOD] Deleted post reference: %s', subject);
       } else if (
         subject.includes('/app.bsky.actor.profile/') ||
         subject.startsWith('did:')
       ) {
         // For profiles, we mark as deleted rather than removing completely
         // This preserves referential integrity for existing data
-        console.log(`[INSTANCE_MOD] Marked profile as deleted: ${subject}`);
+        console.log('[INSTANCE_MOD] Marked profile as deleted: %s', subject);
       } else {
         console.log(
           `[INSTANCE_MOD] Unknown subject type, skipping deletion: ${subject}`

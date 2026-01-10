@@ -15,9 +15,10 @@ describe('vite server utilities', () => {
       log('Test message');
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringMatching(
-          /\d{1,2}:\d{2}:\d{2}\s[AP]M\s\[express\]\sTest message/
-        )
+        '%s [%s] %s',
+        expect.stringMatching(/\d{1,2}:\d{2}:\d{2}\s[AP]M/),
+        'express',
+        'Test message'
       );
     });
 
@@ -25,7 +26,10 @@ describe('vite server utilities', () => {
       log('Custom message', 'custom-source');
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('[custom-source]')
+        '%s [%s] %s',
+        expect.stringMatching(/\d{1,2}:\d{2}:\d{2}\s[AP]M/),
+        'custom-source',
+        'Custom message'
       );
     });
 
@@ -33,7 +37,10 @@ describe('vite server utilities', () => {
       log('Default source test');
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('[express]')
+        '%s [%s] %s',
+        expect.stringMatching(/\d{1,2}:\d{2}:\d{2}\s[AP]M/),
+        'express',
+        'Default source test'
       );
     });
 
@@ -41,7 +48,10 @@ describe('vite server utilities', () => {
       log('Time format test');
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringMatching(/\d{1,2}:\d{2}:\d{2}\s[AP]M/)
+        '%s [%s] %s',
+        expect.stringMatching(/\d{1,2}:\d{2}:\d{2}\s[AP]M/),
+        'express',
+        'Time format test'
       );
     });
 
@@ -49,7 +59,10 @@ describe('vite server utilities', () => {
       log('Specific message content');
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Specific message content')
+        '%s [%s] %s',
+        expect.any(String),
+        'express',
+        'Specific message content'
       );
     });
   });

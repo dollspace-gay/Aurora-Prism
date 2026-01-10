@@ -34,13 +34,13 @@ export async function getAuthenticatedDid(
   try {
     const token = authService.extractToken(req);
     if (!token) {
-      console.log(`[AUTH] No token found in request to ${req.path}`);
+      console.log('[AUTH] No token found in request to %s', req.path);
       return null;
     }
 
     const payload = await authService.verifyToken(token);
     if (!payload?.did) {
-      console.log(`[AUTH] Token payload missing DID for ${req.path}`);
+      console.log('[AUTH] Token payload missing DID for %s', req.path);
       return null;
     }
     // Enforce minimal audience/method checks if present
@@ -116,7 +116,7 @@ export async function requireAuthDid(
 ): Promise<string | null> {
   const did = await getAuthenticatedDid(req);
   if (!did) {
-    console.log(`[AUTH] Authentication required but missing for ${req.path}`);
+    console.log('[AUTH] Authentication required but missing for %s', req.path);
     res.status(401).json({
       error: 'AuthMissing',
       message: 'Authentication Required',

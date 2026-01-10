@@ -29,7 +29,7 @@ export class AutoBackfillLikesService {
   async checkAndBackfill(userDid: string): Promise<boolean> {
     // Skip if already backfilling for this user
     if (ongoingBackfills.has(userDid)) {
-      console.log(`[AUTO_BACKFILL_LIKES] Already backfilling for ${userDid}`);
+      console.log('[AUTO_BACKFILL_LIKES] Already backfilling for %s', userDid);
       return false;
     }
 
@@ -140,7 +140,7 @@ export class AutoBackfillLikesService {
         );
 
         if (missingPostUris.length === 0) {
-          console.log(`[AUTO_BACKFILL_LIKES] No posts to fetch for ${userDid}`);
+          console.log('[AUTO_BACKFILL_LIKES] No posts to fetch for %s', userDid);
           return;
         }
 

@@ -276,7 +276,7 @@ export class QuotePostsBackfillService {
   async backfillQuotePostsForUser(
     userDid: string
   ): Promise<{ checked: number; quotes: number; fetched: number }> {
-    console.log(`[QUOTE_POSTS] Backfilling quote posts for ${userDid}`);
+    console.log('[QUOTE_POSTS] Backfilling quote posts for %s', userDid);
 
     // Get user's posts
     const userPosts = await db

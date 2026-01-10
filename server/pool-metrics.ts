@@ -143,7 +143,7 @@ export class PoolMonitor {
   logStatus(): void {
     const metrics = this.getMetrics();
     if (!metrics) {
-      console.log(`[PoolMonitor:${this.label}] No metrics available yet`);
+      console.log('[PoolMonitor:%s] No metrics available yet', this.label);
       return;
     }
 

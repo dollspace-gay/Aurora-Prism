@@ -144,7 +144,7 @@ export class PDSDataFetcher {
         await this.fetchUserData(did, pdsEndpoint);
       }
     } catch (error) {
-      console.error(`[PDS_FETCHER] Failed to fetch user ${did}:`, error);
+      console.error('[PDS_FETCHER] Failed to fetch user %s:', did, error);
     }
   }
 
@@ -430,7 +430,7 @@ export class PDSDataFetcher {
         }
 
         const errorMsg = `Profile fetch failed: ${profileResponse.status}${errorDetails ? ` - ${errorDetails}` : ''}`;
-        console.warn(`[PDS_FETCHER] ${errorMsg} for ${did} at ${pdsEndpoint}`);
+        console.warn('[PDS_FETCHER] %s for %s at %s', errorMsg, did, pdsEndpoint);
 
         return {
           success: false,
@@ -656,7 +656,7 @@ export class PDSDataFetcher {
           (recordResponse.status === 400 || recordResponse.status === 404) &&
           isRecordNotFound
         ) {
-          console.warn(`[PDS_FETCHER] Post not found (deleted): ${postUri}`);
+          console.warn('[PDS_FETCHER] Post not found (deleted): %s', postUri);
           return {
             success: true, // Treat as success to stop retrying
             data: null,
@@ -664,7 +664,7 @@ export class PDSDataFetcher {
         }
 
         const errorMsg = `Record fetch failed: ${recordResponse.status}${errorDetails ? ` - ${errorDetails}` : ''}`;
-        console.warn(`[PDS_FETCHER] ${errorMsg} for ${postUri}`);
+        console.warn('[PDS_FETCHER] %s for %s', errorMsg, postUri);
 
         return {
           success: false,
@@ -752,7 +752,7 @@ export class PDSDataFetcher {
           (recordResponse.status === 400 || recordResponse.status === 404) &&
           isRecordNotFound
         ) {
-          console.warn(`[PDS_FETCHER] Record not found (deleted): ${uri}`);
+          console.warn('[PDS_FETCHER] Record not found (deleted): %s', uri);
           return {
             success: true, // Treat as success to stop retrying
             data: null,
@@ -760,7 +760,7 @@ export class PDSDataFetcher {
         }
 
         const errorMsg = `Record fetch failed: ${recordResponse.status}${errorDetails ? ` - ${errorDetails}` : ''}`;
-        console.warn(`[PDS_FETCHER] ${errorMsg} for ${uri}`);
+        console.warn('[PDS_FETCHER] %s for %s', errorMsg, uri);
 
         return { success: false, error: errorMsg };
       }
@@ -846,7 +846,7 @@ export class PDSDataFetcher {
   clearAll() {
     const count = this.incompleteEntries.size;
     this.incompleteEntries.clear();
-    console.log(`[PDS_FETCHER] Cleared ${count} incomplete entries`);
+    console.log('[PDS_FETCHER] Cleared %d incomplete entries', count);
   }
 }
 

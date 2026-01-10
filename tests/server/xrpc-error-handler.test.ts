@@ -148,7 +148,8 @@ describe('XRPC Error Handler', () => {
       handleError(mockRes, error, 'myEndpoint');
 
       expect(console.error).toHaveBeenCalledWith(
-        '[XRPC] Error in myEndpoint:',
+        '[XRPC] Error in %s:',
+        'myEndpoint',
         error
       );
     });

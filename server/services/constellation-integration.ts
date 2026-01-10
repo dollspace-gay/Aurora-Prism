@@ -94,7 +94,7 @@ class ConstellationIntegration {
         });
       }
 
-      console.log(`[CONSTELLATION] Integration enabled (URL: ${this.baseUrl})`);
+      console.log('[CONSTELLATION] Integration enabled (URL: %s)', this.baseUrl);
     }
   }
 

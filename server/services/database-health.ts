@@ -160,7 +160,7 @@ export class DatabaseHealthService {
 
         if (loss > this.DATA_LOSS_THRESHOLD) {
           const message = `CRITICAL DATA LOSS DETECTED: ${check.name} dropped from ${check.prev} to ${check.curr} (${(loss * 100).toFixed(1)}% loss)`;
-          console.error(`[DB_HEALTH] ${message}`);
+          console.error('[DB_HEALTH] %s', message);
           logCollector.error('Data loss detected', {
             table: check.name,
             previous: check.prev,

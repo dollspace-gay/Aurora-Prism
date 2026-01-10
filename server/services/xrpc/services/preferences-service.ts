@@ -28,7 +28,7 @@ export async function getPreferences(
     const userDid = await requireAuthDid(req, res);
     if (!userDid) return;
 
-    console.log(`[PREFERENCES] GET request for ${userDid} - proxying to PDS`);
+    console.log('[PREFERENCES] GET request for %s - proxying to PDS', userDid);
 
     // Get user's PDS endpoint
     const pdsEndpoint = await getUserPdsEndpoint(userDid);
@@ -86,7 +86,7 @@ export async function putPreferences(
     const userDid = await requireAuthDid(req, res);
     if (!userDid) return;
 
-    console.log(`[PREFERENCES] PUT request for ${userDid} - proxying to PDS`);
+    console.log('[PREFERENCES] PUT request for %s - proxying to PDS', userDid);
 
     // Get user's PDS endpoint
     const pdsEndpoint = await getUserPdsEndpoint(userDid);

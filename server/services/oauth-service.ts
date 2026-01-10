@@ -91,7 +91,7 @@ class DatabaseSessionStore {
           did: sub,
           handle: sub,
         });
-        console.log(`[OAUTH] Created user record for ${sub}`);
+        console.log('[OAUTH] Created user record for %s', sub);
       }
 
       const existingSession = await storage.getSession(sub);
@@ -166,7 +166,7 @@ export class OAuthService {
         );
       }
 
-      console.log(`[OAUTH] Loading keyset from file: ${keysetPath}`);
+      console.log('[OAUTH] Loading keyset from file: %s', keysetPath);
       const fs = await import('fs/promises');
       const keysetData = JSON.parse(await fs.readFile(keysetPath, 'utf-8'));
 

@@ -367,7 +367,7 @@ export class PDSClient {
           // If not JSON, use the status message
         }
 
-        console.error(`[PDS_CLIENT] Create session failed: ${errorMessage}`);
+        console.error('[PDS_CLIENT] Create session failed: %s', errorMessage);
         return {
           success: false,
           error: errorMessage,
@@ -458,7 +458,7 @@ export class PDSClient {
         };
       }
 
-      console.log(`[PDS_CLIENT] Successfully refreshed token for ${data.did}`);
+      console.log('[PDS_CLIENT] Successfully refreshed token for %s', data.did);
 
       return {
         success: true,

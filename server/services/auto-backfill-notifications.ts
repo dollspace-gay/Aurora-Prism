@@ -109,7 +109,7 @@ export class AutoBackfillNotificationsService {
             },
           });
 
-        console.log(`[AUTO_BACKFILL_NOTIFICATIONS] Complete for ${userDid}!`);
+        console.log('[AUTO_BACKFILL_NOTIFICATIONS] Complete for %s!', userDid);
       } catch (error) {
         console.error(
           `[AUTO_BACKFILL_NOTIFICATIONS] Fatal error for ${userDid}:`,

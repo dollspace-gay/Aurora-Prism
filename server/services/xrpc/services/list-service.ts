@@ -93,7 +93,7 @@ export async function getList(req: Request, res: Response): Promise<void> {
 
           if (response.ok) {
             const { value, cid } = await response.json();
-            console.log(`[XRPC] List discovered, indexing: ${value.name}`);
+            console.log('[XRPC] List discovered, indexing: %s', value.name);
 
             // Process through event processor to index it
             const { eventProcessor } = await import('../../event-processor');
@@ -388,7 +388,7 @@ export async function getListFeed(req: Request, res: Response): Promise<void> {
 
           if (response.ok) {
             const { value, cid } = await response.json();
-            console.log(`[XRPC] List discovered, indexing: ${value.name}`);
+            console.log('[XRPC] List discovered, indexing: %s', value.name);
 
             // Process through event processor to index it
             const { eventProcessor } = await import('../../event-processor');

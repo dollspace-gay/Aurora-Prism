@@ -42,7 +42,7 @@ export class AdminAuthorizationService {
       return;
     }
 
-    console.log(`[ADMIN_AUTH] Processing ${entries.length} admin entries...`);
+    console.log('[ADMIN_AUTH] Processing %d admin entries...', entries.length);
 
     for (const entry of entries) {
       try {
@@ -56,7 +56,7 @@ export class AdminAuthorizationService {
           // Resolve DID to get handle
           const didDoc = await didResolver.resolveDID(did);
           if (!didDoc) {
-            console.error(`[ADMIN_AUTH] Could not resolve DID ${did}`);
+            console.error('[ADMIN_AUTH] Could not resolve DID %s', did);
             continue;
           }
 
@@ -114,9 +114,9 @@ export class AdminAuthorizationService {
             set: { handle },
           });
 
-        console.log(`[ADMIN_AUTH] Authorized admin: ${handle} (${did})`);
+        console.log('[ADMIN_AUTH] Authorized admin: %s (%s)', handle, did);
       } catch (error) {
-        console.error(`[ADMIN_AUTH] Error processing entry ${entry}:`, error);
+        console.error('[ADMIN_AUTH] Error processing entry %s:', entry, error);
       }
     }
 

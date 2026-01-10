@@ -29,7 +29,7 @@ export class CacheService {
     }
 
     const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-    console.log(`[CACHE] Connecting to Redis at ${redisUrl}...`);
+    console.log('[CACHE] Connecting to Redis at %s...', redisUrl);
 
     this.redis = new Redis(redisUrl, {
       maxRetriesPerRequest: null,

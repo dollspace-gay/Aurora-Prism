@@ -50,7 +50,7 @@ export async function listNotifications(
     const userDid = await requireAuthDid(req, res);
     if (!userDid) return;
 
-    console.log(`[listNotifications] Fetching notifications for ${userDid}`);
+    console.log('[listNotifications] Fetching notifications for %s', userDid);
     const notificationsList = await storage.getNotifications(
       userDid,
       params.limit,

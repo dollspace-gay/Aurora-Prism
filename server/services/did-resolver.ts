@@ -532,7 +532,7 @@ export class DIDResolver {
       } else if (did.startsWith('did:web:')) {
         didDoc = await this.resolveWebDID(did);
       } else {
-        smartConsole.error(`[DID_RESOLVER] Unsupported DID method: ${did}`);
+        smartConsole.error('[DID_RESOLVER] Unsupported DID method: %s', did);
         return null;
       }
 
@@ -543,7 +543,7 @@ export class DIDResolver {
 
       return didDoc;
     } catch (error) {
-      smartConsole.error(`[DID_RESOLVER] Error resolving DID ${did}:`, error);
+      smartConsole.error('[DID_RESOLVER] Error resolving DID %s:', did, error);
       return null;
     }
   }
@@ -679,7 +679,7 @@ export class DIDResolver {
           ? `https://${domain}${path}/did.json`
           : `https://${domain}/.well-known/did.json`;
 
-        smartConsole.log(`[DID_RESOLVER] Resolving Web DID from: ${didDocUrl}`);
+        smartConsole.log('[DID_RESOLVER] Resolving Web DID from: %s', didDocUrl);
 
         const response = await fetch(didDocUrl, {
           headers: {

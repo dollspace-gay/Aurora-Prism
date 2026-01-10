@@ -41,7 +41,7 @@ export async function getProfile(req: Request, res: Response): Promise<void> {
 
         // Trigger backfill (non-blocking - don't wait for it)
         onDemandBackfill.backfillUser(actor).catch((error) => {
-          console.error(`[ON_DEMAND] Backfill failed for ${actor}:`, error);
+          console.error('[ON_DEMAND] Backfill failed for %s:', actor, error);
         });
 
         // Return 404 with a helpful message

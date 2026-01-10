@@ -90,11 +90,11 @@ export class BackfillService {
     this.USE_IDLE_PROCESSING = process.env.BACKFILL_USE_IDLE !== 'false'; // Use idle processing (default: true)
 
     console.log(`[BACKFILL] Resource throttling config:`);
-    console.log(`  - Batch size: ${this.BATCH_SIZE} events`);
-    console.log(`  - Batch delay: ${this.BATCH_DELAY_MS}ms`);
-    console.log(`  - Max concurrent: ${this.MAX_CONCURRENT_PROCESSING}`);
-    console.log(`  - Memory limit: ${this.MAX_MEMORY_MB}MB`);
-    console.log(`  - Idle processing: ${this.USE_IDLE_PROCESSING}`);
+    console.log('  - Batch size: %d events', this.BATCH_SIZE);
+    console.log('  - Batch delay: %dms', this.BATCH_DELAY_MS);
+    console.log('  - Max concurrent: %d', this.MAX_CONCURRENT_PROCESSING);
+    console.log('  - Memory limit: %dMB', this.MAX_MEMORY_MB);
+    console.log('  - Idle processing: %s', this.USE_IDLE_PROCESSING);
 
     this.idResolver = new IdResolver();
   }
@@ -120,9 +120,9 @@ export class BackfillService {
       this.cutoffDate.setDate(this.cutoffDate.getDate() - this.backfillDays);
     }
 
-    console.log(`[BACKFILL] Starting ${backfillMode} historical backfill...`);
+    console.log('[BACKFILL] Starting %s historical backfill...', backfillMode);
     if (this.cutoffDate) {
-      console.log(`[BACKFILL] Cutoff date: ${this.cutoffDate.toISOString()}`);
+      console.log('[BACKFILL] Cutoff date: %s', this.cutoffDate.toISOString());
     }
 
     logCollector.info('Starting historical backfill', {
@@ -185,7 +185,7 @@ export class BackfillService {
       } else if (this.progress.currentCursor !== null) {
         // Resume from saved position
         startCursor = this.progress.currentCursor;
-        console.log(`[BACKFILL] Resuming from saved cursor: ${startCursor}`);
+        console.log('[BACKFILL] Resuming from saved cursor: %d', startCursor);
       } else {
         // Start from oldest available within server's rollback window
         startCursor = 0;

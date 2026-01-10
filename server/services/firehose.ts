@@ -465,7 +465,7 @@ export class FirehoseClient {
       return;
     }
 
-    console.log(`[FIREHOSE] Reconnecting in ${this.reconnectDelay}ms...`);
+    console.log('[FIREHOSE] Reconnecting in %dms...', this.reconnectDelay);
 
     this.reconnectTimeout = setTimeout(() => {
       this.reconnectTimeout = null;
@@ -741,7 +741,7 @@ export function initializeAdditionalRelays() {
     for (const relayUrl of additionalRelayUrls) {
       const client = new FirehoseClient(relayUrl);
       additionalRelays.push(client);
-      console.log(`[FIREHOSE] Additional relay registered: ${relayUrl}`);
+      console.log('[FIREHOSE] Additional relay registered: %s', relayUrl);
     }
   }
 

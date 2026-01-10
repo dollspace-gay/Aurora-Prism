@@ -124,11 +124,11 @@ export class RepoBackfillService {
       );
     }
 
-    console.log(`[REPO_BACKFILL] Fetching complete repository for ${did}...`);
+    console.log('[REPO_BACKFILL] Fetching complete repository for %s...', did);
 
     try {
       await this.fetchAndProcessRepo(did);
-      console.log(`[REPO_BACKFILL] ✓ Successfully processed ${did}`);
+      console.log('[REPO_BACKFILL] ✓ Successfully processed %s', did);
     } catch (error: unknown) {
       console.error(
         `[REPO_BACKFILL] Error processing ${did}:`,
@@ -242,7 +242,7 @@ export class RepoBackfillService {
   private async fetchAndProcessRepo(did: string): Promise<void> {
     try {
       // Resolve DID to find the PDS endpoint
-      console.log(`[REPO_BACKFILL] Resolving DID ${did}...`);
+      console.log('[REPO_BACKFILL] Resolving DID %s...', did);
       const didDoc = await didResolver.did.resolve(did);
 
       if (!didDoc || !didDoc.service) {
@@ -259,7 +259,7 @@ export class RepoBackfillService {
       );
 
       if (!pdsService || !pdsService.serviceEndpoint) {
-        console.warn(`[REPO_BACKFILL] No PDS endpoint found for ${did}`);
+        console.warn('[REPO_BACKFILL] No PDS endpoint found for %s', did);
         return;
       }
 
@@ -271,7 +271,7 @@ export class RepoBackfillService {
         );
         return;
       }
-      console.log(`[REPO_BACKFILL] Resolved ${did} to PDS: ${pdsUrl}`);
+      console.log('[REPO_BACKFILL] Resolved %s to PDS: %s', did, pdsUrl);
 
       // Create agent for the user's PDS
       const pdsAgent = new AtpAgent({ service: pdsUrl });
@@ -288,7 +288,7 @@ export class RepoBackfillService {
         dataLength = response.data.length.toString();
       }
 
-      console.log(`[REPO_BACKFILL] Response for ${did}:`, {
+      console.log('[REPO_BACKFILL] Response for %s:', did, {
         success: response.success,
         hasData: !!response.data,
         dataType: response.data ? typeof response.data : 'none',
@@ -312,7 +312,7 @@ export class RepoBackfillService {
       );
 
       if (roots.length === 0) {
-        console.warn(`[REPO_BACKFILL] No root CID found in repo for ${did}`);
+        console.warn('[REPO_BACKFILL] No root CID found in repo for %s', did);
         return;
       }
 
@@ -466,7 +466,7 @@ export class RepoBackfillService {
         for (const [collection, count] of Array.from(
           collectionCounts.entries()
         )) {
-          console.log(`[REPO_BACKFILL]   - ${collection}: ${count} records`);
+          console.log('[REPO_BACKFILL]   - %s: %d records', collection, count);
         }
       } finally {
         // Always re-enable PDS fetching and data collection checks, even if there was an error
@@ -495,7 +495,7 @@ export class RepoBackfillService {
         stack?: string;
         constructor?: { name?: string };
       } | null;
-      console.error(`[REPO_BACKFILL] Error fetching ${did}:`, {
+      console.error('[REPO_BACKFILL] Error fetching %s:', did, {
         message: getErrorMessage(error),
         status,
         statusText: errObj?.statusText,

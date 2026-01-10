@@ -188,7 +188,7 @@ export async function getUserPdsEndpoint(
     }
 
     const handle = user.handle.toLowerCase();
-    console.log(`[PDS_DISCOVERY] Found handle: ${handle}`);
+    console.log('[PDS_DISCOVERY] Found handle: %s', handle);
 
     // Step 2a: Check known PDS providers (fast path)
     for (const [domain, pdsEndpoint] of Object.entries(KNOWN_PDS_PROVIDERS)) {
@@ -284,7 +284,7 @@ export async function resolveActor(
     return cachedDid;
   }
 
-  console.log(`[RESOLVE_ACTOR] Looking up handle: ${actor}`);
+  console.log('[RESOLVE_ACTOR] Looking up handle: %s', actor);
   let user = await storage.getUserByHandle(handle);
 
   if (!user) {
@@ -331,6 +331,6 @@ export async function resolveActor(
   // Cache the result
   cacheManager.cacheHandleResolution(handle, user.did);
 
-  console.log(`[RESOLVE_ACTOR] Found user: ${actor} -> ${user.did}`);
+  console.log('[RESOLVE_ACTOR] Found user: %s -> %s', actor, user.did);
   return user.did;
 }

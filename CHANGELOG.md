@@ -81,6 +81,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Deprecated XRPC monolithic API file
 
 ### Security
+- Fix tainted format string patterns in console logging (#63)
 - Fix CORS misconfiguration by using cors package without credentials (#62)
 - Fix elliptic vulnerability by replacing with @noble/curves (#46)
 - Disabled X-Powered-By header to prevent information disclosure

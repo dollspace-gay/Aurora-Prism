@@ -26,9 +26,9 @@ export async function getPosts(req: Request, res: Response): Promise<void> {
     const params = getPostsSchema.parse(req.query);
     const viewerDid = await getAuthenticatedDid(req);
 
-    console.log(`[getPosts] Fetching ${params.uris.length} posts`);
+    console.log('[getPosts] Fetching %d posts', params.uris.length);
     const posts = await storage.getPosts(params.uris);
-    console.log(`[getPosts] Found ${posts.length} posts in database`);
+    console.log('[getPosts] Found %d posts in database', posts.length);
 
     if (posts.length === 0) {
       console.log(`[getPosts] No posts found for URIs:`, params.uris);
@@ -36,7 +36,7 @@ export async function getPosts(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    console.log(`[getPosts] Serializing ${posts.length} posts`);
+    console.log('[getPosts] Serializing %d posts', posts.length);
     const serializedPosts = await serializePosts(
       posts,
       viewerDid || undefined,

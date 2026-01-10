@@ -32,7 +32,7 @@ class RedisQueue {
     }
 
     const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-    console.log(`[REDIS] Connecting to ${redisUrl}...`);
+    console.log('[REDIS] Connecting to %s...', redisUrl);
 
     this.redis = new Redis(redisUrl, {
       maxRetriesPerRequest: null,
@@ -180,7 +180,7 @@ class RedisQueue {
         '0',
         'MKSTREAM'
       );
-      console.log(`[REDIS] Created consumer group: ${this.CONSUMER_GROUP}`);
+      console.log('[REDIS] Created consumer group: %s', this.CONSUMER_GROUP);
     } catch (error: unknown) {
       // BUSYGROUP error means group already exists, which is fine
       if (!getErrorMessage(error).includes('BUSYGROUP')) {

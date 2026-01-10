@@ -18,7 +18,7 @@ export function log(message: string, source = 'express') {
     hour12: true,
   });
 
-  console.log(`${formattedTime} [${source}] ${message}`);
+  console.log('%s [%s] %s', formattedTime, source, message);
 }
 
 export async function setupVite(app: Express, server: Server) {

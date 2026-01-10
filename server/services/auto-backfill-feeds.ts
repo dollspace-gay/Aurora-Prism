@@ -22,7 +22,7 @@ export class AutoBackfillFeedsService {
    */
   async checkAndBackfill(userDid: string): Promise<boolean> {
     if (ongoingBackfills.has(userDid)) {
-      console.log(`[AUTO_BACKFILL_FEEDS] Already backfilling for ${userDid}`);
+      console.log('[AUTO_BACKFILL_FEEDS] Already backfilling for %s', userDid);
       return false;
     }
 
@@ -45,7 +45,7 @@ export class AutoBackfillFeedsService {
         }
       }
 
-      console.log(`[AUTO_BACKFILL_FEEDS] Triggering backfill for ${userDid}`);
+      console.log('[AUTO_BACKFILL_FEEDS] Triggering backfill for %s', userDid);
       this.backfillInBackground(userDid);
       return true;
     } catch (error) {
@@ -104,7 +104,7 @@ export class AutoBackfillFeedsService {
             },
           });
 
-        console.log(`[AUTO_BACKFILL_FEEDS] Complete for ${userDid}!`);
+        console.log('[AUTO_BACKFILL_FEEDS] Complete for %s!', userDid);
       } catch (error) {
         console.error(
           `[AUTO_BACKFILL_FEEDS] Fatal error for ${userDid}:`,
@@ -126,7 +126,7 @@ export class AutoBackfillFeedsService {
       const didDoc = await didResolver.resolveDID(userDid);
 
       if (!didDoc) {
-        console.error(`[AUTO_BACKFILL_FEEDS] Could not resolve DID ${userDid}`);
+        console.error('[AUTO_BACKFILL_FEEDS] Could not resolve DID %s', userDid);
         return;
       }
 

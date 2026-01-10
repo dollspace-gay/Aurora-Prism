@@ -66,7 +66,7 @@ export class CacheManager {
    */
   invalidatePreferencesCache(userDid: string): void {
     this.preferencesCache.delete(userDid);
-    console.log(`[PREFERENCES] Cache invalidated for ${userDid}`);
+    console.log('[PREFERENCES] Cache invalidated for %s', userDid);
   }
 
   /**

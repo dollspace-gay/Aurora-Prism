@@ -2666,7 +2666,7 @@ export class DatabaseStorage implements IStorage {
         }
       } catch {
         // Decryption failed - delete this corrupted session
-        console.log(`[STORAGE] Deleting corrupted session ${session.id}`);
+        console.log('[STORAGE] Deleting corrupted session %s', session.id);
         await this.db.delete(sessions).where(eq(sessions.id, session.id));
         deletedCount++;
       }

@@ -124,7 +124,7 @@ export function transformBlobToCdnUrl(
   // Use local image proxy to fetch from Bluesky CDN
   const baseUrl = getBaseUrl(req);
   const proxyUrl = `${baseUrl}/img/${format}/plain/${userDid}/${cid}@jpeg`;
-  console.log(`[CDN_TRANSFORM] ${blobCid} -> ${cid} -> ${proxyUrl}`);
+  console.log('[CDN_TRANSFORM] %s -> %s -> %s', blobCid, cid, proxyUrl);
   return proxyUrl;
 }
 
