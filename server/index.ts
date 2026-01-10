@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import { registerRoutes } from './routes';
 import { setupVite, serveStatic, log } from './vite';
 import { logCollector } from './services/log-collector';
@@ -101,45 +102,35 @@ app.use(
   })
 );
 
-// CORS configuration - Following ATProto standards
-// ATProto services are public APIs using bearer token auth (Authorization header),
-// not session cookies, so CSRF protection via origin restrictions is not necessary.
-// This matches how official Bluesky AppView handles CORS.
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-
-  // Allow all origins for XRPC/API endpoints (standard ATProto behavior)
-  // Use wildcard for requests without origin, or reflect origin for credentialed requests
-  if (origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-  }
-
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, OPTIONS'
-  );
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, Accept, atproto-accept-labelers, X-CSRF-Token, x-bsky-topics'
-  );
-  res.setHeader(
-    'Access-Control-Expose-Headers',
-    'atproto-content-labelers, atproto-repo-rev, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset'
-  );
-  // Cache preflight requests for 24 hours
-  res.setHeader('Access-Control-Max-Age', '86400');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-    return;
-  }
-
-  next();
-});
+// CORS configuration - Following official ATProto AppView standards
+// Uses cors package without credentials (no Access-Control-Allow-Credentials: true)
+// ATProto uses bearer token auth (Authorization header), not cookies
+// This matches how official Bluesky AppView (bsky package) handles CORS
+app.use(
+  cors({
+    // Cache preflight requests for 24 hours (matches official appview)
+    maxAge: 86400,
+    // Allow all standard methods
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    // ATProto-specific headers
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'atproto-accept-labelers',
+      'X-CSRF-Token',
+      'x-bsky-topics',
+    ],
+    // Expose ATProto-specific response headers
+    exposedHeaders: [
+      'atproto-content-labelers',
+      'atproto-repo-rev',
+      'RateLimit-Limit',
+      'RateLimit-Remaining',
+      'RateLimit-Reset',
+    ],
+  })
+);
 
 // Logging configuration
 const MAX_LOG_LINE_LENGTH = 80;
@@ -201,15 +192,7 @@ app.use((req, res, next) => {
         stack: err.stack,
       });
 
-      // Ensure CORS headers are present on error responses
-      const origin = req.headers.origin;
-      if (origin) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-      } else {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-      }
-
+      // CORS headers are handled by the cors middleware
       res.status(status).json({ message });
       // DO NOT throw after sending response - this would crash the server
     }
