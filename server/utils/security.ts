@@ -3,6 +3,25 @@
  */
 
 /**
+ * Apply a regex replacement repeatedly until no more matches are found.
+ * This prevents multi-character sanitization bypass attacks where
+ * malicious patterns reform after a single replacement pass.
+ */
+function replaceUntilStable(
+  input: string,
+  pattern: RegExp,
+  replacement: string
+): string {
+  let result = input;
+  let previous: string;
+  do {
+    previous = result;
+    result = result.replace(pattern, replacement);
+  } while (result !== previous);
+  return result;
+}
+
+/**
  * Validates that a URL is safe to fetch from (prevents SSRF attacks)
  * @param url The URL to validate
  * @returns true if the URL is safe, false otherwise
@@ -105,10 +124,14 @@ export function sanitizeUrlPath(url: string): string {
   // Remove any null bytes
   let sanitized = url.replace(/\0/g, '');
 
-  // Remove any script tags or javascript: protocol
-  sanitized = sanitized.replace(/<script[^>]*>.*?<\/script>/gi, '');
-  sanitized = sanitized.replace(/javascript:/gi, '');
-  sanitized = sanitized.replace(/on\w+=/gi, '');
+  // Remove any script tags or javascript: protocol (applied repeatedly to prevent bypass)
+  sanitized = replaceUntilStable(
+    sanitized,
+    /<script[^>]*>.*?<\/script>/gi,
+    ''
+  );
+  sanitized = replaceUntilStable(sanitized, /javascript:/gi, '');
+  sanitized = replaceUntilStable(sanitized, /on\w+=/gi, '');
 
   // Limit to reasonable length
   if (sanitized.length > 2048) {
@@ -180,6 +203,14 @@ export function sanitizeResponseHeaders(
     'x-ratelimit-reset',
   ];
 
+  // Helper to sanitize a single header value string
+  const sanitizeHeaderValue = (v: string): string => {
+    let s = replaceUntilStable(v, /<script[^>]*>.*?<\/script>/gi, '');
+    s = replaceUntilStable(s, /javascript:/gi, '');
+    s = replaceUntilStable(s, /on\w+=/gi, '');
+    return s;
+  };
+
   for (const [key, value] of Object.entries(headers)) {
     const lowerKey = key.toLowerCase();
 
@@ -187,21 +218,13 @@ export function sanitizeResponseHeaders(
     if (safeHeaders.includes(lowerKey) && value !== undefined) {
       // Sanitize header values to remove potential script injection
       if (typeof value === 'string') {
-        sanitized[key] = value
-          .replace(/<script[^>]*>.*?<\/script>/gi, '')
-          .replace(/javascript:/gi, '')
-          .replace(/on\w+=/gi, '');
+        sanitized[key] = sanitizeHeaderValue(value);
       } else if (typeof value === 'number') {
         // Numbers are safe, pass through directly
         sanitized[key] = value;
       } else if (Array.isArray(value)) {
         // Sanitize each element in the array
-        sanitized[key] = value.map((v) =>
-          v
-            .replace(/<script[^>]*>.*?<\/script>/gi, '')
-            .replace(/javascript:/gi, '')
-            .replace(/on\w+=/gi, '')
-        );
+        sanitized[key] = value.map(sanitizeHeaderValue);
       }
     }
   }
@@ -352,27 +375,49 @@ export function sanitizeHtmlOutput(html: string): string {
 
   let sanitized = html;
 
-  // Remove dangerous tags
-  sanitized = sanitized.replace(/<script[^>]*>.*?<\/script>/gis, '');
-  sanitized = sanitized.replace(/<iframe[^>]*>.*?<\/iframe>/gis, '');
-  sanitized = sanitized.replace(/<object[^>]*>.*?<\/object>/gis, '');
-  sanitized = sanitized.replace(/<embed[^>]*>/gi, '');
+  // Remove dangerous tags (applied repeatedly to prevent bypass)
+  sanitized = replaceUntilStable(
+    sanitized,
+    /<script[^>]*>.*?<\/script>/gis,
+    ''
+  );
+  sanitized = replaceUntilStable(
+    sanitized,
+    /<iframe[^>]*>.*?<\/iframe>/gis,
+    ''
+  );
+  sanitized = replaceUntilStable(
+    sanitized,
+    /<object[^>]*>.*?<\/object>/gis,
+    ''
+  );
+  sanitized = replaceUntilStable(sanitized, /<embed[^>]*>/gi, '');
 
-  // Remove inline event handlers
-  sanitized = sanitized.replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '');
+  // Remove inline event handlers (applied repeatedly to prevent bypass)
+  sanitized = replaceUntilStable(
+    sanitized,
+    /\son\w+\s*=\s*["'][^"']*["']/gi,
+    ''
+  );
 
-  // Remove javascript: protocol URLs
-  sanitized = sanitized.replace(
+  // Remove javascript: protocol URLs (applied repeatedly to prevent bypass)
+  sanitized = replaceUntilStable(
+    sanitized,
     /href\s*=\s*["']javascript:[^"']*["']/gi,
     'href="#"'
   );
-  sanitized = sanitized.replace(
+  sanitized = replaceUntilStable(
+    sanitized,
     /src\s*=\s*["']javascript:[^"']*["']/gi,
     'src=""'
   );
 
   // Remove data: URIs that could contain malicious content
-  sanitized = sanitized.replace(/src\s*=\s*["']data:[^"']*["']/gi, 'src=""');
+  sanitized = replaceUntilStable(
+    sanitized,
+    /src\s*=\s*["']data:[^"']*["']/gi,
+    'src=""'
+  );
 
   // Return the sanitized HTML
   return sanitized;
