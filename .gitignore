@@ -33,3 +33,4 @@ nul
 
 # Test coverage output
 coverage/
+.claude/settings.local.json
