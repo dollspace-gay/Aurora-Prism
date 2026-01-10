@@ -1,14 +1,14 @@
 import jwt from 'jsonwebtoken';
-import { randomBytes, createPublicKey, verify } from 'crypto';
+import { randomBytes } from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
 import * as jose from 'jose';
 import type { JWSHeaderParameters } from 'jose';
-import KeyEncoder from 'key-encoder';
 import { fromString, toString, concat } from 'uint8arrays';
 import { base58btc } from 'multiformats/bases/base58';
 import { varint } from 'multiformats';
-import elliptic from 'elliptic';
-const { ec: EC } = elliptic;
+import { secp256k1 } from '@noble/curves/secp256k1';
+import { p256 } from '@noble/curves/p256';
+import { sha256 } from '@noble/hashes/sha256';
 
 const verifyEs256kSig = (
   publicKey: Uint8Array,
@@ -16,29 +16,12 @@ const verifyEs256kSig = (
   sig: Uint8Array
 ): boolean => {
   try {
-    // The `key-encoder` library is a CJS module that, when bundled,
-    // might be wrapped in a default object. This handles that case
-    // by checking for a `default` property and using it if it exists.
+    // Hash the data with SHA-256
+    const msgHash = sha256(data);
 
-    const KeyEncoderClass =
-      (KeyEncoder as { default?: typeof KeyEncoder }).default || KeyEncoder;
-    const keyEncoder = new KeyEncoderClass('secp256k1');
-    const pemKey = keyEncoder.encodePublic(
-      toString(publicKey, 'hex'),
-      'raw',
-      'pem'
-    );
-    const key = createPublicKey({ format: 'pem', key: pemKey });
-
-    return verify(
-      'sha256',
-      data,
-      {
-        key,
-        dsaEncoding: 'ieee-p1363',
-      },
-      sig
-    );
+    // Verify using @noble/curves secp256k1
+    // sig is in IEEE P1363 format (r || s), which verify() accepts directly
+    return secp256k1.verify(sig, msgHash, publicKey);
   } catch (err) {
     console.error('[AUTH] Error during ES256K signature verification:', err);
     return false;
@@ -298,7 +281,7 @@ export class AuthService {
       }
 
       if (header.alg === 'ES256K') {
-        // Manually verify ES256K signatures using native crypto
+        // Manually verify ES256K signatures using @noble/curves
         const signingInput = fromString(`${headerB64}.${payloadB64}`);
         const signature = fromString(signatureB64, 'base64url');
 
@@ -319,9 +302,9 @@ export class AuthService {
 
           const keyBytes = multicodecBytes.subarray(bytesRead);
           if (keyBytes.length === 33) {
-            const ec = new EC('secp256k1');
-            const keyPoint = ec.keyFromPublic(keyBytes).getPublic();
-            publicKeyBytes = fromString(keyPoint.encode('hex', false), 'hex');
+            // Compressed key - decompress using @noble/curves
+            const point = secp256k1.ProjectivePoint.fromHex(keyBytes);
+            publicKeyBytes = point.toRawBytes(false); // false = uncompressed
           } else if (keyBytes.length === 65 && keyBytes[0] === 0x04) {
             publicKeyBytes = keyBytes;
           } else {
@@ -356,10 +339,11 @@ export class AuthService {
               x = keyBytes.subarray(1, 33);
               y = keyBytes.subarray(33, 65);
             } else if (keyBytes.length === 33) {
-              const ec = new EC('p256');
-              const keyPoint = ec.keyFromPublic(keyBytes).getPublic();
-              x = keyPoint.getX().toBuffer('be', 32);
-              y = keyPoint.getY().toBuffer('be', 32);
+              // Compressed key - decompress using @noble/curves p256
+              const point = p256.ProjectivePoint.fromHex(keyBytes);
+              const uncompressed = point.toRawBytes(false);
+              x = uncompressed.subarray(1, 33);
+              y = uncompressed.subarray(33, 65);
             } else {
               throw new Error('Invalid ES256 public key format');
             }
