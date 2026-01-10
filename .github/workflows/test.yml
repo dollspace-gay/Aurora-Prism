@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+# Minimal permissions following principle of least privilege
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
