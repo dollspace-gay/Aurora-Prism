@@ -22,6 +22,20 @@ export interface ViewerContext {
   preferences?: Record<string, unknown>;
 }
 
+export interface ActorViewerState {
+  following?: string;
+  followedBy?: string;
+  blocking?: string;
+  blockedBy?: boolean;
+  muted?: boolean;
+}
+
+export interface PostViewerState {
+  likeUri?: string;
+  repostUri?: string;
+  bookmarked?: boolean;
+}
+
 export class ViewerContextBuilder {
   /**
    * Build comprehensive viewer context for a given DID
@@ -138,7 +152,7 @@ export class ViewerContextBuilder {
   async buildActorStates(
     viewerDid: string,
     actorDids: string[]
-  ): Promise<Map<string, any>> {
+  ): Promise<Map<string, ActorViewerState>> {
     if (actorDids.length === 0) return new Map();
 
     const ctx = await this.build(viewerDid);
@@ -185,7 +199,7 @@ export class ViewerContextBuilder {
       );
 
     for (const did of actorDids) {
-      const state: any = {};
+      const state: ActorViewerState = {};
 
       // Following
       const followingUri = followingUris.find(
@@ -232,7 +246,7 @@ export class ViewerContextBuilder {
   async buildPostStates(
     viewerDid: string,
     postUris: string[]
-  ): Promise<Map<string, any>> {
+  ): Promise<Map<string, PostViewerState>> {
     if (postUris.length === 0) return new Map();
 
     const [likesData, repostsData, bookmarksData] = await Promise.all([
@@ -261,7 +275,7 @@ export class ViewerContextBuilder {
     const result = new Map();
 
     for (const uri of postUris) {
-      const state: any = {};
+      const state: PostViewerState = {};
 
       const like = likesData.find((l) => l.postUri === uri);
       if (like) {

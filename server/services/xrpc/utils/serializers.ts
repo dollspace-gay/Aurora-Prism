@@ -302,11 +302,27 @@ export function createAuthorViewerState(
  * Serialize posts with all related data (authors, aggregations, viewer state, etc.)
  * This is the main post serialization function extracted from xrpc-api.ts
  */
+// Post input type for serialization (accepts drizzle output)
+interface SerializablePost {
+  authorDid: string;
+  uri: string;
+  cid: string;
+  text: string;
+  embed?: unknown;
+  facets?: unknown;
+  parentUri?: string | null;
+  rootUri?: string | null;
+  createdAt: Date;
+  indexedAt: Date;
+  langs?: unknown;
+  tags?: unknown;
+}
+
 export async function serializePosts(
-  posts: Array<{ authorDid: string; uri: string; cid: string; text: string; embed?: unknown; facets?: unknown; parentUri?: string | null; rootUri?: string | null; createdAt: Date; indexedAt: Date; langs?: string[] | null; tags?: string[] | null }>,
+  posts: SerializablePost[],
   viewerDid?: string,
   req?: Request
-): Promise<PostView[]> {
+): Promise<unknown[]> {
   const useEnhancedHydration =
     process.env.ENHANCED_HYDRATION_ENABLED === 'true';
 
@@ -392,7 +408,10 @@ export async function serializePosts(
   listBlocks.forEach((block) => listUris.add(block.listUri));
 
   // Fetch list data for all unique list URIs
-  const listData = new Map<string, any>();
+  const listData = new Map<
+    string,
+    NonNullable<Awaited<ReturnType<typeof storage.getList>>>
+  >();
   if (listUris.size > 0) {
     const lists = await Promise.all(
       Array.from(listUris).map((uri) => storage.getList(uri))
@@ -470,21 +489,26 @@ export async function serializePosts(
         }
       }
 
-      const record: any = {
+      const record: Record<string, unknown> = {
         $type: 'app.bsky.feed.post',
         text: post.text,
         createdAt: post.createdAt.toISOString(),
       };
 
       if (post.embed) {
+        // Type guard for embed with $type field
+        const embed = post.embed as Record<string, unknown>;
         // Ensure embed has proper $type field and is an object
-        if (post.embed && typeof post.embed === 'object' && post.embed.$type) {
+        if (embed && typeof embed === 'object' && embed.$type) {
           // Transform blob references to CDN URLs
-          const transformedEmbed = { ...post.embed };
+          const transformedEmbed = { ...embed };
 
-          if (post.embed.$type === 'app.bsky.embed.images') {
+          if (embed.$type === 'app.bsky.embed.images') {
             // Handle image embeds
-            transformedEmbed.images = post.embed.images?.map((img: any) => ({
+            const images = embed.images as
+              | Array<{ image: { ref: { $link: string } } }>
+              | undefined;
+            transformedEmbed.images = images?.map((img) => ({
               ...img,
               image: {
                 ...img.image,
@@ -499,23 +523,26 @@ export async function serializePosts(
                 },
               },
             }));
-          } else if (post.embed.$type === 'app.bsky.embed.external') {
+          } else if (embed.$type === 'app.bsky.embed.external') {
             // Handle external embeds
-            const external = { ...post.embed.external };
+            const embedExternal = embed.external as
+              | { thumb?: { ref?: { $link: string; link?: string } } }
+              | undefined;
+            const external: Record<string, unknown> = { ...embedExternal };
 
             // Only transform thumbnail if it exists and has a valid ref
-            if (post.embed.external?.thumb?.ref?.$link) {
+            if (embedExternal?.thumb?.ref?.$link) {
               const thumbUrl = transformBlobToCdnUrl(
-                post.embed.external.thumb.ref.$link,
+                embedExternal.thumb.ref.$link,
                 post.authorDid,
                 'feed_thumbnail',
                 req
               );
               if (thumbUrl) {
                 external.thumb = {
-                  ...post.embed.external.thumb,
+                  ...embedExternal.thumb,
                   ref: {
-                    ...post.embed.external.thumb.ref,
+                    ...embedExternal.thumb.ref,
                     link: thumbUrl,
                   },
                 };

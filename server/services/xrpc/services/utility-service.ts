@@ -82,7 +82,13 @@ export async function getServices(req: Request, res: Response): Promise<void> {
           likeCount: number;
           indexedAt: string;
           policies?: unknown;
-          labels?: Array<{ src: string; uri: string; val: string; cts: string; neg?: boolean }>;
+          labels?: Array<{
+            src: string;
+            uri: string;
+            val: string;
+            cts: string;
+            neg?: boolean;
+          }>;
         } = {
           uri: service.uri,
           cid: service.cid,

@@ -241,7 +241,7 @@ export class RedisAdapter implements InputAdapter {
         'STREAMS',
         this.streamKey,
         '>'
-      )) as any;
+      )) as Array<[string, Array<[string, string[]]>]> | null;
 
       if (!results || results.length === 0) {
         return [];
@@ -249,8 +249,8 @@ export class RedisAdapter implements InputAdapter {
 
       const events: Array<{ event: AdapterEvent; messageId: string }> = [];
 
-      for (const [_stream, messages] of results as any[]) {
-        for (const [messageId, fields] of messages as any[]) {
+      for (const [_stream, messages] of results) {
+        for (const [messageId, fields] of messages) {
           try {
             const type = fields[1] as 'commit' | 'identity' | 'account';
             const data = JSON.parse(fields[3]);

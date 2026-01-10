@@ -33,7 +33,7 @@ interface IncompleteEntry {
     | 'record'; // generic record fetch by URI
   did: string;
   uri?: string;
-  missingData?: any;
+  missingData?: Record<string, unknown>;
   retryCount: number;
   lastAttempt: number;
 }
@@ -166,7 +166,7 @@ export class PDSDataFetcher {
       | 'record',
     did: string,
     uri?: string,
-    missingData?: any
+    missingData?: Record<string, unknown>
   ) {
     // Sanitize DID before storing
     const cleanDid = this.sanitizeDID(did);
@@ -446,34 +446,42 @@ export class PDSDataFetcher {
         const handle = await didResolver.resolveDIDToHandle(did);
 
         // Extract avatar and banner CIDs from blob references (same logic as event processor)
-        const extractBlobCid = (blob: any): string | null => {
+        const extractBlobCid = (blob: unknown): string | null => {
           if (!blob) return null;
 
           if (typeof blob === 'string') {
             return blob === 'undefined' ? null : blob;
           }
 
-          if (blob.ref) {
-            if (typeof blob.ref === 'string') {
-              return blob.ref !== 'undefined' ? blob.ref : null;
+          // Cast to record for property access after primitive checks
+          const blobObj = blob as Record<string, unknown>;
+
+          if (blobObj.ref) {
+            const ref = blobObj.ref;
+            if (typeof ref === 'string') {
+              return ref !== 'undefined' ? ref : null;
             }
 
-            if (blob.ref.$link) {
-              return blob.ref.$link !== 'undefined' ? blob.ref.$link : null;
+            const refObj = ref as Record<string, unknown>;
+            if (refObj.$link) {
+              const link = refObj.$link as string;
+              return link !== 'undefined' ? link : null;
             }
 
             // Binary CID object from PDS
-            if (blob.ref.code !== undefined && blob.ref.multihash) {
+            if (refObj.code !== undefined && refObj.multihash) {
               try {
                 if (
-                  typeof blob.ref.toString === 'function' &&
-                  blob.ref.toString !== Object.prototype.toString
+                  typeof refObj.toString === 'function' &&
+                  refObj.toString !== Object.prototype.toString
                 ) {
-                  const cidString = blob.ref.toString();
+                  const cidString = (
+                    refObj as { toString: () => string }
+                  ).toString();
                   return cidString !== 'undefined' ? cidString : null;
                 }
 
-                const mh = blob.ref.multihash;
+                const mh = refObj.multihash as Record<string, unknown>;
                 const digest = mh.digest;
 
                 let digestBytes: Uint8Array;
@@ -482,10 +490,12 @@ export class PDSDataFetcher {
                   typeof digest === 'object' &&
                   !ArrayBuffer.isView(digest)
                 ) {
-                  const size = mh.size || Object.keys(digest).length;
+                  const digestObj = digest as Record<number, number>;
+                  const size =
+                    (mh.size as number) || Object.keys(digestObj).length;
                   digestBytes = new Uint8Array(size);
                   for (let i = 0; i < size; i++) {
-                    digestBytes[i] = digest[i];
+                    digestBytes[i] = digestObj[i];
                   }
                 } else if (ArrayBuffer.isView(digest)) {
                   digestBytes = new Uint8Array(
@@ -497,10 +507,13 @@ export class PDSDataFetcher {
                   return null;
                 }
 
-                const multihashDigest = Digest.create(mh.code, digestBytes);
+                const multihashDigest = Digest.create(
+                  mh.code as number,
+                  digestBytes
+                );
                 const cidObj = CID.create(
-                  blob.ref.version || 1,
-                  blob.ref.code,
+                  ((refObj.version as number) || 1) as 0 | 1,
+                  refObj.code as number,
                   multihashDigest
                 );
                 return cidObj.toString();
@@ -514,8 +527,9 @@ export class PDSDataFetcher {
             }
           }
 
-          if (blob.cid) {
-            return blob.cid !== 'undefined' ? blob.cid : null;
+          if (blobObj.cid) {
+            const cid = blobObj.cid as string;
+            return cid !== 'undefined' ? cid : null;
           }
 
           return null;
@@ -529,7 +543,7 @@ export class PDSDataFetcher {
 
         // Build update object that only includes fields with values
         // This preserves data from CAR imports and only fills in missing fields
-        const updateData: Partial<any> = {};
+        const updateData: Record<string, unknown> = {};
 
         // Always update handle if we have one
         if (handle) {

@@ -193,7 +193,10 @@ class SearchService {
       const settings = await storage.getUserSettings(userDid);
       if (settings) {
         filteredResults = results.rows.filter((post) => {
-          const filterResult = contentFilter.wouldFilter(post as any, settings);
+          const filterResult = contentFilter.wouldFilter(
+            post as unknown as Parameters<typeof contentFilter.wouldFilter>[0],
+            settings
+          );
           return !filterResult.filtered;
         });
       }

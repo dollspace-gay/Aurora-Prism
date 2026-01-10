@@ -327,12 +327,19 @@ export class PDSClient {
    * Proxies the authentication request to the user's home PDS
    * Returns the complete PDS response to preserve all AT Protocol fields
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PDS session response has dynamic structure
+
   async createSession(
     pdsEndpoint: string,
     identifier: string,
     password: string
-  ): Promise<XRPCResponse<any>> {
+  ): Promise<
+    XRPCResponse<{
+      did: string;
+      handle: string;
+      accessJwt: string;
+      refreshJwt: string;
+    }>
+  > {
     try {
       const response = await fetch(
         `${pdsEndpoint}/xrpc/com.atproto.server.createSession`,
@@ -474,22 +481,29 @@ export class PDSClient {
   /**
    * Refresh session (alias for refreshAccessToken for XRPC compatibility)
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PDS session response has dynamic structure
+
   async refreshSession(
     pdsEndpoint: string,
     refreshToken: string
-  ): Promise<XRPCResponse<any>> {
+  ): Promise<
+    XRPCResponse<{
+      accessJwt: string;
+      refreshJwt: string;
+      did: string;
+      handle: string;
+    }>
+  > {
     return this.refreshAccessToken(pdsEndpoint, refreshToken);
   }
 
   /**
    * Get current session info using access token
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PDS session response has dynamic structure
+
   async getSession(
     pdsEndpoint: string,
     accessToken: string
-  ): Promise<XRPCResponse<any>> {
+  ): Promise<XRPCResponse<{ did: string; handle: string }>> {
     try {
       const response = await fetch(
         `${pdsEndpoint}/xrpc/com.atproto.server.getSession`,

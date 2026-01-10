@@ -10,7 +10,7 @@ import { sql } from 'drizzle-orm';
 import { likes, posts, userSettings } from '@shared/schema';
 import { EventProcessor } from './event-processor';
 import { getErrorMessage, hasErrorStatus } from '../utils/error-utils';
-import type { DIDDocument } from '../types/atproto';
+import type { DIDDocument, ATCommitEvent } from '../types/atproto';
 
 const BATCH_SIZE = 100;
 const CONCURRENT_FETCHES = 10;
@@ -63,7 +63,7 @@ export class AutoBackfillLikesService {
       );
 
       const missingCount = parseInt(
-        (result.rows[0] as any).missing_count || '0'
+        (result.rows[0] as { missing_count?: string })?.missing_count || '0'
       );
 
       if (missingCount < MIN_MISSING_THRESHOLD) {
@@ -237,7 +237,7 @@ export class AutoBackfillLikesService {
                     ],
                     time: new Date().toISOString(),
                     rev: '',
-                  } as any);
+                  } as ATCommitEvent);
 
                   fetchedCount++;
 

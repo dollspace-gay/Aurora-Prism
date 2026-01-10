@@ -5,7 +5,7 @@
 
 import type { Request, Response } from 'express';
 import { storage } from '../../../storage';
-import { searchService, type PostSearchResult } from '../../search';
+import { searchService } from '../../search';
 import { getAuthenticatedDid } from '../utils/auth-helpers';
 import { handleError } from '../utils/error-handler';
 import { maybeAvatar, serializePostsEnhanced } from '../utils/serializers';
@@ -15,13 +15,23 @@ import {
 } from '../schemas/actor-schemas';
 import { searchPostsSchema } from '../schemas/search-schemas';
 import { searchStarterPacksSchema } from '../schemas/starter-pack-schemas';
-import type { PostModel, PostView, UserModel } from '../types';
+import type { PostView, UserModel } from '../types';
 
 /**
  * Serialize posts with optional enhanced hydration
  */
 async function serializePosts(
-  posts: PostModel[],
+  posts: Array<{
+    authorDid: string;
+    uri: string;
+    cid: string;
+    text: string;
+    embed?: unknown;
+    createdAt: Date;
+    indexedAt: Date;
+    parentUri?: string | null;
+    rootUri?: string | null;
+  }>,
   viewerDid?: string,
   req?: Request
 ): Promise<PostView[]> {
@@ -73,11 +83,7 @@ export async function searchPosts(req: Request, res: Response): Promise<void> {
       viewerDid || undefined
     );
 
-    const serialized = await serializePosts(
-      posts as PostSearchResult[],
-      viewerDid || undefined,
-      req
-    );
+    const serialized = await serializePosts(posts, viewerDid || undefined, req);
 
     res.json({ posts: serialized, cursor });
   } catch (error) {
@@ -259,7 +265,7 @@ export async function searchStarterPacks(
       starterPacks: starterPacks.map((sp) => ({
         uri: sp.uri,
         cid: sp.cid,
-        creator: sp.creator || { did: sp.creatorDid, handle: sp.creatorDid },
+        creator: { did: sp.creatorDid, handle: sp.creatorDid },
         name: sp.name,
         description: sp.description ?? undefined,
         createdAt: sp.createdAt.toISOString(),

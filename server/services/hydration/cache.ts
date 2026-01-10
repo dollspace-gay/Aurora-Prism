@@ -1,4 +1,12 @@
 import { CacheService } from '../cache';
+import type Redis from 'ioredis';
+
+// Interface for accessing CacheService internal Redis connection
+// Used for batched operations (mget, mset, pipeline) that aren't exposed on CacheService
+interface CacheServiceInternal {
+  redis?: Redis;
+  isInitialized: boolean;
+}
 
 export class HydrationCache {
   private readonly TTL = 300; // 5 minutes (reduced to avoid stale profile data)
@@ -18,7 +26,11 @@ export class HydrationCache {
   /**
    * Set cached hydration data
    */
-  async set(key: string, value: any, ttl: number = this.TTL): Promise<void> {
+  async set(
+    key: string,
+    value: unknown,
+    ttl: number = this.TTL
+  ): Promise<void> {
     await this.cache.set(key, value, ttl);
   }
 
@@ -31,7 +43,7 @@ export class HydrationCache {
     const result = new Map<string, T>();
 
     // Use cache service's internal connection
-    const cacheService = this.cache as any;
+    const cacheService = this.cache as unknown as CacheServiceInternal;
     if (!cacheService.redis || !cacheService.isInitialized) {
       // Fallback to sequential if Redis not available
       for (const key of keys) {
@@ -76,10 +88,13 @@ export class HydrationCache {
   /**
    * Set multiple cached values using Redis pipeline for performance
    */
-  async mset(entries: Map<string, any>, ttl: number = this.TTL): Promise<void> {
+  async mset(
+    entries: Map<string, unknown>,
+    ttl: number = this.TTL
+  ): Promise<void> {
     if (entries.size === 0) return;
 
-    const cacheService = this.cache as any;
+    const cacheService = this.cache as unknown as CacheServiceInternal;
     if (!cacheService.redis || !cacheService.isInitialized) {
       // Fallback to sequential if Redis not available
       for (const [key, value] of Array.from(entries.entries())) {
@@ -121,7 +136,7 @@ export class HydrationCache {
   async invalidateMany(keys: string[]): Promise<void> {
     if (keys.length === 0) return;
 
-    const cacheService = this.cache as any;
+    const cacheService = this.cache as unknown as CacheServiceInternal;
     if (!cacheService.redis || !cacheService.isInitialized) {
       // Fallback to sequential if Redis not available
       for (const key of keys) {
@@ -177,7 +192,7 @@ export class HydrationCache {
    * Clear all hydration cache (useful after profile updates or new installs)
    */
   async clearAll(): Promise<void> {
-    const cacheService = this.cache as any;
+    const cacheService = this.cache as unknown as CacheServiceInternal;
     if (!cacheService.redis || !cacheService.isInitialized) {
       console.warn('[HYDRATION_CACHE] Redis not available, cannot clear cache');
       return;

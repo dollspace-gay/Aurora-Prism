@@ -644,20 +644,20 @@ export class DataPlaneClient {
     actor: string,
     options: { limit?: number; cursor?: string } = {}
   ): Promise<PaginatedResponse<BlockRecord>> {
-    return this.request<PaginatedResponse<BlockRecord>>(
-      '/internal/getBlocks',
-      { actor, ...options }
-    );
+    return this.request<PaginatedResponse<BlockRecord>>('/internal/getBlocks', {
+      actor,
+      ...options,
+    });
   }
 
   async getMutes(
     actor: string,
     options: { limit?: number; cursor?: string } = {}
   ): Promise<PaginatedResponse<MuteRecord>> {
-    return this.request<PaginatedResponse<MuteRecord>>(
-      '/internal/getMutes',
-      { actor, ...options }
-    );
+    return this.request<PaginatedResponse<MuteRecord>>('/internal/getMutes', {
+      actor,
+      ...options,
+    });
   }
 
   // Search queries

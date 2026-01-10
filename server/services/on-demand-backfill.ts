@@ -92,7 +92,8 @@ export class OnDemandBackfill {
 
       // Extract PDS service endpoint
       const pdsService = didDoc.service?.find(
-        (s: { type?: string; serviceEndpoint?: string }) => s.type === 'AtprotoPersonalDataServer'
+        (s: { type?: string; serviceEndpoint?: string }) =>
+          s.type === 'AtprotoPersonalDataServer'
       );
 
       if (!pdsService?.serviceEndpoint) {

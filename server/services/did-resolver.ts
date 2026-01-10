@@ -32,7 +32,7 @@ interface CacheEntry<T> {
   timestamp: number;
 }
 
-interface QueuedRequest<T> {
+interface _QueuedRequest<T> {
   operation: () => Promise<T>;
   resolve: (value: T) => void;
   reject: (error: unknown) => void;

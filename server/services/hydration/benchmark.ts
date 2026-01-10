@@ -16,7 +16,9 @@ async function benchmark(
   fn: () => Promise<unknown>
 ): Promise<BenchmarkResult> {
   const start = performance.now();
-  const result = await fn() as { stats?: { cacheHits?: number; cacheMisses?: number } } | undefined;
+  const result = (await fn()) as
+    | { stats?: { cacheHits?: number; cacheMisses?: number } }
+    | undefined;
   const duration = performance.now() - start;
 
   return {

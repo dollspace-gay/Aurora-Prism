@@ -176,7 +176,7 @@ export class LabelPropagator {
    */
   async filterContent(
     contentUris: string[],
-    viewerPreferences?: any
+    viewerPreferences?: Record<string, unknown>
   ): Promise<Set<string>> {
     const actorDids = contentUris
       .map((uri) => {

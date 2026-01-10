@@ -21,6 +21,8 @@ export interface BackfillProgress {
   lastUpdateTime: Date;
   estimatedCompletion: Date | null;
   isRunning: boolean;
+  queueDepth?: number;
+  activeProcessing?: number;
 }
 
 export class BackfillService {
@@ -539,7 +541,7 @@ export class BackfillService {
       // Add queue status for monitoring
       queueDepth: this.processingQueue.length,
       activeProcessing: this.activeProcessing,
-    } as any;
+    };
   }
 }
 

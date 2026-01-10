@@ -14,6 +14,7 @@ import { didResolver } from './did-resolver';
 import { eventProcessor } from './event-processor';
 import { smartConsole } from './console-wrapper';
 import { storage } from '../storage';
+import type { FeedGenerator, InsertFeedGenerator } from '@shared/schema';
 
 interface FeedGeneratorRecord {
   uri: string;
@@ -441,7 +442,7 @@ export class FeedGeneratorDiscovery {
 
       // Filter for ones with empty/missing displayNames
       const unnamedGenerators = allGenerators.filter(
-        (gen: any) =>
+        (gen: FeedGenerator) =>
           !gen.displayName ||
           gen.displayName.trim() === '' ||
           gen.displayName === 'Unnamed Feed' ||
@@ -470,7 +471,7 @@ export class FeedGeneratorDiscovery {
               displayName: feedGen.displayName,
               description: feedGen.description,
               avatar: feedGen.avatar,
-            } as any);
+            } as Partial<InsertFeedGenerator>);
 
             smartConsole.log(
               `[FEEDGEN_DISCOVERY] Updated ${gen.uri} with displayName: "${feedGen.displayName}"`

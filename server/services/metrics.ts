@@ -199,6 +199,24 @@ export class MetricsService {
     return recentRequests.length;
   }
 
+  // Function overloads for proper typing
+  getEndpointMetrics(path: string): {
+    path: string;
+    totalRequests: number;
+    requestsPerMinute: number;
+    avgResponseTime: number;
+    successRate: number;
+  } | null;
+  getEndpointMetrics(): Record<
+    string,
+    {
+      path: string;
+      totalRequests: number;
+      requestsPerMinute: number;
+      avgResponseTime: number;
+      successRate: number;
+    }
+  >;
   getEndpointMetrics(path?: string) {
     if (path) {
       const metrics = this.endpointMetrics.get(path);
@@ -225,7 +243,16 @@ export class MetricsService {
       };
     }
 
-    const result: Record<string, any> = {};
+    const result: Record<
+      string,
+      {
+        path: string;
+        totalRequests: number;
+        requestsPerMinute: number;
+        avgResponseTime: number;
+        successRate: number;
+      }
+    > = {};
     this.endpointMetrics.forEach((metrics, path) => {
       const now = Date.now();
       const cutoff = now - this.API_REQUEST_WINDOW;

@@ -132,7 +132,7 @@ export class LexiconValidator {
   private errorLog: Array<{ type: string; error: string; timestamp: Date }> =
     [];
 
-  validate(type: string, record: any): boolean {
+  validate(type: string, record: unknown): boolean {
     try {
       switch (type) {
         case 'app.bsky.feed.post':

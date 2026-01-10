@@ -27,6 +27,14 @@ interface ProfileStats {
   mentions: number;
 }
 
+interface PostAggregation {
+  likeCount: number;
+  repostCount: number;
+  replyCount: number;
+  quoteCount: number;
+  bookmarkCount: number;
+}
+
 class ConstellationIntegration {
   private enabled: boolean;
   private baseUrl: string;
@@ -320,7 +328,7 @@ class ConstellationIntegration {
    * Modifies the aggregationsMap in place, falling back to existing values on error
    */
   async enrichAggregations(
-    aggregationsMap: Map<string, any>,
+    aggregationsMap: Map<string, PostAggregation>,
     postUris: string[]
   ): Promise<void> {
     if (!this.enabled) return;

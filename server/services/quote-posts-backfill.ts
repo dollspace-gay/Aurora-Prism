@@ -116,7 +116,9 @@ export class QuotePostsBackfillService {
           quotesFound += response.data.posts.length;
 
           // Fetch quote posts in chunks
-          const quoteUris = response.data.posts.map((p: any) => p.uri);
+          const quoteUris = response.data.posts.map(
+            (p: { uri: string }) => p.uri
+          );
 
           for (let i = 0; i < quoteUris.length; i += CONCURRENT_FETCHES) {
             const chunk = quoteUris.slice(i, i + CONCURRENT_FETCHES);
@@ -180,7 +182,16 @@ export class QuotePostsBackfillService {
           const authorDidDoc = await didResolver.resolveDID(authorDid);
           if (!authorDidDoc) return;
 
-          const services = (authorDidDoc as { service?: Array<{ type?: string; id?: string; serviceEndpoint?: string }> }).service || [];
+          const services =
+            (
+              authorDidDoc as {
+                service?: Array<{
+                  type?: string;
+                  id?: string;
+                  serviceEndpoint?: string;
+                }>;
+              }
+            ).service || [];
           const pdsService = services.find(
             (s) =>
               s.type === 'AtprotoPersonalDataServer' || s.id === '#atproto_pds'
@@ -213,12 +224,14 @@ export class QuotePostsBackfillService {
               ],
               time: new Date().toISOString(),
               rev: '',
-            } as any);
+            } as Parameters<typeof eventProcessor.processCommit>[0]);
 
             fetched++;
 
             // If this quote post also quotes something, recursively fetch it
-            const quoteRecord = postRecord.data.value as any;
+            const quoteRecord = postRecord.data.value as {
+              embed?: { record?: { uri?: string } };
+            };
             if (quoteRecord.embed?.record?.uri) {
               const embeddedUri = quoteRecord.embed.record.uri;
               const embeddedPost = await storage.getPost(embeddedUri);

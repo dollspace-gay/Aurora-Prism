@@ -4006,12 +4006,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      const sessionData = result.data;
+
       // Trigger automatic backfill of liked posts in background (non-blocking)
-      if (result.data.did) {
+      if (sessionData.did) {
         import('./services/auto-backfill-likes').then(
           ({ autoBackfillLikesService }) => {
             autoBackfillLikesService
-              .checkAndBackfill(result.data.did)
+              .checkAndBackfill(sessionData.did)
               .catch((err) => {
                 console.error('[AUTO_BACKFILL_LIKES] Error:', err);
               });
@@ -4022,7 +4024,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         import('./services/auto-backfill-follows').then(
           ({ autoBackfillFollowsService }) => {
             autoBackfillFollowsService
-              .checkAndBackfill(result.data.did)
+              .checkAndBackfill(sessionData.did)
               .catch((err) => {
                 console.error('[AUTO_BACKFILL_FOLLOWS] Error:', err);
               });
@@ -4031,7 +4033,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Return the session data from the PDS
-      res.json(result.data);
+      res.json(sessionData);
     } catch (error) {
       console.error('[XRPC] Error in createSession:', error);
       res.status(500).json({
@@ -4102,12 +4104,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
+        const refreshedData = result.data;
+
         // Trigger automatic backfill of liked posts in background (non-blocking)
-        if (result.data.did) {
+        if (refreshedData.did) {
           import('./services/auto-backfill-likes').then(
             ({ autoBackfillLikesService }) => {
               autoBackfillLikesService
-                .checkAndBackfill(result.data.did)
+                .checkAndBackfill(refreshedData.did)
                 .catch((err) => {
                   console.error('[AUTO_BACKFILL_LIKES] Error:', err);
                 });
@@ -4118,7 +4122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           import('./services/auto-backfill-follows').then(
             ({ autoBackfillFollowsService }) => {
               autoBackfillFollowsService
-                .checkAndBackfill(result.data.did)
+                .checkAndBackfill(refreshedData.did)
                 .catch((err) => {
                   console.error('[AUTO_BACKFILL_FOLLOWS] Error:', err);
                 });
@@ -4126,7 +4130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
         }
 
-        res.json(result.data);
+        res.json(refreshedData);
       } catch (decodeError) {
         console.error('[XRPC] Error decoding refresh token:', decodeError);
         return res.status(401).json({
@@ -4918,7 +4922,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         searchVector: null,
         createdAt: new Date(),
         indexedAt: new Date(),
-      } as any; // Use any for mock post since we only need text for filtering
+      } as Parameters<typeof contentFilter.wouldFilter>[0]; // Cast to Post type expected by wouldFilter
 
       const result = contentFilter.wouldFilter(mockPost, settings || null);
 

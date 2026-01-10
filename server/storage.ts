@@ -2705,7 +2705,7 @@ export class DatabaseStorage implements IStorage {
       .from(oauthStates)
       .where(eq(oauthStates.state, state));
     return stateRecord
-      ? (stateRecord.stateData as Record<string, any>)
+      ? (stateRecord.stateData as Record<string, unknown>)
       : undefined;
   }
 

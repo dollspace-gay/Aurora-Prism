@@ -140,7 +140,9 @@ export class Hydrator {
     return result;
   }
 
-  private async hydratePosts(postUris: string[]): Promise<Map<string, HydratedPost>> {
+  private async hydratePosts(
+    postUris: string[]
+  ): Promise<Map<string, HydratedPost>> {
     if (postUris.length === 0) return new Map();
 
     const postsData = await db

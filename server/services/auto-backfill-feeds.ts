@@ -9,7 +9,7 @@ import { db } from '../db';
 import { userSettings } from '@shared/schema';
 import { EventProcessor } from './event-processor';
 import { getErrorMessage, hasErrorStatus } from '../utils/error-utils';
-import type { DIDDocument } from '../types/atproto';
+import type { DIDDocument, ATCommitEvent } from '../types/atproto';
 
 const BACKFILL_COOLDOWN_HOURS = 1;
 
@@ -235,7 +235,7 @@ export class AutoBackfillFeedsService {
                 ],
                 time: new Date().toISOString(),
                 rev: '',
-              } as any);
+              } as ATCommitEvent);
 
               feedsFetched++;
             }

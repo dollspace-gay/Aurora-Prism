@@ -211,17 +211,25 @@ class SchemaIntrospectionService {
           [tableName]
         );
 
-        const fields: TableField[] = columnsResult.rows.map((col: any) => ({
-          name: col.column_name,
-          type: this.formatPostgresType(
-            col.data_type,
-            col.character_maximum_length,
-            col.udt_name
-          ),
-          description:
-            col.column_comment ||
-            this.getFieldDescription(col.column_name, tableName),
-        }));
+        const fields: TableField[] = columnsResult.rows.map(
+          (col: {
+            column_name: string;
+            data_type: string;
+            character_maximum_length: number | null;
+            udt_name: string | null;
+            column_comment: string | null;
+          }) => ({
+            name: col.column_name,
+            type: this.formatPostgresType(
+              col.data_type,
+              col.character_maximum_length,
+              col.udt_name
+            ),
+            description:
+              col.column_comment ||
+              this.getFieldDescription(col.column_name, tableName),
+          })
+        );
 
         // Get indexes
         const indexesResult = await schemaPool.query(
@@ -243,26 +251,32 @@ class SchemaIntrospectionService {
           [tableName]
         );
 
-        const indexes: string[] = indexesResult.rows.map((idx: any) => {
-          let indexName = idx.indexname;
-          const isUnique = idx.indisunique;
-          const indexType = idx.index_type;
+        const indexes: string[] = indexesResult.rows.map(
+          (idx: {
+            indexname: string;
+            indisunique: boolean;
+            index_type: string;
+          }) => {
+            let indexName = idx.indexname;
+            const isUnique = idx.indisunique;
+            const indexType = idx.index_type;
 
-          // Add type annotation for special index types
-          if (indexType === 'gin') {
-            indexName += ' (GIN)';
-          } else if (indexType === 'gist') {
-            indexName += ' (GiST)';
-          } else if (indexType === 'hash') {
-            indexName += ' (Hash)';
+            // Add type annotation for special index types
+            if (indexType === 'gin') {
+              indexName += ' (GIN)';
+            } else if (indexType === 'gist') {
+              indexName += ' (GiST)';
+            } else if (indexType === 'hash') {
+              indexName += ' (Hash)';
+            }
+
+            if (isUnique && !indexName.includes('unique')) {
+              indexName += ' (Unique)';
+            }
+
+            return indexName;
           }
-
-          if (isUnique && !indexName.includes('unique')) {
-            indexName += ' (Unique)';
-          }
-
-          return indexName;
-        });
+        );
 
         // Get row count estimate (fast)
         const rowEstimate = Number(tableRow.row_estimate) || 0;

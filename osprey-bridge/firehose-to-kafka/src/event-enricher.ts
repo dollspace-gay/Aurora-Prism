@@ -1,5 +1,17 @@
 import { Pool } from 'pg';
 
+interface CachedProfile {
+  timestamp: number;
+  data: {
+    handle?: string;
+    displayName?: string;
+    description?: string;
+    followersCount?: number;
+    followsCount?: number;
+    postsCount?: number;
+  };
+}
+
 export interface EnrichedEvent {
   // Original firehose event data
   type: 'commit' | 'identity' | 'account';
@@ -33,7 +45,7 @@ export class EventEnricher {
   private pool: Pool | null = null;
   private enrichWithProfiles: boolean;
   private enrichWithHandles: boolean;
-  private profileCache: Map<string, any> = new Map();
+  private profileCache: Map<string, CachedProfile> = new Map();
   private readonly CACHE_TTL = 60000; // 1 minute cache
 
   constructor(
