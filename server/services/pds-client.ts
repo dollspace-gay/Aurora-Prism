@@ -37,13 +37,12 @@ export class PDSClient {
 
       // Use com.atproto.server.getSession - requires valid auth
       const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            Accept: 'application/json',
-          },
-          signal: AbortSignal.timeout(10000),
-        }
-      );
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json',
+        },
+        signal: AbortSignal.timeout(10000),
+      });
 
       if (!response.ok) {
         console.error(
@@ -100,7 +99,10 @@ export class PDSClient {
 
       // SSRF protection: validate PDS endpoint
       if (!isUrlSafeToFetch(url)) {
-        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+        return {
+          success: false,
+          error: 'SSRF protection: blocked unsafe PDS URL',
+        };
       }
 
       const response = await fetch(url, {
@@ -159,7 +161,10 @@ export class PDSClient {
 
       // SSRF protection: validate PDS endpoint
       if (!isUrlSafeToFetch(url)) {
-        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+        return {
+          success: false,
+          error: 'SSRF protection: blocked unsafe PDS URL',
+        };
       }
 
       const response = await fetch(url, {
@@ -220,7 +225,10 @@ export class PDSClient {
 
       // SSRF protection: validate PDS endpoint
       if (!isUrlSafeToFetch(url)) {
-        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+        return {
+          success: false,
+          error: 'SSRF protection: blocked unsafe PDS URL',
+        };
       }
 
       const response = await fetch(url, {
@@ -269,7 +277,10 @@ export class PDSClient {
 
       // SSRF protection: validate PDS endpoint
       if (!isUrlSafeToFetch(url)) {
-        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+        return {
+          success: false,
+          error: 'SSRF protection: blocked unsafe PDS URL',
+        };
       }
 
       const response = await fetch(url, {
@@ -286,10 +297,9 @@ export class PDSClient {
             createdAt: new Date().toISOString(),
             $type: 'app.bsky.graph.follow',
           },
-          }),
-          signal: AbortSignal.timeout(10000),
-        }
-      );
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -374,7 +384,10 @@ export class PDSClient {
 
       // SSRF protection: validate PDS endpoint
       if (!isUrlSafeToFetch(url)) {
-        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+        return {
+          success: false,
+          error: 'SSRF protection: blocked unsafe PDS URL',
+        };
       }
 
       const response = await fetch(url, {
@@ -459,7 +472,10 @@ export class PDSClient {
 
       // SSRF protection: validate PDS endpoint
       if (!isUrlSafeToFetch(url)) {
-        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+        return {
+          success: false,
+          error: 'SSRF protection: blocked unsafe PDS URL',
+        };
       }
 
       const response = await fetch(url, {
@@ -546,7 +562,10 @@ export class PDSClient {
 
       // SSRF protection: validate PDS endpoint
       if (!isUrlSafeToFetch(url)) {
-        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+        return {
+          success: false,
+          error: 'SSRF protection: blocked unsafe PDS URL',
+        };
       }
 
       const response = await fetch(url, {

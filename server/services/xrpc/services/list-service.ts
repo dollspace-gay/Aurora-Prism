@@ -91,42 +91,44 @@ export async function getList(req: Request, res: Response): Promise<void> {
 
           // SSRF protection: validate PDS URL
           if (!isUrlSafeToFetch(recordUrl)) {
-            console.warn('[XRPC] SSRF protection: blocked unsafe PDS URL for list fetch');
+            console.warn(
+              '[XRPC] SSRF protection: blocked unsafe PDS URL for list fetch'
+            );
           } else {
             const response = await fetch(recordUrl, {
               signal: AbortSignal.timeout(5000),
             });
 
             if (response.ok) {
-            const { value, cid } = await response.json();
-            console.log('[XRPC] List discovered, indexing: %s', value.name);
+              const { value, cid } = await response.json();
+              console.log('[XRPC] List discovered, indexing: %s', value.name);
 
-            // Process through event processor to index it
-            const { eventProcessor } = await import('../../event-processor');
-            const listRecord: any = {
-              $type: 'app.bsky.graph.list',
-              name: value.name,
-              purpose: value.purpose,
-              description: value.description,
-              createdAt: value.createdAt,
-            };
-            // Only include avatar if it's a valid blob reference
-            if (
-              value.avatar &&
-              typeof value.avatar === 'object' &&
-              value.avatar.ref
-            ) {
-              listRecord.avatar = value.avatar;
-            }
-            await eventProcessor.processRecord(
-              params.list,
-              cid,
-              creatorDid,
-              listRecord
-            );
+              // Process through event processor to index it
+              const { eventProcessor } = await import('../../event-processor');
+              const listRecord: any = {
+                $type: 'app.bsky.graph.list',
+                name: value.name,
+                purpose: value.purpose,
+                description: value.description,
+                createdAt: value.createdAt,
+              };
+              // Only include avatar if it's a valid blob reference
+              if (
+                value.avatar &&
+                typeof value.avatar === 'object' &&
+                value.avatar.ref
+              ) {
+                listRecord.avatar = value.avatar;
+              }
+              await eventProcessor.processRecord(
+                params.list,
+                cid,
+                creatorDid,
+                listRecord
+              );
 
-            // Try fetching again after indexing
-            list = await storage.getList(params.list);
+              // Try fetching again after indexing
+              list = await storage.getList(params.list);
             }
           }
         }
@@ -392,42 +394,44 @@ export async function getListFeed(req: Request, res: Response): Promise<void> {
 
           // SSRF protection: validate PDS URL
           if (!isUrlSafeToFetch(recordUrl)) {
-            console.warn('[XRPC] SSRF protection: blocked unsafe PDS URL for list fetch');
+            console.warn(
+              '[XRPC] SSRF protection: blocked unsafe PDS URL for list fetch'
+            );
           } else {
             const response = await fetch(recordUrl, {
               signal: AbortSignal.timeout(5000),
             });
 
             if (response.ok) {
-            const { value, cid } = await response.json();
-            console.log('[XRPC] List discovered, indexing: %s', value.name);
+              const { value, cid } = await response.json();
+              console.log('[XRPC] List discovered, indexing: %s', value.name);
 
-            // Process through event processor to index it
-            const { eventProcessor } = await import('../../event-processor');
-            const listRecord: any = {
-              $type: 'app.bsky.graph.list',
-              name: value.name,
-              purpose: value.purpose,
-              description: value.description,
-              createdAt: value.createdAt,
-            };
-            // Only include avatar if it's a valid blob reference
-            if (
-              value.avatar &&
-              typeof value.avatar === 'object' &&
-              value.avatar.ref
-            ) {
-              listRecord.avatar = value.avatar;
-            }
-            await eventProcessor.processRecord(
-              params.list,
-              cid,
-              creatorDid,
-              listRecord
-            );
+              // Process through event processor to index it
+              const { eventProcessor } = await import('../../event-processor');
+              const listRecord: any = {
+                $type: 'app.bsky.graph.list',
+                name: value.name,
+                purpose: value.purpose,
+                description: value.description,
+                createdAt: value.createdAt,
+              };
+              // Only include avatar if it's a valid blob reference
+              if (
+                value.avatar &&
+                typeof value.avatar === 'object' &&
+                value.avatar.ref
+              ) {
+                listRecord.avatar = value.avatar;
+              }
+              await eventProcessor.processRecord(
+                params.list,
+                cid,
+                creatorDid,
+                listRecord
+              );
 
-            // Try fetching again after indexing
-            list = await storage.getList(params.list);
+              // Try fetching again after indexing
+              list = await storage.getList(params.list);
             }
           }
         }

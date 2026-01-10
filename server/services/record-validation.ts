@@ -53,7 +53,11 @@ function isTimestampValid(timestamp: string): boolean {
  * Count embed depth recursively
  */
 function getEmbedDepth(embed: unknown, currentDepth = 0): number {
-  if (!embed || typeof embed !== 'object' || currentDepth > LIMITS.MAX_EMBED_DEPTH) {
+  if (
+    !embed ||
+    typeof embed !== 'object' ||
+    currentDepth > LIMITS.MAX_EMBED_DEPTH
+  ) {
     return currentDepth;
   }
 
@@ -83,7 +87,10 @@ function getEmbedDepth(embed: unknown, currentDepth = 0): number {
 }
 
 // Base schemas for common types
-const didSchema = z.string().max(LIMITS.MAX_DID_LENGTH).regex(/^did:[a-z]+:[a-zA-Z0-9._:%-]+$/);
+const didSchema = z
+  .string()
+  .max(LIMITS.MAX_DID_LENGTH)
+  .regex(/^did:[a-z]+:[a-zA-Z0-9._:%-]+$/);
 const uriSchema = z.string().max(LIMITS.MAX_URI_LENGTH);
 const cidSchema = z.string().min(1).max(256);
 const timestampSchema = z.string().refine(isTimestampValid, {
@@ -129,22 +136,114 @@ const replyRefSchema = z.object({
 // Blob reference schema
 const blobRefSchema = z.object({
   $type: z.literal('blob').optional(),
-  ref: z.object({
-    $link: cidSchema,
-  }).optional(),
+  ref: z
+    .object({
+      $link: cidSchema,
+    })
+    .optional(),
   mimeType: z.string().max(256).optional(),
-  size: z.number().int().min(0).max(50 * 1024 * 1024).optional(), // 50MB max
+  size: z
+    .number()
+    .int()
+    .min(0)
+    .max(50 * 1024 * 1024)
+    .optional(), // 50MB max
 });
 
-// Image schema
+// Image schema for embed validation
 const imageSchema = z.object({
   alt: z.string().max(10000).optional(),
   image: blobRefSchema.optional(),
-  aspectRatio: z.object({
-    width: z.number().int().min(1).max(65535),
-    height: z.number().int().min(1).max(65535),
-  }).optional(),
+  aspectRatio: z
+    .object({
+      width: z.number().int().min(1).max(65535),
+      height: z.number().int().min(1).max(65535),
+    })
+    .optional(),
 });
+
+// External link embed schema
+const externalEmbedSchema = z.object({
+  $type: z.literal('app.bsky.embed.external'),
+  external: z.object({
+    uri: uriSchema,
+    title: z.string().max(1000).optional(),
+    description: z.string().max(2000).optional(),
+    thumb: blobRefSchema.optional(),
+  }),
+});
+
+// Images embed schema
+const imagesEmbedSchema = z.object({
+  $type: z.literal('app.bsky.embed.images'),
+  images: z.array(imageSchema).max(4),
+});
+
+// Record embed schema (quote posts)
+const recordEmbedSchema = z.object({
+  $type: z.literal('app.bsky.embed.record'),
+  record: z.object({
+    uri: uriSchema,
+    cid: cidSchema,
+  }),
+});
+
+// Record with media embed schema
+const recordWithMediaEmbedSchema = z.object({
+  $type: z.literal('app.bsky.embed.recordWithMedia'),
+  record: z.object({
+    record: z.object({
+      uri: uriSchema,
+      cid: cidSchema,
+    }),
+  }),
+  media: z.union([
+    z.object({
+      $type: z.literal('app.bsky.embed.images'),
+      images: z.array(imageSchema).max(4),
+    }),
+    z.object({
+      $type: z.literal('app.bsky.embed.external'),
+      external: z.object({
+        uri: uriSchema,
+        title: z.string().max(1000).optional(),
+        description: z.string().max(2000).optional(),
+        thumb: blobRefSchema.optional(),
+      }),
+    }),
+  ]),
+});
+
+// Video embed schema
+const videoEmbedSchema = z.object({
+  $type: z.literal('app.bsky.embed.video'),
+  video: blobRefSchema.optional(),
+  captions: z
+    .array(
+      z.object({
+        lang: z.string().max(10),
+        file: blobRefSchema,
+      })
+    )
+    .max(10)
+    .optional(),
+  alt: z.string().max(10000).optional(),
+  aspectRatio: z
+    .object({
+      width: z.number().int().min(1).max(65535),
+      height: z.number().int().min(1).max(65535),
+    })
+    .optional(),
+});
+
+// Combined embed schema for posts
+const postEmbedSchema = z.union([
+  imagesEmbedSchema,
+  externalEmbedSchema,
+  recordEmbedSchema,
+  recordWithMediaEmbedSchema,
+  videoEmbedSchema,
+]);
 
 // Post record schema (app.bsky.feed.post)
 const postRecordSchema = z.object({
@@ -153,7 +252,7 @@ const postRecordSchema = z.object({
   createdAt: timestampSchema,
   reply: replyRefSchema.optional(),
   facets: z.array(facetSchema).max(LIMITS.MAX_FACETS).optional(),
-  embed: z.unknown().optional(), // Validated separately for depth
+  embed: postEmbedSchema.optional(),
   langs: z.array(z.string().max(10)).max(10).optional(),
   labels: z.unknown().optional(), // Self-labels
   tags: z.array(z.string().max(640)).max(8).optional(),
@@ -232,10 +331,12 @@ const profileRecordSchema = z.object({
   avatar: blobRefSchema.optional(),
   banner: blobRefSchema.optional(),
   labels: z.unknown().optional(),
-  pinnedPost: z.object({
-    uri: uriSchema,
-    cid: cidSchema,
-  }).optional(),
+  pinnedPost: z
+    .object({
+      uri: uriSchema,
+      cid: cidSchema,
+    })
+    .optional(),
   createdAt: timestampSchema.optional(),
 });
 
@@ -255,7 +356,9 @@ export class RecordValidationService {
     if (!parsed.success) {
       return {
         valid: false,
-        errors: parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`),
+        errors: parsed.error.issues.map(
+          (e) => `${e.path.join('.')}: ${e.message}`
+        ),
         warnings: [],
       };
     }
@@ -264,7 +367,9 @@ export class RecordValidationService {
     if (parsed.data.embed) {
       const depth = getEmbedDepth(parsed.data.embed);
       if (depth > LIMITS.MAX_EMBED_DEPTH) {
-        errors.push(`Embed depth ${depth} exceeds maximum ${LIMITS.MAX_EMBED_DEPTH}`);
+        errors.push(
+          `Embed depth ${depth} exceeds maximum ${LIMITS.MAX_EMBED_DEPTH}`
+        );
       }
     }
 
@@ -273,10 +378,14 @@ export class RecordValidationService {
       const textBytes = Buffer.byteLength(parsed.data.text, 'utf8');
       for (const facet of parsed.data.facets) {
         if (facet.index.byteEnd > textBytes) {
-          warnings.push(`Facet byteEnd (${facet.index.byteEnd}) exceeds text length (${textBytes})`);
+          warnings.push(
+            `Facet byteEnd (${facet.index.byteEnd}) exceeds text length (${textBytes})`
+          );
         }
         if (facet.index.byteStart >= facet.index.byteEnd) {
-          warnings.push(`Invalid facet range: ${facet.index.byteStart}-${facet.index.byteEnd}`);
+          warnings.push(
+            `Invalid facet range: ${facet.index.byteStart}-${facet.index.byteEnd}`
+          );
         }
       }
     }
@@ -296,7 +405,9 @@ export class RecordValidationService {
     if (!parsed.success) {
       return {
         valid: false,
-        errors: parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`),
+        errors: parsed.error.issues.map(
+          (e) => `${e.path.join('.')}: ${e.message}`
+        ),
         warnings: [],
       };
     }
@@ -311,7 +422,9 @@ export class RecordValidationService {
     if (!parsed.success) {
       return {
         valid: false,
-        errors: parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`),
+        errors: parsed.error.issues.map(
+          (e) => `${e.path.join('.')}: ${e.message}`
+        ),
         warnings: [],
       };
     }
@@ -326,7 +439,9 @@ export class RecordValidationService {
     if (!parsed.success) {
       return {
         valid: false,
-        errors: parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`),
+        errors: parsed.error.issues.map(
+          (e) => `${e.path.join('.')}: ${e.message}`
+        ),
         warnings: [],
       };
     }
@@ -341,7 +456,9 @@ export class RecordValidationService {
     if (!parsed.success) {
       return {
         valid: false,
-        errors: parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`),
+        errors: parsed.error.issues.map(
+          (e) => `${e.path.join('.')}: ${e.message}`
+        ),
         warnings: [],
       };
     }
@@ -356,7 +473,9 @@ export class RecordValidationService {
     if (!parsed.success) {
       return {
         valid: false,
-        errors: parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`),
+        errors: parsed.error.issues.map(
+          (e) => `${e.path.join('.')}: ${e.message}`
+        ),
         warnings: [],
       };
     }
@@ -371,7 +490,9 @@ export class RecordValidationService {
     if (!parsed.success) {
       return {
         valid: false,
-        errors: parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`),
+        errors: parsed.error.issues.map(
+          (e) => `${e.path.join('.')}: ${e.message}`
+        ),
         warnings: [],
       };
     }
@@ -386,7 +507,9 @@ export class RecordValidationService {
     if (!parsed.success) {
       return {
         valid: false,
-        errors: parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`),
+        errors: parsed.error.issues.map(
+          (e) => `${e.path.join('.')}: ${e.message}`
+        ),
         warnings: [],
       };
     }
@@ -401,7 +524,9 @@ export class RecordValidationService {
     if (!parsed.success) {
       return {
         valid: false,
-        errors: parsed.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`),
+        errors: parsed.error.issues.map(
+          (e) => `${e.path.join('.')}: ${e.message}`
+        ),
         warnings: [],
       };
     }

@@ -5039,10 +5039,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user is admin
-      const { adminAuthService } = await import('./services/admin-authorization');
+      const { adminAuthService } =
+        await import('./services/admin-authorization');
       const isAdmin = await adminAuthService.isAdmin(session.did);
       if (!isAdmin) {
-        console.warn('[WS] Connection rejected: Admin access required for DID %s', session.did);
+        console.warn(
+          '[WS] Connection rejected: Admin access required for DID %s',
+          session.did
+        );
         ws.close(4003, 'Admin access required');
         return;
       }

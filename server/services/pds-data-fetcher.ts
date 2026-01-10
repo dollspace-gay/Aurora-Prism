@@ -391,7 +391,10 @@ export class PDSDataFetcher {
 
       // SSRF protection: validate PDS endpoint
       if (!isUrlSafeToFetch(url)) {
-        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+        return {
+          success: false,
+          error: 'SSRF protection: blocked unsafe PDS URL',
+        };
       }
 
       const profileResponse = await fetch(url, {
@@ -646,7 +649,10 @@ export class PDSDataFetcher {
 
       // SSRF protection: validate PDS endpoint
       if (!isUrlSafeToFetch(recordUrl)) {
-        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+        return {
+          success: false,
+          error: 'SSRF protection: blocked unsafe PDS URL',
+        };
       }
 
       // Fetch the post record
@@ -747,7 +753,10 @@ export class PDSDataFetcher {
 
       // SSRF protection: validate PDS endpoint
       if (!isUrlSafeToFetch(recordUrl)) {
-        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+        return {
+          success: false,
+          error: 'SSRF protection: blocked unsafe PDS URL',
+        };
       }
 
       const recordResponse = await fetch(recordUrl, {

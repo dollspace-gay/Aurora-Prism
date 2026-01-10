@@ -83,7 +83,9 @@ export class OnDemandBackfill {
 
       // SSRF protection: validate URL (plc.directory is safe, but validate for consistency)
       if (!isUrlSafeToFetch(plcUrl)) {
-        console.warn('[ON_DEMAND_BACKFILL] SSRF protection: blocked unsafe URL');
+        console.warn(
+          '[ON_DEMAND_BACKFILL] SSRF protection: blocked unsafe URL'
+        );
         return null;
       }
 
