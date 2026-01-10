@@ -67,6 +67,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Deprecated XRPC monolithic API file
 
 ### Security
+- Fix elliptic vulnerability by replacing with @noble/curves (#46)
 - Disabled X-Powered-By header to prevent information disclosure
 - Added trust proxy configuration for proper IP detection
 - Implemented safe JSON body parser with size limits (10MB)

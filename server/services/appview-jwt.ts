@@ -7,9 +7,11 @@
 
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
+import crypto from 'crypto';
 import { fromString, toString, concat } from 'uint8arrays';
-import KeyEncoder from 'key-encoder';
-import elliptic from 'elliptic';
+import { secp256k1 } from '@noble/curves/secp256k1';
+import { p256 } from '@noble/curves/p256';
+import { sha256 } from '@noble/hashes/sha256';
 
 if (!process.env.SESSION_SECRET) {
   throw new Error('SESSION_SECRET environment variable is required');
@@ -20,39 +22,58 @@ const PRIVATE_KEY_PATH =
   process.env.APPVIEW_PRIVATE_KEY_PATH || '/app/appview-private.pem';
 
 /**
+ * Extract raw private key bytes from PEM format
+ */
+const extractPrivateKeyFromPem = (pem: string): Uint8Array => {
+  try {
+    // Use Node.js crypto to parse the PEM and extract the raw key
+    const keyObject = crypto.createPrivateKey({
+      key: pem,
+      format: 'pem',
+    });
+
+    // Export as JWK to get the raw 'd' parameter
+    const jwk = keyObject.export({ format: 'jwk' }) as {
+      d?: string;
+      crv?: string;
+    };
+
+    if (!jwk.d) {
+      throw new Error('Could not extract private key parameter from PEM');
+    }
+
+    // The 'd' parameter is base64url encoded
+    return fromString(jwk.d, 'base64url');
+  } catch (error) {
+    console.error(
+      '[AppViewJWT] Failed to extract private key from PEM:',
+      error
+    );
+    throw new Error('Failed to extract private key from PEM');
+  }
+};
+
+/**
  * Sign data using ES256K (secp256k1) algorithm
  * This is required because jsonwebtoken library doesn't support ES256K
  */
 const signES256K = (privateKeyPem: string, data: string): string => {
   try {
-    // The `key-encoder` library is a CJS module that, when bundled,
-    // might be wrapped in a default object. This handles that case
-    // by checking for a `default` property and using it if it exists.
+    // Extract raw private key from PEM
+    const privateKeyBytes = extractPrivateKeyFromPem(privateKeyPem);
 
-    const KeyEncoderClass =
-      (KeyEncoder as { default?: typeof KeyEncoder }).default || KeyEncoder;
-    const keyEncoder = new KeyEncoderClass('secp256k1');
+    // Hash the data with SHA-256
+    const dataBytes = new TextEncoder().encode(data);
+    const msgHash = sha256(dataBytes);
 
-    // Convert PEM to raw key format
-    const rawKey = keyEncoder.encodePrivate(privateKeyPem, 'pem', 'raw');
-
-    // Create secp256k1 curve instance
-    const ec = new elliptic.ec('secp256k1');
-
-    // Create key pair from private key
-    const keyPair = ec.keyFromPrivate(rawKey);
-
-    // Sign the data
-    const signature = keyPair.sign(data, {
-      canonical: true,
-      pers: undefined,
+    // Sign with secp256k1 using @noble/curves
+    // lowS: true ensures canonical signature (low S value)
+    const signature = secp256k1.sign(msgHash, privateKeyBytes, {
+      lowS: true,
     });
 
-    // Convert to IEEE P1363 format (r || s) and then to base64url
-    const r = signature.r.toString('hex').padStart(64, '0');
-    const s = signature.s.toString('hex').padStart(64, '0');
-    const signatureHex = r + s;
-    const signatureBytes = fromString(signatureHex, 'hex');
+    // Get signature in IEEE P1363 format (r || s) - 64 bytes
+    const signatureBytes = signature.toCompactRawBytes();
 
     // Convert to base64url encoding for JWT
     return toString(signatureBytes, 'base64url');
@@ -417,9 +438,12 @@ export class AppViewJWTService {
     signatureB64: string
   ): boolean {
     try {
-      // Manually verify ES256K signatures using native crypto
-      const signingInput = fromString(`${headerB64}.${payloadB64}`);
-      const signature = fromString(signatureB64, 'base64url');
+      // Decode signature from base64url (IEEE P1363 format: r || s)
+      const signatureBytes = fromString(signatureB64, 'base64url');
+
+      // Create the signing input and hash it
+      const signingInput = `${headerB64}.${payloadB64}`;
+      const msgHash = sha256(new TextEncoder().encode(signingInput));
 
       let publicKeyBytes: Uint8Array;
 
@@ -430,6 +454,7 @@ export class AppViewJWTService {
         }
         const x = fromString(jwk.x, 'base64url');
         const y = fromString(jwk.y, 'base64url');
+        // Uncompressed public key format: 0x04 || x || y
         publicKeyBytes = concat([new Uint8Array([0x04]), x, y]);
       } else if (method.publicKeyMultibase) {
         const { base58btc } = require('multiformats/bases/base58');
@@ -440,9 +465,9 @@ export class AppViewJWTService {
 
         const keyBytes = multicodecBytes.subarray(bytesRead);
         if (keyBytes.length === 33) {
-          const ec = new elliptic.ec('secp256k1');
-          const keyPoint = ec.keyFromPublic(keyBytes).getPublic();
-          publicKeyBytes = fromString(keyPoint.encode('hex', false), 'hex');
+          // Compressed key - decompress using @noble/curves
+          const point = secp256k1.ProjectivePoint.fromHex(keyBytes);
+          publicKeyBytes = point.toRawBytes(false); // false = uncompressed
         } else if (keyBytes.length === 65 && keyBytes[0] === 0x04) {
           publicKeyBytes = keyBytes;
         } else {
@@ -452,28 +477,12 @@ export class AppViewJWTService {
         throw new Error('No supported key format found for ES256K');
       }
 
-      // Verify the signature using secp256k1
-
-      const KeyEncoderClass =
-        (KeyEncoder as { default?: typeof KeyEncoder }).default || KeyEncoder;
-      const keyEncoder = new KeyEncoderClass('secp256k1');
-      const pemKey = keyEncoder.encodePublic(
-        toString(publicKeyBytes, 'hex'),
-        'raw',
-        'pem'
-      );
-
-      const { createPublicKey, verify } = require('crypto');
-      const key = createPublicKey({ format: 'pem', key: pemKey });
-
-      const verified = verify(
-        'sha256',
-        signingInput,
-        {
-          key,
-          dsaEncoding: 'ieee-p1363',
-        },
-        signature
+      // Verify the signature using @noble/curves
+      // signatureBytes is already in compact format (r || s), which verify() accepts directly
+      const verified = secp256k1.verify(
+        signatureBytes,
+        msgHash,
+        publicKeyBytes
       );
 
       if (!verified) {
@@ -518,10 +527,11 @@ export class AppViewJWTService {
             x = keyBytes.subarray(1, 33);
             y = keyBytes.subarray(33, 65);
           } else if (keyBytes.length === 33) {
-            const ec = new elliptic.ec('p256');
-            const keyPoint = ec.keyFromPublic(keyBytes).getPublic();
-            x = keyPoint.getX().toBuffer('be', 32);
-            y = keyPoint.getY().toBuffer('be', 32);
+            // Compressed key - decompress using @noble/curves p256
+            const point = p256.ProjectivePoint.fromHex(keyBytes);
+            const uncompressed = point.toRawBytes(false);
+            x = uncompressed.subarray(1, 33);
+            y = uncompressed.subarray(33, 65);
           } else {
             throw new Error('Invalid ES256 public key format');
           }
