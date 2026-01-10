@@ -51,7 +51,8 @@ describe('auth-helpers', () => {
 
       expect(result).toBeNull();
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('[AUTH] No token found')
+        '[AUTH] No token found in request to %s',
+        '/xrpc/app.bsky.feed.getTimeline'
       );
     });
 
@@ -137,7 +138,10 @@ describe('auth-helpers', () => {
 
       expect(result).toBeNull();
       expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining('[AUTH] aud mismatch')
+        '[AUTH] aud mismatch. expected=%s or %s#bsky_appview got=%s',
+        'did:plc:appview',
+        'did:plc:appview',
+        'did:plc:wrong-appview'
       );
     });
 
@@ -167,7 +171,9 @@ describe('auth-helpers', () => {
 
       expect(result).toBeNull();
       expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining('[AUTH] lxm mismatch')
+        '[AUTH] lxm mismatch. expected=%s got=%s',
+        'app.bsky.feed.getTimeline',
+        'different.method'
       );
     });
 

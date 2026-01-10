@@ -107,7 +107,9 @@ describe('PoolMonitor', () => {
       monitor.collect();
 
       expect(consoleSpy.warn).toHaveBeenCalledWith(
-        expect.stringContaining('5 queries waiting')
+        '[PoolMonitor:%s] %d queries waiting for connections',
+        'test',
+        5
       );
     });
   });
@@ -204,7 +206,9 @@ describe('PoolMonitor', () => {
 
       expect(timer).toBeDefined();
       expect(consoleSpy.log).toHaveBeenCalledWith(
-        expect.stringContaining('Starting monitoring')
+        '[PoolMonitor:%s] Starting monitoring (interval: %dms)',
+        'test',
+        1000
       );
 
       clearInterval(timer);
@@ -240,7 +244,8 @@ describe('PoolMonitor', () => {
       monitor.logStatus();
 
       expect(consoleSpy.log).toHaveBeenCalledWith(
-        expect.stringContaining('No metrics available')
+        '[PoolMonitor:%s] No metrics available yet',
+        'test'
       );
     });
 
@@ -252,7 +257,13 @@ describe('PoolMonitor', () => {
       monitor.logStatus();
 
       expect(consoleSpy.log).toHaveBeenCalledWith(
-        expect.stringContaining('Pool:')
+        '[PoolMonitor:%s] Pool: %d/%d active (%s%%), %d idle, %d waiting',
+        'test',
+        2, // active = clients - idle = 5 - 3 = 2
+        10,
+        '20.0',
+        3,
+        1
       );
     });
   });

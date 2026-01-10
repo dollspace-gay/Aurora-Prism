@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Smart console wrapper with log aggregation
 
 ### Fixed
+- Fix tainted format string patterns in console logging across all server files (#64)
 - Event array memory growth in dashboard (unbounded array issue)
 - `pendingOp` variable undefined error in BoundedArrayMap
 - Profile cache (pfp) not updating correctly

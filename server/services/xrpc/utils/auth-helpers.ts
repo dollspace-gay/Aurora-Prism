@@ -79,14 +79,19 @@ export async function getAuthenticatedDid(
 
         if (!isBaseAppViewDid && !isServiceAppViewDid) {
           console.warn(
-            `[AUTH] aud mismatch. expected=${appviewDid} or ${appviewDid}#bsky_appview got=${anyPayload.aud}`
+            '[AUTH] aud mismatch. expected=%s or %s#bsky_appview got=%s',
+            appviewDid,
+            appviewDid,
+            anyPayload.aud
           );
           return null;
         }
       }
       if (anyPayload.lxm && nsid && anyPayload.lxm !== nsid) {
         console.warn(
-          `[AUTH] lxm mismatch. expected=${nsid} got=${anyPayload.lxm}`
+          '[AUTH] lxm mismatch. expected=%s got=%s',
+          nsid,
+          anyPayload.lxm
         );
         return null;
       }

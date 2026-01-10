@@ -61,18 +61,30 @@ export class PoolMonitor {
 
     if (utilization >= this.criticalThreshold) {
       console.error(
-        `[PoolMonitor:${this.label}] CRITICAL: Pool ${(utilization * 100).toFixed(1)}% utilized (${metrics.active}/${metrics.total}), ${metrics.waiting} waiting`
+        '[PoolMonitor:%s] CRITICAL: Pool %s% utilized (%d/%d), %d waiting',
+        this.label,
+        (utilization * 100).toFixed(1),
+        metrics.active,
+        metrics.total,
+        metrics.waiting
       );
     } else if (utilization >= this.warningThreshold) {
       console.warn(
-        `[PoolMonitor:${this.label}] WARNING: Pool ${(utilization * 100).toFixed(1)}% utilized (${metrics.active}/${metrics.total}), ${metrics.waiting} waiting`
+        '[PoolMonitor:%s] WARNING: Pool %s% utilized (%d/%d), %d waiting',
+        this.label,
+        (utilization * 100).toFixed(1),
+        metrics.active,
+        metrics.total,
+        metrics.waiting
       );
     }
 
     // Warn about waiting queries
     if (metrics.waiting > 0) {
       console.warn(
-        `[PoolMonitor:${this.label}] ${metrics.waiting} queries waiting for connections`
+        '[PoolMonitor:%s] %d queries waiting for connections',
+        this.label,
+        metrics.waiting
       );
     }
   }
@@ -130,7 +142,9 @@ export class PoolMonitor {
    */
   startMonitoring(intervalMs: number = 30000): NodeJS.Timeout {
     console.log(
-      `[PoolMonitor:${this.label}] Starting monitoring (interval: ${intervalMs}ms)`
+      '[PoolMonitor:%s] Starting monitoring (interval: %dms)',
+      this.label,
+      intervalMs
     );
     return setInterval(() => {
       this.collect();
@@ -149,7 +163,13 @@ export class PoolMonitor {
 
     const utilization = ((metrics.active / metrics.total) * 100).toFixed(1);
     console.log(
-      `[PoolMonitor:${this.label}] Pool: ${metrics.active}/${metrics.total} active (${utilization}%), ${metrics.idle} idle, ${metrics.waiting} waiting`
+      '[PoolMonitor:%s] Pool: %d/%d active (%s%%), %d idle, %d waiting',
+      this.label,
+      metrics.active,
+      metrics.total,
+      utilization,
+      metrics.idle,
+      metrics.waiting
     );
   }
 }
