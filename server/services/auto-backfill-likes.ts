@@ -140,7 +140,10 @@ export class AutoBackfillLikesService {
         );
 
         if (missingPostUris.length === 0) {
-          console.log('[AUTO_BACKFILL_LIKES] No posts to fetch for %s', userDid);
+          console.log(
+            '[AUTO_BACKFILL_LIKES] No posts to fetch for %s',
+            userDid
+          );
           return;
         }
 

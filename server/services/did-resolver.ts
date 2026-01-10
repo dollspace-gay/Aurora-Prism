@@ -679,7 +679,10 @@ export class DIDResolver {
           ? `https://${domain}${path}/did.json`
           : `https://${domain}/.well-known/did.json`;
 
-        smartConsole.log('[DID_RESOLVER] Resolving Web DID from: %s', didDocUrl);
+        smartConsole.log(
+          '[DID_RESOLVER] Resolving Web DID from: %s',
+          didDocUrl
+        );
 
         const response = await fetch(didDocUrl, {
           headers: {

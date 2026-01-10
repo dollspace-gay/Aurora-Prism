@@ -430,7 +430,12 @@ export class PDSDataFetcher {
         }
 
         const errorMsg = `Profile fetch failed: ${profileResponse.status}${errorDetails ? ` - ${errorDetails}` : ''}`;
-        console.warn('[PDS_FETCHER] %s for %s at %s', errorMsg, did, pdsEndpoint);
+        console.warn(
+          '[PDS_FETCHER] %s for %s at %s',
+          errorMsg,
+          did,
+          pdsEndpoint
+        );
 
         return {
           success: false,

@@ -161,7 +161,10 @@ export class OnDemandBackfill {
         await this.backfillCollection(did, pdsUrl, collection);
       }
 
-      console.log('[ON_DEMAND_BACKFILL] Backfilled all collections for %s', did);
+      console.log(
+        '[ON_DEMAND_BACKFILL] Backfilled all collections for %s',
+        did
+      );
     } catch (error) {
       console.error(`[ON_DEMAND_BACKFILL] Error during backfill:`, error);
       throw error;

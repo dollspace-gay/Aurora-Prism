@@ -65,7 +65,10 @@ export class AutoBackfillFollowsService {
   async checkAndBackfill(userDid: string): Promise<boolean> {
     // Skip if already backfilling for this user
     if (ongoingBackfills.has(userDid)) {
-      console.log('[AUTO_BACKFILL_FOLLOWS] Already backfilling for %s', userDid);
+      console.log(
+        '[AUTO_BACKFILL_FOLLOWS] Already backfilling for %s',
+        userDid
+      );
       return false;
     }
 
@@ -88,7 +91,10 @@ export class AutoBackfillFollowsService {
         }
       }
 
-      console.log('[AUTO_BACKFILL_FOLLOWS] Triggering backfill for %s', userDid);
+      console.log(
+        '[AUTO_BACKFILL_FOLLOWS] Triggering backfill for %s',
+        userDid
+      );
 
       // Trigger backfill in background
       this.backfillInBackground(userDid);

@@ -125,9 +125,10 @@ export function sanitizeUrlPath(url: string): string {
   let sanitized = url.replace(/\0/g, '');
 
   // Remove any script tags or javascript: protocol (applied repeatedly to prevent bypass)
+  // Note: closing tag pattern handles malformed tags like </script > or </script foo="bar">
   sanitized = replaceUntilStable(
     sanitized,
-    /<script[^>]*>.*?<\/script>/gi,
+    /<script[^>]*>.*?<\/script\s*[^>]*>/gi,
     ''
   );
   sanitized = replaceUntilStable(sanitized, /javascript:/gi, '');
@@ -205,7 +206,7 @@ export function sanitizeResponseHeaders(
 
   // Helper to sanitize a single header value string
   const sanitizeHeaderValue = (v: string): string => {
-    let s = replaceUntilStable(v, /<script[^>]*>.*?<\/script>/gi, '');
+    let s = replaceUntilStable(v, /<script[^>]*>.*?<\/script\s*[^>]*>/gi, '');
     s = replaceUntilStable(s, /javascript:/gi, '');
     s = replaceUntilStable(s, /on\w+=/gi, '');
     return s;
@@ -376,19 +377,20 @@ export function sanitizeHtmlOutput(html: string): string {
   let sanitized = html;
 
   // Remove dangerous tags (applied repeatedly to prevent bypass)
+  // Note: closing tag patterns handle malformed tags like </script > or </script foo="bar">
   sanitized = replaceUntilStable(
     sanitized,
-    /<script[^>]*>.*?<\/script>/gis,
+    /<script[^>]*>.*?<\/script\s*[^>]*>/gis,
     ''
   );
   sanitized = replaceUntilStable(
     sanitized,
-    /<iframe[^>]*>.*?<\/iframe>/gis,
+    /<iframe[^>]*>.*?<\/iframe\s*[^>]*>/gis,
     ''
   );
   sanitized = replaceUntilStable(
     sanitized,
-    /<object[^>]*>.*?<\/object>/gis,
+    /<object[^>]*>.*?<\/object\s*[^>]*>/gis,
     ''
   );
   sanitized = replaceUntilStable(sanitized, /<embed[^>]*>/gi, '');

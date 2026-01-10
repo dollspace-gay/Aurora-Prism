@@ -126,7 +126,10 @@ export class AutoBackfillFeedsService {
       const didDoc = await didResolver.resolveDID(userDid);
 
       if (!didDoc) {
-        console.error('[AUTO_BACKFILL_FEEDS] Could not resolve DID %s', userDid);
+        console.error(
+          '[AUTO_BACKFILL_FEEDS] Could not resolve DID %s',
+          userDid
+        );
         return;
       }
 
