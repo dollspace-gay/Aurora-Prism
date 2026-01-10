@@ -448,8 +448,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
-  app.get('/.well-known/did.json', serveDIDDocument);
-  app.get('/did.json', serveDIDDocument);
+  // Rate limit DID document endpoints to prevent file system DoS
+  app.get('/.well-known/did.json', apiLimiter, serveDIDDocument);
+  app.get('/did.json', apiLimiter, serveDIDDocument);
 
   // Blob Proxy Endpoint - Fetch and serve blobs from Bluesky CDN
   // Pattern: /img/{preset}/plain/{did}/{cid}@{format}
