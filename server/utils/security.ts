@@ -126,9 +126,10 @@ export function sanitizeUrlPath(url: string): string {
 
   // Remove any script tags or javascript: protocol (applied repeatedly to prevent bypass)
   // Note: closing tag pattern handles malformed tags like </script > or </script foo="bar">
+  // The 's' flag enables dotAll mode so '.' matches newlines
   sanitized = replaceUntilStable(
     sanitized,
-    /<script[^>]*>.*?<\/script\s*[^>]*>/gi,
+    /<script[^>]*>.*?<\/script\s*[^>]*>/gis,
     ''
   );
   sanitized = replaceUntilStable(sanitized, /javascript:/gi, '');
@@ -205,8 +206,9 @@ export function sanitizeResponseHeaders(
   ];
 
   // Helper to sanitize a single header value string
+  // The 's' flag enables dotAll mode so '.' matches newlines
   const sanitizeHeaderValue = (v: string): string => {
-    let s = replaceUntilStable(v, /<script[^>]*>.*?<\/script\s*[^>]*>/gi, '');
+    let s = replaceUntilStable(v, /<script[^>]*>.*?<\/script\s*[^>]*>/gis, '');
     s = replaceUntilStable(s, /javascript:/gi, '');
     s = replaceUntilStable(s, /on\w+=/gi, '');
     return s;
