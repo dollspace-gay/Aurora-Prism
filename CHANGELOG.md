@@ -82,6 +82,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Deprecated XRPC monolithic API file
 
 ### Security
+- Add runtime validation for firehose record content (#72)
+- Add SESSION_SECRET entropy validation at startup (#71)
+- Add network egress filtering for defense in depth (#70)
+- Fix PDS authentication token signature verification bypass (#69)
+- Add authentication to debug endpoints and WebSocket dashboard (#68)
 - Fix remaining tainted format string patterns in console logging (#67)
 - Fix bad HTML filtering regex patterns to handle malformed end tags (#66)
 - Fix incomplete multi-character sanitization vulnerability in HTML sanitizer (#65)

@@ -15,6 +15,7 @@ import { eventProcessor } from './event-processor';
 import { smartConsole } from './console-wrapper';
 import { storage } from '../storage';
 import type { FeedGenerator, InsertFeedGenerator } from '@shared/schema';
+import { isUrlSafeToFetch } from '../utils/security';
 
 interface FeedGeneratorRecord {
   uri: string;
@@ -100,6 +101,14 @@ export class FeedGeneratorDiscovery {
           url.searchParams.set('cursor', cursor);
         }
 
+        // SSRF protection: validate URL before fetching
+        if (!isUrlSafeToFetch(url.toString())) {
+          smartConsole.warn(
+            `[FEEDGEN_DISCOVERY] SSRF protection: blocked fetch to unsafe PDS URL for ${did}`
+          );
+          break;
+        }
+
         const response = await fetch(url.toString(), {
           headers: { Accept: 'application/json' },
           signal: AbortSignal.timeout(10000),
@@ -151,7 +160,7 @@ export class FeedGeneratorDiscovery {
     uri: string
   ): Promise<FeedGeneratorRecord | null> {
     try {
-      // Parse the URI: at://did:plc:xxx/app.bsky.feed.generator/rkey
+      // Parse the URI format: at://did/collection/rkey
       const parts = uri.split('/');
       if (parts.length < 5) {
         smartConsole.warn(
@@ -182,6 +191,14 @@ export class FeedGeneratorDiscovery {
 
       // Fetch the record
       const url = `${pdsEndpoint}/xrpc/com.atproto.repo.getRecord?repo=${encodeURIComponent(did)}&collection=${encodeURIComponent(collection)}&rkey=${encodeURIComponent(rkey)}`;
+
+      // SSRF protection: validate URL before fetching
+      if (!isUrlSafeToFetch(url)) {
+        smartConsole.warn(
+          `[FEEDGEN_DISCOVERY] SSRF protection: blocked fetch to unsafe PDS URL for ${uri}`
+        );
+        return null;
+      }
 
       const response = await fetch(url, {
         headers: { Accept: 'application/json' },

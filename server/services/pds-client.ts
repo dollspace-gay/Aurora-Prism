@@ -7,6 +7,8 @@
  * - API requests with authentication
  */
 
+import { isUrlSafeToFetch } from '../utils/security';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- XRPC responses have dynamic structure
 interface XRPCResponse<T = any> {
   success: boolean;
@@ -25,10 +27,16 @@ export class PDSClient {
     accessToken: string
   ): Promise<string | null> {
     try {
+      const url = `${pdsEndpoint}/xrpc/com.atproto.server.getSession`;
+
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(url)) {
+        console.error('[PDS_CLIENT] SSRF protection: blocked unsafe PDS URL');
+        return null;
+      }
+
       // Use com.atproto.server.getSession - requires valid auth
-      const response = await fetch(
-        `${pdsEndpoint}/xrpc/com.atproto.server.getSession`,
-        {
+      const response = await fetch(url, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             Accept: 'application/json',
@@ -88,25 +96,29 @@ export class PDSClient {
     }
   ): Promise<XRPCResponse<{ uri: string; cid: string }>> {
     try {
-      const response = await fetch(
-        `${pdsEndpoint}/xrpc/com.atproto.repo.createRecord`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
+      const url = `${pdsEndpoint}/xrpc/com.atproto.repo.createRecord`;
+
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(url)) {
+        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          repo: did,
+          collection: 'app.bsky.feed.post',
+          record: {
+            ...record,
+            $type: 'app.bsky.feed.post',
           },
-          body: JSON.stringify({
-            repo: did,
-            collection: 'app.bsky.feed.post',
-            record: {
-              ...record,
-              $type: 'app.bsky.feed.post',
-            },
-          }),
-          signal: AbortSignal.timeout(15000),
-        }
-      );
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -143,26 +155,30 @@ export class PDSClient {
     subject: { uri: string; cid: string }
   ): Promise<XRPCResponse<{ uri: string; cid: string }>> {
     try {
-      const response = await fetch(
-        `${pdsEndpoint}/xrpc/com.atproto.repo.createRecord`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
+      const url = `${pdsEndpoint}/xrpc/com.atproto.repo.createRecord`;
+
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(url)) {
+        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          repo: did,
+          collection: 'app.bsky.feed.like',
+          record: {
+            subject,
+            createdAt: new Date().toISOString(),
+            $type: 'app.bsky.feed.like',
           },
-          body: JSON.stringify({
-            repo: did,
-            collection: 'app.bsky.feed.like',
-            record: {
-              subject,
-              createdAt: new Date().toISOString(),
-              $type: 'app.bsky.feed.like',
-            },
-          }),
-          signal: AbortSignal.timeout(10000),
-        }
-      );
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -200,22 +216,26 @@ export class PDSClient {
     rkey: string
   ): Promise<XRPCResponse> {
     try {
-      const response = await fetch(
-        `${pdsEndpoint}/xrpc/com.atproto.repo.deleteRecord`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            repo: did,
-            collection,
-            rkey,
-          }),
-          signal: AbortSignal.timeout(10000),
-        }
-      );
+      const url = `${pdsEndpoint}/xrpc/com.atproto.repo.deleteRecord`;
+
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(url)) {
+        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          repo: did,
+          collection,
+          rkey,
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -245,22 +265,27 @@ export class PDSClient {
     subjectDid: string
   ): Promise<XRPCResponse<{ uri: string; cid: string }>> {
     try {
-      const response = await fetch(
-        `${pdsEndpoint}/xrpc/com.atproto.repo.createRecord`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
+      const url = `${pdsEndpoint}/xrpc/com.atproto.repo.createRecord`;
+
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(url)) {
+        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          repo: did,
+          collection: 'app.bsky.graph.follow',
+          record: {
+            subject: subjectDid,
+            createdAt: new Date().toISOString(),
+            $type: 'app.bsky.graph.follow',
           },
-          body: JSON.stringify({
-            repo: did,
-            collection: 'app.bsky.graph.follow',
-            record: {
-              subject: subjectDid,
-              createdAt: new Date().toISOString(),
-              $type: 'app.bsky.graph.follow',
-            },
           }),
           signal: AbortSignal.timeout(10000),
         }
@@ -301,14 +326,18 @@ export class PDSClient {
     rkey: string
   ): Promise<string | null> {
     try {
-      const response = await fetch(
-        `${pdsEndpoint}/xrpc/com.atproto.repo.getRecord?` +
-          `repo=${repo}&collection=${collection}&rkey=${rkey}`,
-        {
-          headers: { Accept: 'application/json' },
-          signal: AbortSignal.timeout(5000),
-        }
-      );
+      const url = `${pdsEndpoint}/xrpc/com.atproto.repo.getRecord?repo=${repo}&collection=${collection}&rkey=${rkey}`;
+
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(url)) {
+        console.error('[PDS_CLIENT] SSRF protection: blocked unsafe PDS URL');
+        return null;
+      }
+
+      const response = await fetch(url, {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(5000),
+      });
 
       if (!response.ok) {
         return null;
@@ -341,20 +370,24 @@ export class PDSClient {
     }>
   > {
     try {
-      const response = await fetch(
-        `${pdsEndpoint}/xrpc/com.atproto.server.createSession`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            identifier,
-            password,
-          }),
-          signal: AbortSignal.timeout(15000),
-        }
-      );
+      const url = `${pdsEndpoint}/xrpc/com.atproto.server.createSession`;
+
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(url)) {
+        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          identifier,
+          password,
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -422,17 +455,21 @@ export class PDSClient {
     }>
   > {
     try {
-      const response = await fetch(
-        `${pdsEndpoint}/xrpc/com.atproto.server.refreshSession`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${refreshToken}`,
-            'Content-Type': 'application/json',
-          },
-          signal: AbortSignal.timeout(10000),
-        }
-      );
+      const url = `${pdsEndpoint}/xrpc/com.atproto.server.refreshSession`;
+
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(url)) {
+        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+          'Content-Type': 'application/json',
+        },
+        signal: AbortSignal.timeout(10000),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -505,16 +542,20 @@ export class PDSClient {
     accessToken: string
   ): Promise<XRPCResponse<{ did: string; handle: string }>> {
     try {
-      const response = await fetch(
-        `${pdsEndpoint}/xrpc/com.atproto.server.getSession`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            Accept: 'application/json',
-          },
-          signal: AbortSignal.timeout(10000),
-        }
-      );
+      const url = `${pdsEndpoint}/xrpc/com.atproto.server.getSession`;
+
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(url)) {
+        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+      }
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json',
+        },
+        signal: AbortSignal.timeout(10000),
+      });
 
       if (!response.ok) {
         return {
@@ -605,6 +646,16 @@ export class PDSClient {
 
     const queryString = searchParams.toString();
     const url = `${pdsEndpoint}${path}${queryString ? `?${queryString}` : ''}`;
+
+    // SSRF protection: validate PDS endpoint
+    if (!isUrlSafeToFetch(url)) {
+      console.error('[PDS_CLIENT] SSRF protection: blocked unsafe PDS URL');
+      return {
+        status: 403,
+        headers: {},
+        body: { error: 'SSRF protection: blocked unsafe PDS URL' },
+      };
+    }
 
     // Sanitize headers to prevent forwarding potentially problematic ones.
     const forwardedHeaders: Record<string, string> = {

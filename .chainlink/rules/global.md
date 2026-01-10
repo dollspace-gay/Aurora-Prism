@@ -102,7 +102,7 @@ chainlink ready         # Show unblocked work
 3. **ERROR HANDLING**: No panics/crashes on bad input
 4. **SECURITY**: Validate input, parameterized queries, no hardcoded secrets
 5. **NO DEAD CODE**: Remove or complete incomplete code
-
+6. **USE BASH GREP**: DO NOT USE THE GREP OR GLOB TOOL THEY DO NOT WORK.
 ### Pre-Coding Grounding
 Before using unfamiliar libraries/APIs:
 1. **VERIFY IT EXISTS**: WebSearch to confirm the API

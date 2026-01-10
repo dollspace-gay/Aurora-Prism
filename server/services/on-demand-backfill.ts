@@ -1,6 +1,7 @@
 import { logCollector } from './log-collector';
 import { redisQueue } from './redis-queue';
 import { metricsService } from './metrics';
+import { isUrlSafeToFetch } from '../utils/security';
 
 interface BackfillJob {
   did: string;
@@ -79,6 +80,13 @@ export class OnDemandBackfill {
     try {
       // Fetch DID document from PLC directory
       const plcUrl = `https://plc.directory/${did}`;
+
+      // SSRF protection: validate URL (plc.directory is safe, but validate for consistency)
+      if (!isUrlSafeToFetch(plcUrl)) {
+        console.warn('[ON_DEMAND_BACKFILL] SSRF protection: blocked unsafe URL');
+        return null;
+      }
+
       const response = await fetch(plcUrl);
 
       if (!response.ok) {
@@ -124,6 +132,12 @@ export class OnDemandBackfill {
     try {
       // First, get repo description
       const describeUrl = `https://${pdsUrl}/xrpc/com.atproto.repo.describeRepo?repo=${did}`;
+
+      // SSRF protection: validate PDS URL
+      if (!isUrlSafeToFetch(describeUrl)) {
+        throw new Error('SSRF protection: blocked unsafe PDS URL');
+      }
+
       const describeResponse = await fetch(describeUrl);
 
       if (!describeResponse.ok) {
@@ -183,6 +197,12 @@ export class OnDemandBackfill {
       do {
         // Fetch records from this collection
         const listUrl: string = `https://${pdsUrl}/xrpc/com.atproto.repo.listRecords?repo=${did}&collection=${collection}&limit=100${cursor ? `&cursor=${cursor}` : ''}`;
+
+        // SSRF protection: validate PDS URL
+        if (!isUrlSafeToFetch(listUrl)) {
+          throw new Error('SSRF protection: blocked unsafe PDS URL');
+        }
+
         const response: Response = await fetch(listUrl);
 
         if (!response.ok) {

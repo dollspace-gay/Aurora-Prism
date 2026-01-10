@@ -28,11 +28,67 @@ const verifyEs256kSig = (
   }
 };
 
+/**
+ * Validates that the SESSION_SECRET has sufficient entropy for secure use.
+ * Throws an error if the secret is weak or potentially insecure.
+ */
+function validateSessionSecret(secret: string): void {
+  const MIN_LENGTH = 32;
+
+  // Check minimum length
+  if (secret.length < MIN_LENGTH) {
+    throw new Error(
+      `SESSION_SECRET must be at least ${MIN_LENGTH} characters (got ${secret.length})`
+    );
+  }
+
+  // Reject known weak/default values
+  const weakSecrets = [
+    'change-me-in-production',
+    'changeme',
+    'secret',
+    'password',
+    'development-secret',
+    'dev-secret',
+    'test-secret',
+    'your-secret-here',
+    'replace-this-secret',
+    'default-secret',
+  ];
+
+  const lowerSecret = secret.toLowerCase();
+  for (const weak of weakSecrets) {
+    if (lowerSecret.includes(weak)) {
+      throw new Error(
+        'SESSION_SECRET contains a known weak/default value. Generate a secure random secret.'
+      );
+    }
+  }
+
+  // Reject secrets that are all the same character (e.g., "aaaaaaaaaa...")
+  if (/^(.)\1+$/.test(secret)) {
+    throw new Error(
+      'SESSION_SECRET consists of repeated characters. Generate a secure random secret.'
+    );
+  }
+
+  // Check for minimum character diversity (at least 8 unique characters)
+  const uniqueChars = new Set(secret).size;
+  if (uniqueChars < 8) {
+    throw new Error(
+      `SESSION_SECRET has low entropy (only ${uniqueChars} unique characters). Use a more diverse secret.`
+    );
+  }
+}
+
 if (!process.env.SESSION_SECRET) {
   throw new Error(
     'SESSION_SECRET environment variable is required for production use'
   );
 }
+
+// Validate the secret has sufficient entropy
+validateSessionSecret(process.env.SESSION_SECRET);
 
 const JWT_SECRET = process.env.SESSION_SECRET;
 const JWT_EXPIRY = '7d';
@@ -98,7 +154,7 @@ export class AuthService {
     try {
       // Decode without verification to check token structure
       const decoded = jwt.decode(token, { complete: true }) as {
-        header: { alg: string; kid?: string };
+        header: { alg: string; kid?: string; typ?: string };
         payload: Record<string, unknown>;
       } | null;
 
@@ -107,7 +163,20 @@ export class AuthService {
         return null;
       }
 
+      const header = decoded.header;
       const payload = decoded.payload as Record<string, unknown>;
+
+      // SECURITY: Reject PDS-specific token types that should not reach AppViews
+      // Per AT Protocol spec, these tokens are for PDS-to-client communication only
+      // Reference: https://atproto.com/specs/xrpc (Domain Separation)
+      const rejectedTypes = ['at+jwt', 'refresh+jwt', 'dpop+jwt'];
+      if (header.typ && rejectedTypes.includes(header.typ)) {
+        console.warn(
+          '[AUTH] 🔒 Rejected token with typ: %s - PDS tokens should not reach AppView directly',
+          header.typ
+        );
+        return null;
+      }
 
       // AT Protocol supports two token formats:
       // 1. OAuth access tokens (RFC 9068): sub=userDID, iss=authServer, aud=resourceServer
@@ -179,8 +248,8 @@ export class AuthService {
         return null;
       }
 
-      // For PDS tokens (com.atproto.access scope), skip signature verification
-      // The PDS already verified the user's credentials and tokens are short-lived
+      // For PDS tokens (com.atproto.access scope), verify signature AND enforce freshness
+      // SECURITY: All authentication tokens are now verified to prevent impersonation attacks.
       // NOTE: In standard AT Protocol flow, PDS access tokens shouldn't reach AppViews directly.
       // Clients talk to PDS, which proxies to AppView using service auth tokens.
       // This code path may be hit by non-standard direct-to-AppView clients.
@@ -189,9 +258,50 @@ export class AuthService {
         scope === 'com.atproto.appPassPrivileged';
 
       const exp = payload.exp as number | undefined;
+      const iat = payload.iat as number | undefined;
+
       if (isPdsToken) {
+        // Enforce token freshness (5-minute window) to prevent replay attacks
+        const now = Math.floor(Date.now() / 1000);
+        const TOKEN_FRESHNESS_WINDOW = 300; // 5 minutes in seconds
+
+        if (!iat) {
+          console.error(
+            '[AUTH] 🔒 SECURITY: PDS token rejected - missing iat claim. DID: %s, PDS: %s',
+            userDid,
+            signingDid
+          );
+          return null;
+        }
+
+        if (now - iat > TOKEN_FRESHNESS_WINDOW) {
+          console.error(
+            '[AUTH] 🔒 SECURITY: PDS token rejected - token too old (issued %d seconds ago). DID: %s, PDS: %s',
+            now - iat,
+            userDid,
+            signingDid
+          );
+          return null;
+        }
+
+        // Verify signature for PDS tokens (critical security check)
+        const verified = await this.verifyJWTSignature(token, signingDid);
+        if (!verified) {
+          console.error(
+            '[AUTH] 🔒 SECURITY ALERT: PDS token signature verification FAILED. Possible forgery attempt. DID: %s, PDS: %s, scope: %s',
+            userDid,
+            signingDid,
+            scope
+          );
+          return null;
+        }
+
         console.warn(
-          `[AUTH] ⚠️ PDS token received directly (unusual flow) - DID: ${userDid}, PDS: ${signingDid}, scope: ${scope}, exp: ${exp ? new Date(exp * 1000).toISOString() : 'none'}`
+          '[AUTH] ⚠️ PDS token verified (unusual flow) - DID: %s, PDS: %s, scope: %s, exp: %s',
+          userDid,
+          signingDid,
+          scope,
+          exp ? new Date(exp * 1000).toISOString() : 'none'
         );
         return {
           did: userDid,
@@ -201,18 +311,44 @@ export class AuthService {
         };
       }
 
-      // For other token types (service auth tokens), verify signature
+      // For service auth tokens, validate expiration and verify signature
+      // Per AT Protocol spec: exp is required for service auth tokens
+      const now = Math.floor(Date.now() / 1000);
+
+      if (!exp) {
+        console.error(
+          '[AUTH] 🔒 Service auth token rejected - missing exp claim. DID: %s',
+          userDid
+        );
+        return null;
+      }
+
+      if (now > exp) {
+        console.error(
+          '[AUTH] 🔒 Service auth token rejected - expired %d seconds ago. DID: %s',
+          now - exp,
+          userDid
+        );
+        return null;
+      }
+
+      // Verify signature
       const verified = await this.verifyJWTSignature(token, signingDid);
 
       if (!verified) {
         console.error(
-          `[AUTH] Signature verification failed for DID: ${signingDid}`
+          '[AUTH] 🔒 SECURITY ALERT: Service auth token signature verification FAILED. DID: %s, signer: %s',
+          userDid,
+          signingDid
         );
         return null;
       }
 
       console.log(
-        `[AUTH] ✓ AT Protocol token verified for DID: ${userDid} (signed by: ${signingDid})`
+        '[AUTH] ✓ AT Protocol service token verified for DID: %s (signed by: %s, lxm: %s)',
+        userDid,
+        signingDid,
+        lxm || 'none'
       );
       return {
         did: userDid,

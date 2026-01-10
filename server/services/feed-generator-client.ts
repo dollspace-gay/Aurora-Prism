@@ -5,6 +5,7 @@ import type { Post } from '@shared/schema';
 import { db } from '../db';
 import { blocks } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+import { isUrlSafeToFetch } from '../utils/security';
 
 // Feed skeleton reason types (repost, pin, etc.)
 interface SkeletonReasonRepost {
@@ -79,6 +80,14 @@ export class FeedGeneratorClient {
       }
 
       console.log(`[FeedGenClient] Fetching skeleton from ${url.toString()}`);
+
+      // SSRF protection: validate the service endpoint before fetching
+      if (!isUrlSafeToFetch(url.toString())) {
+        console.error(
+          `[FeedGenClient] SSRF protection: blocked fetch to unsafe URL: ${url.toString()}`
+        );
+        throw new Error('Feed generator endpoint failed SSRF validation');
+      }
 
       const headers: Record<string, string> = {
         Accept: 'application/json',
@@ -190,7 +199,7 @@ export class FeedGeneratorClient {
       let fetchedCount = 0;
       for (const uri of missingUris) {
         try {
-          // Parse AT URI: at://did:plc:xxx/app.bsky.feed.post/rkey
+          // Parse AT URI format: at://did/collection/rkey
           const match = uri.match(/^at:\/\/([^/]+)\/([^/]+)\/([^/]+)$/);
           if (!match) {
             console.warn(`[FeedGenClient] Invalid AT URI: ${uri}`);
@@ -216,6 +225,15 @@ export class FeedGeneratorClient {
 
           // Fetch record from PDS
           const recordUrl = `${pdsUrl}/xrpc/com.atproto.repo.getRecord?repo=${encodeURIComponent(did)}&collection=${encodeURIComponent(collection)}&rkey=${encodeURIComponent(rkey)}`;
+
+          // SSRF protection: validate URL before fetching
+          if (!isUrlSafeToFetch(recordUrl)) {
+            console.warn(
+              `[FeedGenClient] SSRF protection: blocked fetch to unsafe PDS URL for ${did}`
+            );
+            continue;
+          }
+
           const response = await fetch(recordUrl, {
             signal: AbortSignal.timeout(5000),
           });

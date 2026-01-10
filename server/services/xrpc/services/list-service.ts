@@ -19,6 +19,7 @@ import {
   getListMutesSchema,
   getListBlocksSchema,
 } from '../schemas';
+import { isUrlSafeToFetch } from '../../../utils/security';
 
 /**
  * Convert list avatar CID to CDN URL
@@ -87,11 +88,16 @@ export async function getList(req: Request, res: Response): Promise<void> {
 
         if (pdsUrl) {
           const recordUrl = `${pdsUrl}/xrpc/com.atproto.repo.getRecord?repo=${encodeURIComponent(creatorDid)}&collection=app.bsky.graph.list&rkey=${encodeURIComponent(rkey)}`;
-          const response = await fetch(recordUrl, {
-            signal: AbortSignal.timeout(5000),
-          });
 
-          if (response.ok) {
+          // SSRF protection: validate PDS URL
+          if (!isUrlSafeToFetch(recordUrl)) {
+            console.warn('[XRPC] SSRF protection: blocked unsafe PDS URL for list fetch');
+          } else {
+            const response = await fetch(recordUrl, {
+              signal: AbortSignal.timeout(5000),
+            });
+
+            if (response.ok) {
             const { value, cid } = await response.json();
             console.log('[XRPC] List discovered, indexing: %s', value.name);
 
@@ -121,6 +127,7 @@ export async function getList(req: Request, res: Response): Promise<void> {
 
             // Try fetching again after indexing
             list = await storage.getList(params.list);
+            }
           }
         }
       } catch (error) {
@@ -382,11 +389,16 @@ export async function getListFeed(req: Request, res: Response): Promise<void> {
 
         if (pdsUrl) {
           const recordUrl = `${pdsUrl}/xrpc/com.atproto.repo.getRecord?repo=${encodeURIComponent(creatorDid)}&collection=app.bsky.graph.list&rkey=${encodeURIComponent(rkey)}`;
-          const response = await fetch(recordUrl, {
-            signal: AbortSignal.timeout(5000),
-          });
 
-          if (response.ok) {
+          // SSRF protection: validate PDS URL
+          if (!isUrlSafeToFetch(recordUrl)) {
+            console.warn('[XRPC] SSRF protection: blocked unsafe PDS URL for list fetch');
+          } else {
+            const response = await fetch(recordUrl, {
+              signal: AbortSignal.timeout(5000),
+            });
+
+            if (response.ok) {
             const { value, cid } = await response.json();
             console.log('[XRPC] List discovered, indexing: %s', value.name);
 
@@ -416,6 +428,7 @@ export async function getListFeed(req: Request, res: Response): Promise<void> {
 
             // Try fetching again after indexing
             list = await storage.getList(params.list);
+            }
           }
         }
       } catch (error) {

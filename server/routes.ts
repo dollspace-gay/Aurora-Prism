@@ -4730,8 +4730,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(endpointsWithMetrics);
   });
 
-  // Get database schema dynamically from information_schema
-  app.get('/api/database/schema', async (_req, res) => {
+  // Get database schema dynamically from information_schema (admin only)
+  app.get('/api/database/schema', requireAdmin, async (_req, res) => {
     try {
       const schema = await schemaIntrospectionService.getSchema();
       res.json(schema);
@@ -4746,14 +4746,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(stats);
   });
 
-  app.get('/api/events/recent', async (_req, res) => {
+  // Recent events endpoint (admin only - exposes internal event data)
+  app.get('/api/events/recent', requireAdmin, async (_req, res) => {
     // Read from Redis for cluster-wide visibility
     const events = await redisQueue.getRecentEvents();
     res.json(events.slice(0, 10));
   });
 
-  // Server-Sent Events endpoint for real-time firehose streaming
-  app.get('/api/events/stream', (_req, res) => {
+  // Server-Sent Events endpoint for real-time firehose streaming (admin only)
+  app.get('/api/events/stream', requireAdmin, (_req, res) => {
     // Set SSE headers
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -4918,8 +4919,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Temporary debugging endpoints
-  app.get('/api/debug/user/:did', async (req, res) => {
+  // Debugging endpoints (admin only - exposes internal user data)
+  app.get('/api/debug/user/:did', requireAdmin, async (req, res) => {
     try {
       const userDid = req.params.did;
 
@@ -4968,7 +4969,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/debug/timeline/:did', async (req, res) => {
+  app.get('/api/debug/timeline/:did', requireAdmin, async (req, res) => {
     try {
       const userDid = req.params.did;
 
@@ -5000,7 +5001,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // WebSocket server for real-time updates
+  // WebSocket server for real-time updates (admin only)
   const wss = new WebSocketServer({
     server: httpServer,
     path: '/ws',
@@ -5008,7 +5009,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Handle WebSocket connections - Consolidated handler for dashboard metrics and firehose events
-  wss.on('connection', (ws: WebSocket, req) => {
+  wss.on('connection', async (ws: WebSocket, req) => {
+    // Authenticate WebSocket connection - require admin access
+    try {
+      // Extract token from query string or cookie
+      const url = new URL(req.url || '', `http://${req.headers.host}`);
+      const queryToken = url.searchParams.get('token');
+      const cookieHeader = req.headers.cookie || '';
+      const cookieToken = cookieHeader
+        .split(';')
+        .map((c) => c.trim())
+        .find((c) => c.startsWith('session='))
+        ?.split('=')[1];
+
+      const token = queryToken || cookieToken;
+
+      if (!token) {
+        console.warn('[WS] Connection rejected: No authentication token');
+        ws.close(4001, 'Authentication required');
+        return;
+      }
+
+      // Verify the session token
+      const session = authService.verifySessionToken(token);
+      if (!session) {
+        console.warn('[WS] Connection rejected: Invalid session token');
+        ws.close(4001, 'Invalid session token');
+        return;
+      }
+
+      // Check if user is admin
+      const { adminAuthService } = await import('./services/admin-authorization');
+      const isAdmin = await adminAuthService.isAdmin(session.did);
+      if (!isAdmin) {
+        console.warn('[WS] Connection rejected: Admin access required for DID %s', session.did);
+        ws.close(4003, 'Admin access required');
+        return;
+      }
+
+      console.log('[WS] Admin authenticated: %s', session.did);
+    } catch (error) {
+      console.error('[WS] Authentication error:', error);
+      ws.close(4001, 'Authentication failed');
+      return;
+    }
+
     console.log(
       '[WS] Dashboard client connected from',
       req.headers.origin || req.headers.host

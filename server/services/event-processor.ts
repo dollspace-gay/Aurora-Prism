@@ -20,6 +20,7 @@ import { pdsDataFetcher as globalPdsDataFetcher } from './pds-data-fetcher';
 import { smartConsole } from './console-wrapper';
 import { sanitizeObject } from '../utils/sanitize';
 import { cacheService as globalCacheService } from '../../data-plane/server/services/cache';
+import { recordValidation } from './record-validation';
 
 // Type for DID resolver (until it's refactored for DI)
 type DidResolverType = typeof globalDidResolver;
@@ -970,7 +971,7 @@ export class EventProcessor {
       const uriParts = uri.split('/');
       if (uriParts.length < 3) return;
 
-      const did = uriParts[2]; // at://did:plc:xxx/collection/rkey
+      const did = uriParts[2]; // URI format: at://did/collection/rkey
 
       // Determine the type based on the action and constraint
       let type:
@@ -1032,6 +1033,25 @@ export class EventProcessor {
     record: any
   ) {
     try {
+      // Defense-in-depth: validate record structure and limits
+      const validation = recordValidation.validateRecord(record);
+      if (!validation.valid) {
+        smartConsole.warn(
+          '[EVENT_PROCESSOR] Record validation failed for %s: %s',
+          uri,
+          validation.errors.join(', ')
+        );
+        // Continue processing - validation is advisory, not blocking
+        // This prevents malformed records from breaking ingestion
+      }
+      if (validation.warnings.length > 0) {
+        smartConsole.log(
+          '[EVENT_PROCESSOR] Record validation warnings for %s: %s',
+          uri,
+          validation.warnings.join(', ')
+        );
+      }
+
       const recordType = record.$type;
 
       switch (recordType) {
@@ -2561,8 +2581,8 @@ export class EventProcessor {
     record: any
   ) {
     try {
-      // Thread gate URI format: at://did:plc:xxx/app.bsky.feed.threadgate/rkey
-      // The post URI is: at://did:plc:xxx/app.bsky.feed.post/rkey
+      // Thread gate URI format: at://did/app.bsky.feed.threadgate/rkey
+      // The post URI is: at://did/app.bsky.feed.post/rkey
       // Extract the post URI from the thread gate URI
       const postUri = uri.replace(
         '/app.bsky.feed.threadgate/',

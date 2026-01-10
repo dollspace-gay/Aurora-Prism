@@ -10,6 +10,7 @@ import { storage } from '../storage';
 import { eventProcessor } from './event-processor';
 import { CID } from 'multiformats/cid';
 import * as Digest from 'multiformats/hashes/digest';
+import { isUrlSafeToFetch } from '../utils/security';
 
 interface PDSDataFetchResult {
   success: boolean;
@@ -388,6 +389,11 @@ export class PDSDataFetcher {
       const encodedDid = encodeURIComponent(did);
       const url = `${pdsEndpoint}/xrpc/com.atproto.repo.getRecord?repo=${encodedDid}&collection=app.bsky.actor.profile&rkey=self`;
 
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(url)) {
+        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+      }
+
       const profileResponse = await fetch(url, {
         headers: { Accept: 'application/json' },
         signal: AbortSignal.timeout(this.FETCH_TIMEOUT_MS),
@@ -636,14 +642,18 @@ export class PDSDataFetcher {
       const encodedCollection = encodeURIComponent(collection);
       const encodedRkey = encodeURIComponent(rkey);
 
+      const recordUrl = `${pdsEndpoint}/xrpc/com.atproto.repo.getRecord?repo=${encodedDid}&collection=${encodedCollection}&rkey=${encodedRkey}`;
+
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(recordUrl)) {
+        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+      }
+
       // Fetch the post record
-      const recordResponse = await fetch(
-        `${pdsEndpoint}/xrpc/com.atproto.repo.getRecord?repo=${encodedDid}&collection=${encodedCollection}&rkey=${encodedRkey}`,
-        {
-          headers: { Accept: 'application/json' },
-          signal: AbortSignal.timeout(this.FETCH_TIMEOUT_MS),
-        }
-      );
+      const recordResponse = await fetch(recordUrl, {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(this.FETCH_TIMEOUT_MS),
+      });
 
       if (!recordResponse.ok) {
         let errorDetails = '';
@@ -733,13 +743,17 @@ export class PDSDataFetcher {
       const encodedCollection = encodeURIComponent(collection);
       const encodedRkey = encodeURIComponent(rkey);
 
-      const recordResponse = await fetch(
-        `${pdsEndpoint}/xrpc/com.atproto.repo.getRecord?repo=${encodedRepo}&collection=${encodedCollection}&rkey=${encodedRkey}`,
-        {
-          headers: { Accept: 'application/json' },
-          signal: AbortSignal.timeout(this.FETCH_TIMEOUT_MS),
-        }
-      );
+      const recordUrl = `${pdsEndpoint}/xrpc/com.atproto.repo.getRecord?repo=${encodedRepo}&collection=${encodedCollection}&rkey=${encodedRkey}`;
+
+      // SSRF protection: validate PDS endpoint
+      if (!isUrlSafeToFetch(recordUrl)) {
+        return { success: false, error: 'SSRF protection: blocked unsafe PDS URL' };
+      }
+
+      const recordResponse = await fetch(recordUrl, {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(this.FETCH_TIMEOUT_MS),
+      });
 
       if (!recordResponse.ok) {
         let errorDetails = '';
