@@ -7,6 +7,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- Migrate TailwindCSS from v3 to v4 (#55)
+- Migrate Vite from v6 to v7 (#53)
+- Migrate Express from v4 to v5 (#52)
+- Migrate React from v18 to v19 (#51)
+- Migrate Zod from v3 to v4 (#54)
+- Evaluate major version upgrade for @neondatabase/serverless (#50)
+- Migrate Recharts from v2 to v3 (#57)
+- Migrate react-day-picker from v8 to v9 (#59)
+- Migrate react-resizable-panels from v2 to v4 (#60)
+- Migrate date-fns from v3 to v4 (#56)
+- Investigate and update AT Protocol packages to latest versions (#48)
+- Investigate potentially unused dependencies (#49)
+- Update safe dependencies (Radix UI, TailwindCSS, ESLint, TanStack) (#47)
 - Comprehensive test suite with 1028 tests covering all major components
 - Test coverage for: routes, storage, event-processor, XRPC services, hydration, serializers, views, security, sanitization, encryption, metrics, rate-limiting, caching, and more
 - Chainlink issue tracking system for development workflow
@@ -34,6 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Worker process coordination
 
 ### Changed
+- Fix all ESLint warnings for production readiness (#14)
 - Set up fuzzing and mutation testing with GitHub Actions (#44)
 - Implement placeholder data-plane routes (graph, search, notifications, feed-generators) (#43)
 - Implement placeholder feed generator queries in data-plane client (#42)

@@ -42,9 +42,8 @@ describe('Rate Limit Middleware', () => {
     it('should export no-op limiters', async () => {
       process.env.RATE_LIMIT_ENABLED = 'false';
 
-      const { authLimiter, apiLimiter } = await import(
-        '../../server/middleware/rate-limit'
-      );
+      const { authLimiter, apiLimiter } =
+        await import('../../server/middleware/rate-limit');
 
       // Create mock request/response
       const req = {};
@@ -100,58 +99,50 @@ describe('Rate Limit Middleware', () => {
 
   describe('limiter configurations', () => {
     it('authLimiter should exist for authentication protection', async () => {
-      const { authLimiter } = await import(
-        '../../server/middleware/rate-limit'
-      );
+      const { authLimiter } =
+        await import('../../server/middleware/rate-limit');
       expect(authLimiter).toBeDefined();
     });
 
     it('oauthLimiter should exist for OAuth protection', async () => {
-      const { oauthLimiter } = await import(
-        '../../server/middleware/rate-limit'
-      );
+      const { oauthLimiter } =
+        await import('../../server/middleware/rate-limit');
       expect(oauthLimiter).toBeDefined();
     });
 
     it('writeLimiter should exist for write operation protection', async () => {
-      const { writeLimiter } = await import(
-        '../../server/middleware/rate-limit'
-      );
+      const { writeLimiter } =
+        await import('../../server/middleware/rate-limit');
       expect(writeLimiter).toBeDefined();
     });
 
     it('searchLimiter should exist for search protection', async () => {
-      const { searchLimiter } = await import(
-        '../../server/middleware/rate-limit'
-      );
+      const { searchLimiter } =
+        await import('../../server/middleware/rate-limit');
       expect(searchLimiter).toBeDefined();
     });
 
     it('adminLimiter should exist for admin protection', async () => {
-      const { adminLimiter } = await import(
-        '../../server/middleware/rate-limit'
-      );
+      const { adminLimiter } =
+        await import('../../server/middleware/rate-limit');
       expect(adminLimiter).toBeDefined();
     });
 
     it('deletionLimiter should exist for deletion protection', async () => {
-      const { deletionLimiter } = await import(
-        '../../server/middleware/rate-limit'
-      );
+      const { deletionLimiter } =
+        await import('../../server/middleware/rate-limit');
       expect(deletionLimiter).toBeDefined();
     });
 
     it('viteLimiter should exist for dev server protection', async () => {
-      const { viteLimiter } = await import(
-        '../../server/middleware/rate-limit'
-      );
+      const { viteLimiter } =
+        await import('../../server/middleware/rate-limit');
       expect(viteLimiter).toBeDefined();
     });
 
     it('xrpcLimiter should exist for XRPC endpoint protection', async () => {
-      const { xrpcLimiter } = await import(
-        '../../server/middleware/rate-limit'
-      );
+      const { xrpcLimiter } =
+        await import('../../server/middleware/rate-limit');
       expect(xrpcLimiter).toBeDefined();
     });
   });

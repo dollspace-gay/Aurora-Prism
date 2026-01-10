@@ -286,9 +286,8 @@ export async function getPostThread(
     const params = getPostThreadSchema.parse(req.query);
 
     // Trigger thread context backfill in background (non-blocking)
-    const { threadContextBackfillService } = await import(
-      '../../thread-context-backfill'
-    );
+    const { threadContextBackfillService } =
+      await import('../../thread-context-backfill');
     threadContextBackfillService
       .backfillPostContext(params.uri)
       .catch((err) => {
@@ -296,9 +295,8 @@ export async function getPostThread(
       });
 
     // Trigger quote posts backfill in background (non-blocking)
-    const { quotePostsBackfillService } = await import(
-      '../../quote-posts-backfill'
-    );
+    const { quotePostsBackfillService } =
+      await import('../../quote-posts-backfill');
     quotePostsBackfillService.fetchQuotesForPost(params.uri).catch((err) => {
       console.error('[QUOTE_POSTS] Error backfilling quotes:', err);
     });
@@ -376,9 +374,8 @@ export async function getFeed(req: Request, res: Response): Promise<void> {
       console.log(
         `[XRPC] Feed generator not found in database, attempting discovery: ${params.feed}`
       );
-      const { feedGeneratorDiscovery } = await import(
-        '../../feed-generator-discovery'
-      );
+      const { feedGeneratorDiscovery } =
+        await import('../../feed-generator-discovery');
       const discovered = await feedGeneratorDiscovery.fetchFeedGeneratorByUri(
         params.feed
       );

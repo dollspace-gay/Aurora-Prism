@@ -14,9 +14,8 @@ describe('LogCollector', () => {
 
   describe('log', () => {
     it('should add log entry with timestamp and level', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       logCollector.log('INFO', 'Test message');
@@ -29,9 +28,8 @@ describe('LogCollector', () => {
     });
 
     it('should add log entry with metadata', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       logCollector.log('INFO', 'Test message', { key: 'value' });
@@ -41,9 +39,8 @@ describe('LogCollector', () => {
     });
 
     it('should prepend new logs (most recent first)', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       logCollector.log('INFO', 'First');
@@ -55,9 +52,8 @@ describe('LogCollector', () => {
     });
 
     it('should limit logs to maxLogs (500)', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       for (let i = 0; i < 510; i++) {
@@ -70,9 +66,8 @@ describe('LogCollector', () => {
     });
 
     it('should output ERROR to console.error', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
 
       logCollector.log('ERROR', 'Error message');
 
@@ -80,9 +75,8 @@ describe('LogCollector', () => {
     });
 
     it('should output WARNING to console.warn', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
 
       logCollector.log('WARNING', 'Warning message');
 
@@ -90,9 +84,8 @@ describe('LogCollector', () => {
     });
 
     it('should output INFO to console.log', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
 
       logCollector.log('INFO', 'Info message');
 
@@ -100,9 +93,8 @@ describe('LogCollector', () => {
     });
 
     it('should output SUCCESS to console.log', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
 
       logCollector.log('SUCCESS', 'Success message');
 
@@ -110,9 +102,8 @@ describe('LogCollector', () => {
     });
 
     it('should output EVENT to console.log', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
 
       logCollector.log('EVENT', 'Event message');
 
@@ -122,9 +113,8 @@ describe('LogCollector', () => {
 
   describe('convenience methods', () => {
     it('info should log with INFO level', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       logCollector.info('Info message', { data: 'test' });
@@ -135,9 +125,8 @@ describe('LogCollector', () => {
     });
 
     it('success should log with SUCCESS level', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       logCollector.success('Success message');
@@ -147,9 +136,8 @@ describe('LogCollector', () => {
     });
 
     it('warning should log with WARNING level', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       logCollector.warning('Warning message');
@@ -159,9 +147,8 @@ describe('LogCollector', () => {
     });
 
     it('error should log with ERROR level', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       logCollector.error('Error message');
@@ -171,9 +158,8 @@ describe('LogCollector', () => {
     });
 
     it('event should log with EVENT level', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       logCollector.event('Event message');
@@ -185,9 +171,8 @@ describe('LogCollector', () => {
 
   describe('getRecentLogs', () => {
     it('should return limited logs based on parameter', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       for (let i = 0; i < 50; i++) {
@@ -199,9 +184,8 @@ describe('LogCollector', () => {
     });
 
     it('should default to 100 logs', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       for (let i = 0; i < 150; i++) {
@@ -213,9 +197,8 @@ describe('LogCollector', () => {
     });
 
     it('should return all logs if less than limit', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
       logCollector.clear();
 
       logCollector.log('INFO', 'Only one');
@@ -227,9 +210,8 @@ describe('LogCollector', () => {
 
   describe('clear', () => {
     it('should remove all logs', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
 
       logCollector.log('INFO', 'Test');
       logCollector.log('INFO', 'Test2');
@@ -242,9 +224,8 @@ describe('LogCollector', () => {
 
   describe('log formatting', () => {
     it('should format log with metadata in JSON', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
 
       logCollector.info('Message', { key: 'value', count: 42 });
 
@@ -254,9 +235,8 @@ describe('LogCollector', () => {
     });
 
     it('should format log without metadata', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
 
       logCollector.info('Simple message');
 
@@ -266,9 +246,8 @@ describe('LogCollector', () => {
     });
 
     it('should include timestamp in log output', async () => {
-      const { logCollector } = await import(
-        '../../server/services/log-collector'
-      );
+      const { logCollector } =
+        await import('../../server/services/log-collector');
 
       logCollector.info('Timestamped message');
 

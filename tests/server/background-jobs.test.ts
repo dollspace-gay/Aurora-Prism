@@ -37,9 +37,8 @@ describe('background-jobs', () => {
     it('should skip background jobs in test environment', async () => {
       process.env.NODE_ENV = 'test';
 
-      const { startBackgroundJobs } = await import(
-        '../../server/background-jobs'
-      );
+      const { startBackgroundJobs } =
+        await import('../../server/background-jobs');
 
       startBackgroundJobs();
 
@@ -52,9 +51,8 @@ describe('background-jobs', () => {
       process.env.NODE_ENV = 'development';
       vi.useFakeTimers();
 
-      const { startBackgroundJobs } = await import(
-        '../../server/background-jobs'
-      );
+      const { startBackgroundJobs } =
+        await import('../../server/background-jobs');
 
       startBackgroundJobs();
 
@@ -73,9 +71,8 @@ describe('background-jobs', () => {
       vi.useFakeTimers();
 
       const { logAllPoolStatus } = await import('../../server/pool-metrics');
-      const { startBackgroundJobs } = await import(
-        '../../server/background-jobs'
-      );
+      const { startBackgroundJobs } =
+        await import('../../server/background-jobs');
 
       startBackgroundJobs();
 
@@ -92,9 +89,8 @@ describe('background-jobs', () => {
       vi.useFakeTimers();
 
       const { storage } = await import('../../server/storage');
-      const { startBackgroundJobs } = await import(
-        '../../server/background-jobs'
-      );
+      const { startBackgroundJobs } =
+        await import('../../server/background-jobs');
 
       startBackgroundJobs();
 
@@ -111,9 +107,8 @@ describe('background-jobs', () => {
       vi.useFakeTimers();
 
       const { storage } = await import('../../server/storage');
-      const { startBackgroundJobs } = await import(
-        '../../server/background-jobs'
-      );
+      const { startBackgroundJobs } =
+        await import('../../server/background-jobs');
 
       startBackgroundJobs();
 
@@ -133,9 +128,8 @@ describe('background-jobs', () => {
       vi.useFakeTimers();
 
       const { logAllPoolStatus } = await import('../../server/pool-metrics');
-      const { startBackgroundJobs } = await import(
-        '../../server/background-jobs'
-      );
+      const { startBackgroundJobs } =
+        await import('../../server/background-jobs');
 
       startBackgroundJobs();
 

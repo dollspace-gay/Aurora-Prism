@@ -1,4 +1,3 @@
-/* eslint-env browser */
 /* global window, ResizeObserver, IntersectionObserver */
 import { afterEach, vi } from 'vitest';
 

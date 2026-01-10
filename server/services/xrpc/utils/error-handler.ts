@@ -18,7 +18,7 @@ export function handleError(
   console.error(`[XRPC] Error in ${context}:`, error);
 
   if (error instanceof z.ZodError) {
-    res.status(400).json({ error: 'InvalidRequest', message: error.errors });
+    res.status(400).json({ error: 'InvalidRequest', message: error.issues });
     return;
   }
 

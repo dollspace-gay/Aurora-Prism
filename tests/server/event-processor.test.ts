@@ -478,9 +478,8 @@ describe('EventProcessor Class', () => {
   describe('Configuration', () => {
     it('should allow setting skip PDS fetching flag', async () => {
       // This tests the setSkipPdsFetching method
-      const { EventProcessor } = await import(
-        '../../server/services/event-processor'
-      );
+      const { EventProcessor } =
+        await import('../../server/services/event-processor');
       const processor = new EventProcessor(mockStorage as any);
 
       // No error should be thrown
@@ -489,9 +488,8 @@ describe('EventProcessor Class', () => {
     });
 
     it('should allow setting skip data collection check flag', async () => {
-      const { EventProcessor } = await import(
-        '../../server/services/event-processor'
-      );
+      const { EventProcessor } =
+        await import('../../server/services/event-processor');
       const processor = new EventProcessor(mockStorage as any);
 
       // No error should be thrown
@@ -500,9 +498,8 @@ describe('EventProcessor Class', () => {
     });
 
     it('should allow invalidating data collection cache', async () => {
-      const { EventProcessor } = await import(
-        '../../server/services/event-processor'
-      );
+      const { EventProcessor } =
+        await import('../../server/services/event-processor');
       const processor = new EventProcessor(mockStorage as any);
 
       // No error should be thrown
@@ -512,9 +509,8 @@ describe('EventProcessor Class', () => {
 
   describe('Initialization', () => {
     it('should create processor with default storage', async () => {
-      const { EventProcessor } = await import(
-        '../../server/services/event-processor'
-      );
+      const { EventProcessor } =
+        await import('../../server/services/event-processor');
       const processor = new EventProcessor(mockStorage as any);
 
       // Processor should be created without throwing

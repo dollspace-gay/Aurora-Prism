@@ -733,9 +733,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user is admin
-      const { adminAuthService } = await import(
-        './services/admin-authorization'
-      );
+      const { adminAuthService } =
+        await import('./services/admin-authorization');
       const isAdmin = await adminAuthService.isAdmin(did);
 
       // NOTE: Do NOT trigger backfill here - this is for admin panel login only.
@@ -900,9 +899,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.getUser(session.userDid);
 
-      const { adminAuthService } = await import(
-        './services/admin-authorization'
-      );
+      const { adminAuthService } =
+        await import('./services/admin-authorization');
       const isAdmin = await adminAuthService.isAdmin(session.userDid);
 
       res.json({ session, user, isAdmin });
@@ -972,21 +970,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         (async () => {
           try {
             // Import all backfill services
-            const { repoBackfillService } = await import(
-              './services/repo-backfill'
-            );
-            const { autoBackfillLikesService } = await import(
-              './services/auto-backfill-likes'
-            );
-            const { autoBackfillFollowsService } = await import(
-              './services/auto-backfill-follows'
-            );
-            const { autoBackfillFeedsService } = await import(
-              './services/auto-backfill-feeds'
-            );
-            const { autoBackfillNotificationsService } = await import(
-              './services/auto-backfill-notifications'
-            );
+            const { repoBackfillService } =
+              await import('./services/repo-backfill');
+            const { autoBackfillLikesService } =
+              await import('./services/auto-backfill-likes');
+            const { autoBackfillFollowsService } =
+              await import('./services/auto-backfill-follows');
+            const { autoBackfillFeedsService } =
+              await import('./services/auto-backfill-feeds');
+            const { autoBackfillNotificationsService } =
+              await import('./services/auto-backfill-notifications');
 
             // 1. Start repo backfill (CAR file style - posts, likes, reposts, etc.)
             console.log(`[USER_BACKFILL] Starting repo backfill...`);
@@ -1069,9 +1062,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         (async () => {
           try {
             const { AtpAgent } = await import('@atproto/api');
-            const { EventProcessor } = await import(
-              './services/event-processor'
-            );
+            const { EventProcessor } =
+              await import('./services/event-processor');
 
             const BATCH_SIZE = 100;
             const CONCURRENT_FETCHES = 10;
@@ -1255,9 +1247,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         // Import and trigger the auto-backfill service directly
-        const { autoBackfillLikesService } = await import(
-          './services/auto-backfill-likes'
-        );
+        const { autoBackfillLikesService } =
+          await import('./services/auto-backfill-likes');
 
         // Send immediate response
         res.json({
@@ -1314,9 +1305,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         // Import and trigger the auto-backfill service directly
-        const { autoBackfillFollowsService } = await import(
-          './services/auto-backfill-follows'
-        );
+        const { autoBackfillFollowsService } =
+          await import('./services/auto-backfill-follows');
 
         // Send immediate response
         res.json({
@@ -1380,9 +1370,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Run backfill in background
         (async () => {
           try {
-            const { threadContextBackfillService } = await import(
-              './services/thread-context-backfill'
-            );
+            const { threadContextBackfillService } =
+              await import('./services/thread-context-backfill');
             const result =
               await threadContextBackfillService.backfillMissingThreadContext();
             console.log(
@@ -1427,9 +1416,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Run backfill in background
         (async () => {
           try {
-            const { quotePostsBackfillService } = await import(
-              './services/quote-posts-backfill'
-            );
+            const { quotePostsBackfillService } =
+              await import('./services/quote-posts-backfill');
             const result = await quotePostsBackfillService.backfillQuotePosts();
             console.log(
               `[QUOTE_POSTS] Manual scan complete: checked ${result.checked}, found ${result.quotes} quotes, fetched ${result.fetched}`
@@ -2296,7 +2284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         blockedKeywords: z.array(z.string()).optional(),
         mutedUsers: z.array(z.string()).optional(),
         customLists: z.array(z.any()).optional(),
-        feedPreferences: z.record(z.any()).optional(),
+        feedPreferences: z.record(z.string(), z.any()).optional(),
       });
 
       const data = schema.parse(req.body);
@@ -2620,7 +2608,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           value: z.string(),
           description: z.string().optional(),
           severity: z.enum(['info', 'warn', 'alert', 'none']).default('warn'),
-          localizedStrings: z.record(z.any()).optional(),
+          localizedStrings: z.record(z.string(), z.any()).optional(),
         });
 
         const data = schema.parse(req.body);
@@ -2901,9 +2889,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Instance moderation policy (public transparency endpoint)
   app.get('/api/instance/policy', async (_req, res) => {
     try {
-      const { instanceModerationService } = await import(
-        './services/instance-moderation'
-      );
+      const { instanceModerationService } =
+        await import('./services/instance-moderation');
       const policy = instanceModerationService.getPublicPolicy();
       res.json(policy);
     } catch {
@@ -2914,9 +2901,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Instance moderation statistics (public transparency)
   app.get('/api/instance/stats', async (_req, res) => {
     try {
-      const { instanceModerationService } = await import(
-        './services/instance-moderation'
-      );
+      const { instanceModerationService } =
+        await import('./services/instance-moderation');
       const stats = await instanceModerationService.getStatistics();
       res.json(stats);
     } catch {
@@ -3010,9 +2996,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Database health check endpoint
   app.get('/api/database/health', async (_req, res) => {
     try {
-      const { databaseHealthService } = await import(
-        './services/database-health'
-      );
+      const { databaseHealthService } =
+        await import('./services/database-health');
       const metrics = await databaseHealthService.performHealthCheck();
       const poolStatus = await databaseHealthService.checkConnectionPool();
 
@@ -3044,9 +3029,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const data = schema.parse(req.body);
 
-        const { instanceModerationService } = await import(
-          './services/instance-moderation'
-        );
+        const { instanceModerationService } =
+          await import('./services/instance-moderation');
         await instanceModerationService.applyInstanceLabel(data);
 
         res.json({
@@ -3079,9 +3063,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const data = schema.parse(req.body);
 
-        const { instanceModerationService } = await import(
-          './services/instance-moderation'
-        );
+        const { instanceModerationService } =
+          await import('./services/instance-moderation');
         await instanceModerationService.handleTakedown(data);
 
         res.json({
@@ -3320,9 +3303,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireAdmin,
     async (req: AuthRequest, res) => {
       try {
-        const { feedGeneratorDiscovery } = await import(
-          './services/feed-generator-discovery'
-        );
+        const { feedGeneratorDiscovery } =
+          await import('./services/feed-generator-discovery');
 
         // Check if already running
         if (feedGeneratorDiscovery.isDiscoveryRunning()) {
@@ -3368,9 +3350,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireAdmin,
     async (req: AuthRequest, res) => {
       try {
-        const { feedGeneratorDiscovery } = await import(
-          './services/feed-generator-discovery'
-        );
+        const { feedGeneratorDiscovery } =
+          await import('./services/feed-generator-discovery');
         const stats = feedGeneratorDiscovery.getStats();
         const isRunning = feedGeneratorDiscovery.isDiscoveryRunning();
 
@@ -3387,9 +3368,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireAdmin,
     async (req: AuthRequest, res) => {
       try {
-        const { feedGeneratorDiscovery } = await import(
-          './services/feed-generator-discovery'
-        );
+        const { feedGeneratorDiscovery } =
+          await import('./services/feed-generator-discovery');
 
         const schema = z.object({
           uri: z.string().startsWith('at://'),
@@ -4391,9 +4371,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/cache/clear-hydration', async (_req, res) => {
     try {
-      const { optimizedHydrator } = await import(
-        './services/hydration/optimized-hydrator'
-      );
+      const { optimizedHydrator } =
+        await import('./services/hydration/optimized-hydrator');
       await optimizedHydrator.clearCache();
 
       res.json({

@@ -4047,9 +4047,8 @@ export class DatabaseStorage implements IStorage {
         this.statsCache = { data, timestamp: Date.now() };
 
         // Update Redis counters with accurate counts
-        const { redisQueue: redisQueueUpdate } = await import(
-          './services/redis-queue'
-        );
+        const { redisQueue: redisQueueUpdate } =
+          await import('./services/redis-queue');
         await Promise.all([
           redisQueueUpdate.setRecordCount('users', data.totalUsers),
           redisQueueUpdate.setRecordCount('posts', data.totalPosts),
