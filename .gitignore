@@ -30,3 +30,6 @@ nul
 .chainlink/daemon.pid
 .chainlink/issues.db
 .stryker-tmp/
+
+# Test coverage output
+coverage/

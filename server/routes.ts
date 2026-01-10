@@ -3432,7 +3432,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Trigger backfill (non-blocking)
       onDemandBackfill.backfillUser(did).catch((error: unknown) => {
         console.error(
-          `[API] On-demand backfill failed for ${did}:`,
+          '[API] On-demand backfill failed for %s:',
+          did,
           getErrorMessage(error)
         );
       });
