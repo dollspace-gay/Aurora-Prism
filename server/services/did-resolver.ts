@@ -442,9 +442,7 @@ export class DIDResolver {
       // Construct and validate the URL
       const url = `https://${handle}/.well-known/atproto-did`;
       if (!isUrlSafeToFetch(url)) {
-        smartConsole.warn(
-          `[DID_RESOLVER] URL failed SSRF validation: ${url}`
-        );
+        smartConsole.warn(`[DID_RESOLVER] URL failed SSRF validation: ${url}`);
         return null;
       }
 
