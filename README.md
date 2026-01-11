@@ -51,11 +51,13 @@ Aurora Prism protects user-backfilled data while pruning random firehose noise:
 - Docker and Docker Compose installed
 - A domain (optional, for `did:web` identifier)
 
-**Installation Steps:**
+**Option A: Use Pre-built Images (Fastest)**
+
+For tagged releases, use pre-built multi-architecture images from GitHub Container Registry:
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/yourusername/aurora-prism.git
+# 1. Clone the repository (for config files)
+git clone https://github.com/dollspace-gay/aurora-prism.git
 cd aurora-prism
 
 # 2. Generate OAuth keys
@@ -64,7 +66,33 @@ cd aurora-prism
 # 3. Setup DID and keys
 ./setup-did-and-keys.sh
 
-# 4. Start all services
+# 4. Configure to use pre-built image (add to .env file)
+echo "AURORA_PRISM_IMAGE=ghcr.io/dollspace-gay/aurora-prism:latest" >> .env
+
+# 5. Start services
+sudo docker-compose up -d
+```
+
+Available image tags:
+- `latest` - Latest stable release
+- `v1.2.3` - Specific version
+- `v1.2` - Latest patch for v1.2.x
+- `v1` - Latest minor/patch for v1.x.x
+
+**Option B: Build from Source**
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/dollspace-gay/aurora-prism.git
+cd aurora-prism
+
+# 2. Generate OAuth keys
+./oauth-keyset-json.sh
+
+# 3. Setup DID and keys
+./setup-did-and-keys.sh
+
+# 4. Build and start all services
 sudo docker-compose up --build -d
 ```
 
