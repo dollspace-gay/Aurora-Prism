@@ -139,7 +139,11 @@ export class PDSClient {
         },
       };
     } catch (error) {
-      console.error('[PDS_CLIENT] Error creating post:', error);
+      // SECURITY: Never log full error objects - may contain auth headers
+      console.error('[PDS_CLIENT] Error creating post:', {
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -202,7 +206,11 @@ export class PDSClient {
         },
       };
     } catch (error) {
-      console.error('[PDS_CLIENT] Error creating like:', error);
+      // SECURITY: Never log full error objects - may contain auth headers
+      console.error('[PDS_CLIENT] Error creating like:', {
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -255,7 +263,11 @@ export class PDSClient {
 
       return { success: true };
     } catch (error) {
-      console.error('[PDS_CLIENT] Error deleting record:', error);
+      // SECURITY: Never log full error objects - may contain auth headers
+      console.error('[PDS_CLIENT] Error deleting record:', {
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -318,7 +330,11 @@ export class PDSClient {
         },
       };
     } catch (error) {
-      console.error('[PDS_CLIENT] Error creating follow:', error);
+      // SECURITY: Never log full error objects - may contain auth headers
+      console.error('[PDS_CLIENT] Error creating follow:', {
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -356,7 +372,11 @@ export class PDSClient {
       const data = await response.json();
       return data.cid || null;
     } catch (error) {
-      console.error('[PDS_CLIENT] Error getting record CID:', error);
+      // SECURITY: Never log full error objects - may contain auth headers
+      console.error('[PDS_CLIENT] Error getting record CID:', {
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
       return null;
     }
   }
@@ -444,7 +464,11 @@ export class PDSClient {
         data,
       };
     } catch (error) {
-      console.error('[PDS_CLIENT] Error creating session:', error);
+      // SECURITY: Never log full error objects - may contain auth headers
+      console.error('[PDS_CLIENT] Error creating session:', {
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -523,7 +547,11 @@ export class PDSClient {
         },
       };
     } catch (error) {
-      console.error('[PDS_CLIENT] Error refreshing token:', error);
+      // SECURITY: Never log full error objects - may contain auth headers
+      console.error('[PDS_CLIENT] Error refreshing token:', {
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -589,7 +617,11 @@ export class PDSClient {
         data,
       };
     } catch (error) {
-      console.error('[PDS_CLIENT] Error getting session:', error);
+      // SECURITY: Never log full error objects - may contain auth headers
+      console.error('[PDS_CLIENT] Error getting session:', {
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -614,13 +646,14 @@ export class PDSClient {
   ): Promise<{ status: number; headers: Record<string, string>; body: any }> {
     /* eslint-enable @typescript-eslint/no-explicit-any */
     // Log request details for debugging
+    // SECURITY: Never log any part of tokens - even prefixes reveal JWT structure
     console.log(
       `[PDS_CLIENT] Proxying request to PDS with user authentication:`,
       {
         pdsEndpoint,
         method,
         path,
-        tokenPrefix: userToken.substring(0, 20) + '...',
+        hasToken: !!userToken,
       }
     );
 
@@ -728,13 +761,13 @@ export class PDSClient {
       }
     });
 
-    // Log response details for debugging
+    // Log response details for debugging (avoid logging message which may contain tokens)
     console.log(`[PDS_CLIENT] PDS response:`, {
       status: response.status,
       statusText: response.statusText,
       hasBody: !!responseBody,
-      error: responseBody?.error,
-      message: responseBody?.message,
+      // Only log error type, not message - PDS messages may contain token fragments
+      errorType: responseBody?.error,
     });
 
     return {

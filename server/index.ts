@@ -136,6 +136,55 @@ app.use(
 const MAX_LOG_LINE_LENGTH = 80;
 const MAX_LOG_LINE_LENGTH_TRUNCATED = 79;
 
+// Fields that are safe to log (non-sensitive)
+const SAFE_LOG_FIELDS = new Set([
+  'did',
+  'handle',
+  'error',
+  'message',
+  'success',
+  'count',
+  'cursor',
+  'hasMore',
+]);
+
+// Paths that should never have response bodies logged (contain tokens)
+const SENSITIVE_PATHS = [
+  '/api/auth/',
+  '/xrpc/com.atproto.server.createSession',
+  '/xrpc/com.atproto.server.refreshSession',
+  '/xrpc/com.atproto.server.getSession',
+];
+
+/**
+ * Sanitize response body for logging - removes sensitive fields like tokens
+ */
+function sanitizeResponseForLogging(
+  response: Record<string, unknown>,
+  path: string
+): string {
+  // Never log bodies from sensitive auth endpoints
+  if (SENSITIVE_PATHS.some((p) => path.startsWith(p))) {
+    return '[auth response - not logged]';
+  }
+
+  // For other endpoints, only include safe fields
+  const sanitized: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(response)) {
+    if (SAFE_LOG_FIELDS.has(key)) {
+      sanitized[key] = value;
+    }
+  }
+
+  // If no safe fields, just indicate response size
+  if (Object.keys(sanitized).length === 0) {
+    const size = JSON.stringify(response).length;
+    return `[${size} bytes]`;
+  }
+
+  return JSON.stringify(sanitized);
+}
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -149,10 +198,10 @@ app.use((req, res, next) => {
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    if (path.startsWith('/api')) {
+    if (path.startsWith('/api') || path.startsWith('/xrpc')) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        logLine += ` :: ${sanitizeResponseForLogging(capturedJsonResponse, path)}`;
       }
 
       if (logLine.length > MAX_LOG_LINE_LENGTH) {
@@ -184,12 +233,21 @@ app.use((req, res, next) => {
       const status = err.status || err.statusCode || 500;
       const message = err.message || 'Internal Server Error';
 
-      // Log error for debugging
-      console.error('[ERROR]', err);
+      // SECURITY: Log only safe error properties - never full error objects
+      // Full error objects can contain request context with auth headers
+      console.error('[ERROR]', {
+        name: err.name,
+        message: message,
+        status,
+        // Only log stack in development, truncated to first line in production
+        ...(process.env.NODE_ENV === 'development'
+          ? { stack: err.stack?.split('\n').slice(0, 3).join('\n') }
+          : {}),
+      });
       logCollector.error('Request error', {
         error: message,
         status,
-        stack: err.stack,
+        // Never log full stack traces in production - they can leak sensitive paths
       });
 
       // CORS headers are handled by the cors middleware

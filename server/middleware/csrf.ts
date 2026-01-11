@@ -104,29 +104,11 @@ export class CSRFProtection {
     const cookieToken = req.cookies?.csrf_token;
     const cookieSignature = req.cookies?.csrf_signature;
 
-    // Debug logging - sanitize user input to prevent format string injection
-    console.log('[CSRF] Validating request', {
-      method: req.method,
-      path: req.path,
-      hasHeaderToken: !!tokenFromHeader,
-      hasBodyToken: !!tokenFromBody,
-      hasCookieToken: !!cookieToken,
-      hasCookieSignature: !!cookieSignature,
-      userAgent: req.headers['user-agent']?.substring(0, 50),
-      origin: req.headers['origin'],
-      referer: req.headers['referer'],
-    });
-
-    // Validation checks
+    // Validation checks - only log failures, not every validation attempt
     if (!submittedToken) {
-      console.warn('[CSRF] Missing token from request', {
+      console.warn('[CSRF] Missing token', {
         method: req.method,
         path: req.path,
-        headers: Object.keys(req.headers).filter((h) =>
-          h.toLowerCase().includes('csrf')
-        ),
-        bodyKeys: Object.keys(req.body || {}),
-        cookies: Object.keys(req.cookies || {}),
       });
       return res.status(403).json({
         error: 'CSRF token missing',
@@ -135,12 +117,9 @@ export class CSRFProtection {
     }
 
     if (!cookieToken || !cookieSignature) {
-      console.warn('[CSRF] Missing cookies from request', {
+      console.warn('[CSRF] Missing cookies', {
         method: req.method,
         path: req.path,
-        availableCookies: Object.keys(req.cookies || {}),
-        cookieToken: !!cookieToken,
-        cookieSignature: !!cookieSignature,
       });
       return res.status(403).json({
         error: 'CSRF validation failed',
@@ -150,12 +129,9 @@ export class CSRFProtection {
 
     // Verify token matches cookie
     if (submittedToken !== cookieToken) {
-      console.warn('[CSRF] Token mismatch from request', {
+      console.warn('[CSRF] Token mismatch', {
         method: req.method,
         path: req.path,
-        submittedLength: submittedToken?.length,
-        cookieLength: cookieToken?.length,
-        tokensMatch: submittedToken === cookieToken,
       });
       return res.status(403).json({
         error: 'CSRF validation failed',
@@ -175,10 +151,6 @@ export class CSRFProtection {
       });
     }
 
-    console.log('[CSRF] Valid token', {
-      method: req.method,
-      path: req.path,
-    });
     next();
   };
 

@@ -82,6 +82,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Deprecated XRPC monolithic API file
 
 ### Security
+- Fix token prefix leakage exposing JWT structure in logs (#80)
+- Fix auth header exposure in PDS client error logs (#79)
+- Fix stack trace leakage exposing auth headers in error logs (#78)
+- Fix potential OAuth session exposure before encryption (#77)
+- Fix CSRF token state disclosure in logging (#76)
+- Fix PDS error message exposure in logging (#75)
+- Fix feed generator response leakage in error logging (#74)
+- Fix critical token leakage via response logging (#73)
 - Add runtime validation for firehose record content (#72)
 - Add SESSION_SECRET entropy validation at startup (#71)
 - Add network egress filtering for defense in depth (#70)

@@ -130,12 +130,15 @@ export class FeedGeneratorClient {
 
         return skeleton;
       } catch (parseError) {
+        // Log only safe metadata - never log full response which may contain tokens
+        const safeMetadata = {
+          feedLength: Array.isArray(data?.feed) ? data.feed.length : 'invalid',
+          hasCursor: !!data?.cursor,
+          responseKeys: data ? Object.keys(data) : [],
+        };
         console.error(
-          `[FeedGenClient] Invalid response format from feed generator ${serviceEndpoint}:`
-        );
-        console.error(
-          '[FeedGenClient] Response data:',
-          JSON.stringify(data).substring(0, 500)
+          `[FeedGenClient] Invalid response format from feed generator ${serviceEndpoint}:`,
+          safeMetadata
         );
         console.error('[FeedGenClient] Parse error:', parseError);
 

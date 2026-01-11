@@ -94,25 +94,49 @@ class DatabaseSessionStore {
         console.log('[OAUTH] Created user record for %s', sub);
       }
 
+      // SECURITY: Encrypt sensitive session data before any storage operation
+      // Never log or expose session object - it contains OAuth tokens
+      let encryptedSession: string;
+      let encryptedRefreshToken: string;
+
+      try {
+        encryptedSession = await encryptionService.encrypt(
+          JSON.stringify(session)
+        );
+      } catch {
+        // SECURITY: Never include session data in error logs
+        console.error('[OAUTH] Failed to encrypt session for user');
+        throw new Error('Session encryption failed');
+      }
+
+      try {
+        encryptedRefreshToken = session.tokenSet.refresh_token
+          ? await encryptionService.encrypt(session.tokenSet.refresh_token)
+          : '';
+      } catch {
+        // SECURITY: Never include token data in error logs
+        console.error('[OAUTH] Failed to encrypt refresh token for user');
+        throw new Error('Token encryption failed');
+      }
+
+      // Extract only safe metadata before storage operations
+      const pdsEndpoint = session.tokenSet.iss || '';
+
       const existingSession = await storage.getSession(sub);
 
       if (existingSession) {
         await storage.updateSession(sub, {
-          accessToken: await encryptionService.encrypt(JSON.stringify(session)),
-          refreshToken: session.tokenSet.refresh_token
-            ? await encryptionService.encrypt(session.tokenSet.refresh_token)
-            : '',
+          accessToken: encryptedSession,
+          refreshToken: encryptedRefreshToken,
           expiresAt,
         });
       } else {
         await storage.createSession({
           id: sub,
           userDid: sub,
-          accessToken: await encryptionService.encrypt(JSON.stringify(session)),
-          refreshToken: session.tokenSet.refresh_token
-            ? await encryptionService.encrypt(session.tokenSet.refresh_token)
-            : '',
-          pdsEndpoint: session.tokenSet.iss || '',
+          accessToken: encryptedSession,
+          refreshToken: encryptedRefreshToken,
+          pdsEndpoint,
           expiresAt,
         });
       }
@@ -132,8 +156,9 @@ class DatabaseSessionStore {
           await encryptionService.decrypt(dbSession.accessToken)
         );
         return savedSession as NodeSavedSession;
-      } catch (error) {
-        console.error('[OAUTH] Failed to decrypt session:', error);
+      } catch {
+        // SECURITY: Never log error details - could contain partial token data
+        console.error('[OAUTH] Failed to decrypt session for user');
         return undefined;
       }
     });
