@@ -2,6 +2,34 @@
 
 When you make code changes to Python files, you need to rebuild the Docker images on your VPS for the changes to take effect.
 
+## Using Pre-built Images from GHCR
+
+For tagged releases, pre-built images are automatically published to GitHub Container Registry:
+
+```bash
+# Pull and run a specific version
+docker pull ghcr.io/dollspace-gay/aurora-prism:v1.0.0
+docker run ghcr.io/dollspace-gay/aurora-prism:v1.0.0
+
+# Or use in docker-compose.yml
+# image: ghcr.io/dollspace-gay/aurora-prism:v1.0.0
+```
+
+**Available tags:**
+- `v1.2.3` - Specific version tag
+- `v1.2` - Minor version (gets latest patch)
+- `v1` - Major version (gets latest minor.patch)
+- `latest` - Latest stable release
+- `main-<sha>` - Specific commit from main branch
+
+To create a new release with automated image publishing:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The GitHub Actions workflow will automatically build multi-architecture images (amd64, arm64) and push to GHCR.
+
 ## Quick Deploy Commands
 
 ### For Python Firehose/Worker Changes
