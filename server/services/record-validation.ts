@@ -19,6 +19,7 @@ const LIMITS = {
   MAX_DISPLAY_NAME_LENGTH: 640, // Max display name (64 graphemes * ~10 bytes)
   MAX_DESCRIPTION_LENGTH: 2560, // Max description (256 graphemes * ~10 bytes)
   TIMESTAMP_RANGE_YEARS: 10, // +/- years from current time
+  MAX_RECORD_SIZE_BYTES: 1024 * 1024, // 1MB max total record size
 } as const;
 
 /**
@@ -541,6 +542,18 @@ export class RecordValidationService {
       return {
         valid: false,
         errors: ['Record must be an object'],
+        warnings: [],
+      };
+    }
+
+    // Check total record size to prevent JSON bombs
+    const recordSize = JSON.stringify(record).length;
+    if (recordSize > LIMITS.MAX_RECORD_SIZE_BYTES) {
+      return {
+        valid: false,
+        errors: [
+          `Record size ${recordSize} bytes exceeds maximum ${LIMITS.MAX_RECORD_SIZE_BYTES} bytes`,
+        ],
         warnings: [],
       };
     }

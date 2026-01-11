@@ -21,6 +21,7 @@ import { smartConsole } from './console-wrapper';
 import { sanitizeObject } from '../utils/sanitize';
 import { cacheService as globalCacheService } from '../../data-plane/server/services/cache';
 import { recordValidation } from './record-validation';
+import { isValidDID, isValidCID } from '../utils/security';
 
 // Type for DID resolver (until it's refactored for DI)
 type DidResolverType = typeof globalDidResolver;
@@ -1033,6 +1034,24 @@ export class EventProcessor {
     record: any
   ) {
     try {
+      // Validate DID and CID format before processing
+      if (!isValidDID(authorDid)) {
+        smartConsole.warn(
+          '[EVENT_PROCESSOR] Invalid DID format: %s for record %s',
+          authorDid,
+          uri
+        );
+        return;
+      }
+      if (cid && !isValidCID(cid)) {
+        smartConsole.warn(
+          '[EVENT_PROCESSOR] Invalid CID format: %s for record %s',
+          cid,
+          uri
+        );
+        return;
+      }
+
       // Defense-in-depth: validate record structure and limits
       const validation = recordValidation.validateRecord(record);
       if (!validation.valid) {
@@ -1041,8 +1060,8 @@ export class EventProcessor {
           uri,
           validation.errors.join(', ')
         );
-        // Continue processing - validation is advisory, not blocking
-        // This prevents malformed records from breaking ingestion
+        // Block invalid records to prevent JSON bombs, stack overflow, and rendering errors
+        return;
       }
       if (validation.warnings.length > 0) {
         smartConsole.log(
@@ -1114,21 +1133,39 @@ export class EventProcessor {
   async processCommit(event: any) {
     const { repo, ops } = event;
 
+    // Validate repo DID format before processing any operations
+    if (!isValidDID(repo)) {
+      smartConsole.warn('[EVENT_PROCESSOR] Invalid repo DID format: %s', repo);
+      return;
+    }
+
     for (const op of ops) {
       const { action, path, cid } = op;
       const collection = path.split('/')[0];
       const uri = `at://${repo}/${path}`;
+
+      // Validate CID format if present
+      if (cid && !isValidCID(cid)) {
+        smartConsole.warn(
+          '[EVENT_PROCESSOR] Invalid CID format: %s for %s',
+          cid,
+          uri
+        );
+        continue;
+      }
 
       try {
         if (action === 'create' || action === 'update') {
           const record = op.record;
           const recordType = record.$type;
 
-          // Validate record (temporarily disabled for debugging)
-          // if (!lexiconValidator.validate(recordType, record)) {
-          //   smartConsole.log(`[VALIDATOR] Invalid record: ${recordType} at ${uri}`);
-          //   continue;
-          // }
+          // Validate record structure before processing
+          if (!lexiconValidator.validate(recordType, record)) {
+            smartConsole.log(
+              `[VALIDATOR] Invalid record: ${recordType} at ${uri}`
+            );
+            continue;
+          }
 
           switch (recordType) {
             case 'app.bsky.feed.post':
