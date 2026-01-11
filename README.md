@@ -50,12 +50,35 @@ Aurora Prism protects user-backfilled data while pruning random firehose noise:
 **Prerequisites:**
 - Docker and Docker Compose installed
 - A domain (optional, for `did:web` identifier)
+- DNS configured (if using a custom domain)
 
-**Installation Steps:**
+**One-Command Installation:**
+
+```bash
+# Clone and run the interactive installer
+git clone https://github.com/dollspace-gay/aurora-prism.git
+cd aurora-prism
+./install.sh
+```
+
+The installer will:
+- ✅ Check dependencies (openssl, jq, xxd, bs58)
+- ✅ Prompt for your domain and configuration preferences
+- ✅ Generate OAuth keys and AppView signing keys
+- ✅ Create secure `.env` configuration
+- ✅ Pull pre-built images or build from source
+- ✅ Start all services with Docker Compose
+
+That's it! 🎉 Aurora Prism will be running at `http://localhost:5000`
+
+**Manual Installation (Advanced):**
+
+<details>
+<summary>Click to expand manual installation steps</summary>
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/aurora-prism.git
+git clone https://github.com/dollspace-gay/aurora-prism.git
 cd aurora-prism
 
 # 2. Generate OAuth keys
@@ -64,11 +87,24 @@ cd aurora-prism
 # 3. Setup DID and keys
 ./setup-did-and-keys.sh
 
-# 4. Start all services
-sudo docker-compose up --build -d
+# 4. Create .env file
+cp .env.example .env
+# Edit .env with your configuration
+
+# 5. Start services (pre-built image)
+echo "AURORA_PRISM_IMAGE=ghcr.io/dollspace-gay/aurora-prism:latest" >> .env
+docker-compose up -d
+
+# OR build from source
+docker-compose up --build -d
 ```
 
-That's it! 🎉 Aurora Prism will be running at `http://localhost:5000`
+Available pre-built image tags:
+- `ghcr.io/dollspace-gay/aurora-prism:latest` - Latest stable release
+- `ghcr.io/dollspace-gay/aurora-prism:v1.2.3` - Specific version
+- `ghcr.io/dollspace-gay/aurora-prism:v1.2` - Latest patch for v1.2.x
+
+</details>
 
 ### What Gets Setup
 

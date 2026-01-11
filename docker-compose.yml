@@ -147,13 +147,17 @@ services:
     shm_size: 10gb
 
   app:
+    # Use pre-built image from GHCR or build from source
+    # To use pre-built: Set AURORA_PRISM_IMAGE in .env or docker-compose.override.yml
+    # Example: AURORA_PRISM_IMAGE=ghcr.io/dollspace-gay/aurora-prism:latest
+    image: ${AURORA_PRISM_IMAGE:-aurora-prism:local}
+    build: .
     volumes:
       # Mount the secret keys (read-only)
       - ./appview-signing-key.json:/app/appview-signing-key.json:ro,Z
       - ./appview-private.pem:/app/appview-private.pem:ro,Z
       - ./public/did.json:/app/public/did.json:ro,Z
       - ./oauth-keyset.json:/app/oauth-keyset.json:ro,Z
-    build: .
     ports:
       - "5000:5000"
     environment:
