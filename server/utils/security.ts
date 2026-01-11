@@ -2,6 +2,12 @@
  * Security utilities for input validation and sanitization
  */
 
+import dns from 'dns/promises';
+
+// DNS cache for validated hostnames (prevents repeated lookups)
+const dnsCache = new Map<string, { valid: boolean; expires: number }>();
+const DNS_CACHE_TTL = 300000; // 5 minutes
+
 /**
  * Apply a regex replacement repeatedly until no more matches are found.
  * This prevents multi-character sanitization bypass attacks where
@@ -19,6 +25,196 @@ function replaceUntilStable(
     result = result.replace(pattern, replacement);
   } while (result !== previous);
   return result;
+}
+
+/**
+ * Checks if an IP address is safe (not private, loopback, or link-local)
+ * Used for both URL validation and DNS rebinding protection
+ * @param ip The IP address to check
+ * @returns true if the IP is safe (public), false if private/internal
+ */
+export function isIpAddressSafe(ip: string): boolean {
+  // Check IPv4 addresses
+  const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+  const ipv4Match = ip.match(ipv4Regex);
+
+  if (ipv4Match) {
+    const octets = ipv4Match.slice(1).map(Number);
+
+    // Validate octet ranges
+    if (octets.some((o) => o < 0 || o > 255)) {
+      return false;
+    }
+
+    // 10.0.0.0/8 (private)
+    if (octets[0] === 10) {
+      return false;
+    }
+
+    // 172.16.0.0/12 (private)
+    if (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) {
+      return false;
+    }
+
+    // 192.168.0.0/16 (private)
+    if (octets[0] === 192 && octets[1] === 168) {
+      return false;
+    }
+
+    // 169.254.0.0/16 (link-local)
+    if (octets[0] === 169 && octets[1] === 254) {
+      return false;
+    }
+
+    // 127.0.0.0/8 (loopback)
+    if (octets[0] === 127) {
+      return false;
+    }
+
+    // 0.0.0.0/8 (current network)
+    if (octets[0] === 0) {
+      return false;
+    }
+
+    // 100.64.0.0/10 (carrier-grade NAT)
+    if (octets[0] === 100 && octets[1] >= 64 && octets[1] <= 127) {
+      return false;
+    }
+
+    // 192.0.0.0/24 (IETF protocol assignments)
+    if (octets[0] === 192 && octets[1] === 0 && octets[2] === 0) {
+      return false;
+    }
+
+    // 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24 (documentation)
+    if (
+      (octets[0] === 192 && octets[1] === 0 && octets[2] === 2) ||
+      (octets[0] === 198 && octets[1] === 51 && octets[2] === 100) ||
+      (octets[0] === 203 && octets[1] === 0 && octets[2] === 113)
+    ) {
+      return false;
+    }
+
+    // 224.0.0.0/4 (multicast)
+    if (octets[0] >= 224 && octets[0] <= 239) {
+      return false;
+    }
+
+    // 240.0.0.0/4 (reserved)
+    if (octets[0] >= 240) {
+      return false;
+    }
+
+    return true;
+  }
+
+  // Check IPv6 addresses
+  const lowerIp = ip.toLowerCase();
+
+  // Remove brackets if present
+  const cleanIp = lowerIp.replace(/^\[|\]$/g, '');
+
+  // Loopback (::1)
+  if (cleanIp === '::1' || cleanIp === '0:0:0:0:0:0:0:1') {
+    return false;
+  }
+
+  // Unspecified (::)
+  if (cleanIp === '::' || cleanIp === '0:0:0:0:0:0:0:0') {
+    return false;
+  }
+
+  // Link-local (fe80::/10)
+  if (
+    cleanIp.startsWith('fe8') ||
+    cleanIp.startsWith('fe9') ||
+    cleanIp.startsWith('fea') ||
+    cleanIp.startsWith('feb')
+  ) {
+    return false;
+  }
+
+  // Unique local addresses (fc00::/7)
+  if (cleanIp.startsWith('fc') || cleanIp.startsWith('fd')) {
+    return false;
+  }
+
+  // IPv4-mapped IPv6 addresses (::ffff:x.x.x.x)
+  const ipv4MappedMatch = cleanIp.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (ipv4MappedMatch) {
+    return isIpAddressSafe(ipv4MappedMatch[1]);
+  }
+
+  return true;
+}
+
+/**
+ * Validates DNS resolution results to prevent DNS rebinding attacks
+ * Resolves the hostname and checks that all returned IPs are safe
+ * @param hostname The hostname to validate
+ * @returns true if all resolved IPs are safe, false otherwise
+ */
+async function validateDNS(hostname: string): Promise<boolean> {
+  try {
+    // Resolve both IPv4 and IPv6 addresses
+    const [ipv4Result, ipv6Result] = await Promise.allSettled([
+      dns.resolve4(hostname),
+      dns.resolve6(hostname),
+    ]);
+
+    const allAddresses: string[] = [];
+
+    if (ipv4Result.status === 'fulfilled') {
+      allAddresses.push(...ipv4Result.value);
+    }
+    if (ipv6Result.status === 'fulfilled') {
+      allAddresses.push(...ipv6Result.value);
+    }
+
+    // If no addresses resolved, fail closed
+    if (allAddresses.length === 0) {
+      console.warn(`[SECURITY] No DNS records for ${hostname}`);
+      return false;
+    }
+
+    // Validate each resolved IP against private ranges
+    for (const ip of allAddresses) {
+      if (!isIpAddressSafe(ip)) {
+        console.warn(`[SECURITY] DNS rebinding blocked: ${hostname} → ${ip}`);
+        return false;
+      }
+    }
+
+    return true;
+  } catch (err) {
+    // DNS lookup failed - fail closed for security
+    console.error(`[SECURITY] DNS lookup failed for ${hostname}:`, err);
+    return false;
+  }
+}
+
+/**
+ * Validates DNS with caching to avoid repeated lookups
+ * @param hostname The hostname to validate
+ * @returns true if DNS resolves to safe IPs, false otherwise
+ */
+export async function validateDNSWithCache(hostname: string): Promise<boolean> {
+  // Check cache first
+  const cached = dnsCache.get(hostname);
+  if (cached && cached.expires > Date.now()) {
+    return cached.valid;
+  }
+
+  // Perform DNS validation
+  const valid = await validateDNS(hostname);
+
+  // Cache the result
+  dnsCache.set(hostname, {
+    valid,
+    expires: Date.now() + DNS_CACHE_TTL,
+  });
+
+  return valid;
 }
 
 /**
@@ -388,31 +584,42 @@ export function buildSafeBlobUrl(
 }
 
 /**
- * Performs a fetch request with SSRF protection
- * This wrapper function validates the URL and performs the fetch in a way that
- * static analysis tools can recognize as safe from SSRF attacks.
+ * Performs a fetch request with SSRF protection including DNS rebinding prevention
+ * This wrapper function validates the URL and DNS resolution to prevent attacks
+ * where a hostname initially resolves to a public IP but later to a private IP.
  *
  * @param validatedUrl The URL that has been validated by buildSafeBlobUrl or isUrlSafeToFetch
  * @param options Fetch options (headers, etc.)
  * @returns The fetch response
- * @throws Error if the URL is not safe
+ * @throws Error if the URL is not safe or DNS validation fails
  */
 export async function safeFetch(
   validatedUrl: string,
   options?: RequestInit
 ): Promise<Response> {
-  // Final validation check before fetching - belt and suspenders approach
-  // This ensures that even if validation was bypassed earlier, we catch it here
+  // Step 1: URL format validation
   if (!isUrlSafeToFetch(validatedUrl)) {
     throw new Error('URL failed SSRF validation - refusing to fetch');
   }
 
-  // Create a new URL object to break any potential taint tracking from static analysis
-  // This reconstructed URL is explicitly safe because we've validated it
+  // Create a new URL object to extract hostname for DNS validation
   const safeUrl = new URL(validatedUrl);
 
-  // Perform the fetch with the validated URL
-  // The URL has been validated to not target private networks or use unsafe protocols
+  // Step 2: DNS rebinding protection - validate resolved IPs
+  // Skip DNS validation for IP addresses (already validated by isUrlSafeToFetch)
+  const isIpAddress =
+    /^(\d{1,3}\.){3}\d{1,3}$/.test(safeUrl.hostname) ||
+    safeUrl.hostname.includes(':');
+  if (!isIpAddress) {
+    const dnsValid = await validateDNSWithCache(safeUrl.hostname);
+    if (!dnsValid) {
+      throw new Error(
+        `DNS validation failed for ${safeUrl.hostname} - possible DNS rebinding attack`
+      );
+    }
+  }
+
+  // Step 3: Perform the fetch with the validated URL
   return fetch(safeUrl.toString(), options);
 }
 

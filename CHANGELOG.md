@@ -82,6 +82,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Deprecated XRPC monolithic API file
 
 ### Security
+- Add DNS rebinding protection to SSRF validation (#85)
 - Audit unvalidated req.params/query usage in routes.ts (#82)
 - Fix token prefix leakage exposing JWT structure in logs (#80)
 - Fix auth header exposure in PDS client error logs (#79)
