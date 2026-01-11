@@ -22,6 +22,7 @@ import { sanitizeObject } from '../utils/sanitize';
 import { cacheService as globalCacheService } from '../../data-plane/server/services/cache';
 import { recordValidation } from './record-validation';
 import { isValidDID, isValidCID } from '../utils/security';
+import { lexiconValidator } from './lexicon-validator';
 
 // Type for DID resolver (until it's refactored for DI)
 type DidResolverType = typeof globalDidResolver;
