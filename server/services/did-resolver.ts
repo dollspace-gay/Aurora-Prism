@@ -5,7 +5,7 @@
  */
 
 import { smartConsole } from './console-wrapper';
-import { isUrlSafeToFetch } from '../utils/security';
+import { isUrlSafeToFetch, isValidHandle, safeFetch } from '../utils/security';
 import { promises as dnsPromises } from 'dns';
 
 interface VerificationMethod {
@@ -381,6 +381,11 @@ export class DIDResolver {
 
   private async resolveHandleViaDNS(handle: string): Promise<string | null> {
     try {
+      // Validate handle format before DNS lookup
+      if (!isValidHandle(handle)) {
+        return null;
+      }
+
       // Resolve DNS TXT record for _atproto subdomain
       const txtRecords = await dnsPromises.resolveTxt(`_atproto.${handle}`);
 
@@ -426,16 +431,30 @@ export class DIDResolver {
 
   private async resolveHandleViaHTTPS(handle: string): Promise<string | null> {
     try {
-      const response = await fetch(
-        `https://${handle}/.well-known/atproto-did`,
-        {
-          headers: {
-            Accept: 'text/plain',
-            'User-Agent': 'AT-Protocol-DID-Resolver/1.0',
-          },
-          signal: AbortSignal.timeout(this.baseTimeout),
-        }
-      );
+      // Validate handle format to prevent SSRF attacks
+      if (!isValidHandle(handle)) {
+        smartConsole.warn(
+          `[DID_RESOLVER] Invalid handle format rejected: ${handle}`
+        );
+        return null;
+      }
+
+      // Construct and validate the URL
+      const url = `https://${handle}/.well-known/atproto-did`;
+      if (!isUrlSafeToFetch(url)) {
+        smartConsole.warn(
+          `[DID_RESOLVER] URL failed SSRF validation: ${url}`
+        );
+        return null;
+      }
+
+      const response = await safeFetch(url, {
+        headers: {
+          Accept: 'text/plain',
+          'User-Agent': 'AT-Protocol-DID-Resolver/1.0',
+        },
+        signal: AbortSignal.timeout(this.baseTimeout),
+      });
 
       if (!response.ok) {
         if (response.status === 404) {

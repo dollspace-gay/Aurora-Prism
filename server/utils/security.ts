@@ -300,6 +300,62 @@ export function isValidCID(cid: string): boolean {
 }
 
 /**
+ * Validates an AT Protocol handle format to prevent SSRF attacks
+ * AT Protocol handles are domain names with specific format requirements
+ * @param handle The handle to validate
+ * @returns true if the handle format is valid and safe
+ */
+export function isValidHandle(handle: string): boolean {
+  if (!handle || typeof handle !== 'string') {
+    return false;
+  }
+
+  // Length limits
+  if (handle.length < 3 || handle.length > 253) {
+    return false;
+  }
+
+  // Must contain at least one dot (multi-label domain)
+  if (!handle.includes('.')) {
+    return false;
+  }
+
+  // Block IP addresses (IPv4)
+  const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+  if (ipv4Regex.test(handle)) {
+    return false;
+  }
+
+  // Block localhost variants
+  const lowerHandle = handle.toLowerCase();
+  if (
+    lowerHandle === 'localhost' ||
+    lowerHandle.endsWith('.localhost') ||
+    lowerHandle.endsWith('.local') ||
+    lowerHandle.endsWith('.internal')
+  ) {
+    return false;
+  }
+
+  // Valid AT Protocol handle: lowercase alphanumeric with hyphens and dots
+  // Labels can't start or end with hyphen, can't have consecutive dots
+  const handleRegex = /^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/i;
+  if (!handleRegex.test(handle)) {
+    return false;
+  }
+
+  // Check individual label lengths (max 63 chars per DNS label)
+  const labels = handle.split('.');
+  for (const label of labels) {
+    if (label.length > 63 || label.length === 0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
  * Reconstructs a safe blob URL after validation to prevent SSRF
  * @param pdsEndpoint The validated PDS endpoint
  * @param did The DID (must be pre-validated)
