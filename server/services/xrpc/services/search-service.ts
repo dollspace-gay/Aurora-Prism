@@ -6,6 +6,7 @@
 import type { Request, Response } from 'express';
 import { storage } from '../../../storage';
 import { searchService } from '../../search';
+import { passThroughSearchService } from '../../pass-through-search';
 import { getAuthenticatedDid } from '../utils/auth-helpers';
 import { handleError } from '../utils/error-handler';
 import { maybeAvatar, serializePostsEnhanced } from '../utils/serializers';
@@ -65,27 +66,54 @@ export async function searchPosts(req: Request, res: Response): Promise<void> {
 
     const viewerDid = await getAuthenticatedDid(req);
 
-    const { posts, cursor } = await searchService.searchPosts(
-      params.q,
-      {
-        limit: params.limit,
-        cursor: params.cursor,
-        sort: params.sort || 'top',
-        since: params.since,
-        until: params.until,
-        mentions: params.mentions,
-        author: params.author,
-        lang: params.lang,
-        domain: params.domain,
-        url: params.url,
-        tag: params.tag,
-      },
-      viewerDid || undefined
+    const { posts: localPosts, cursor: localCursor } =
+      await searchService.searchPosts(
+        params.q,
+        {
+          limit: params.limit,
+          cursor: params.cursor,
+          sort: params.sort || 'top',
+          since: params.since,
+          until: params.until,
+          mentions: params.mentions,
+          author: params.author,
+          lang: params.lang,
+          domain: params.domain,
+          url: params.url,
+          tag: params.tag,
+        },
+        viewerDid || undefined
+      );
+
+    // Augment with remote results from main Bluesky network
+    const { posts: mergedPosts, cursor: mergedCursor } =
+      await passThroughSearchService.augmentPostSearch(
+        localPosts,
+        localCursor,
+        params.q,
+        {
+          limit: params.limit,
+          cursor: params.cursor,
+          sort: params.sort || 'top',
+          since: params.since,
+          until: params.until,
+          mentions: params.mentions,
+          author: params.author,
+          lang: params.lang,
+          domain: params.domain,
+          url: params.url,
+          tag: params.tag,
+        },
+        viewerDid || undefined
+      );
+
+    const serialized = await serializePosts(
+      mergedPosts,
+      viewerDid || undefined,
+      req
     );
 
-    const serialized = await serializePosts(posts, viewerDid || undefined, req);
-
-    res.json({ posts: serialized, cursor });
+    res.json({ posts: serialized, cursor: mergedCursor });
   } catch (error) {
     handleError(res, error, 'searchPosts');
   }
@@ -111,14 +139,24 @@ export async function searchActors(req: Request, res: Response): Promise<void> {
 
     const viewerDid = await getAuthenticatedDid(req);
 
-    const { actors, cursor } = await searchService.searchActors(
-      term,
-      params.limit,
-      params.cursor
-    );
+    const { actors: localActors, cursor: localCursor } =
+      await searchService.searchActors(term, params.limit, params.cursor);
+
+    // Augment with remote results from main Bluesky network
+    const { actors: mergedActors, cursor: mergedCursor } =
+      await passThroughSearchService.augmentActorSearch(
+        localActors,
+        localCursor,
+        term,
+        {
+          limit: params.limit,
+          cursor: params.cursor,
+        },
+        viewerDid || undefined
+      );
 
     type ActorSearchResult = { did: string };
-    const actorResults = actors as ActorSearchResult[];
+    const actorResults = mergedActors as ActorSearchResult[];
     const dids = actorResults.map((a) => a.did);
     const users = (await storage.getUsers(dids)) as UserModel[];
     const userMap = new Map(users.map((u) => [u.did, u]));
@@ -172,7 +210,7 @@ export async function searchActors(req: Request, res: Response): Promise<void> {
       };
     });
 
-    res.json({ actors: results, cursor });
+    res.json({ actors: results, cursor: mergedCursor });
   } catch (error) {
     handleError(res, error, 'searchActors');
   }
@@ -255,14 +293,30 @@ export async function searchStarterPacks(
 ): Promise<void> {
   try {
     const params = searchStarterPacksSchema.parse(req.query);
-    const { starterPacks, cursor } = await storage.searchStarterPacksByName(
-      params.q,
-      params.limit,
-      params.cursor
-    );
+    const viewerDid = await getAuthenticatedDid(req);
+
+    const { starterPacks: localPacks, cursor: localCursor } =
+      await storage.searchStarterPacksByName(
+        params.q,
+        params.limit,
+        params.cursor
+      );
+
+    // Augment with remote results from main Bluesky network
+    const { starterPacks: mergedPacks, cursor: mergedCursor } =
+      await passThroughSearchService.augmentStarterPackSearch(
+        localPacks,
+        localCursor,
+        params.q,
+        {
+          limit: params.limit,
+          cursor: params.cursor,
+        },
+        viewerDid || undefined
+      );
 
     res.json({
-      starterPacks: starterPacks.map((sp) => ({
+      starterPacks: mergedPacks.map((sp) => ({
         uri: sp.uri,
         cid: sp.cid,
         creator: { did: sp.creatorDid, handle: sp.creatorDid },
@@ -270,7 +324,7 @@ export async function searchStarterPacks(
         description: sp.description ?? undefined,
         createdAt: sp.createdAt.toISOString(),
       })),
-      cursor,
+      cursor: mergedCursor,
     });
   } catch (error) {
     handleError(res, error, 'searchStarterPacks');

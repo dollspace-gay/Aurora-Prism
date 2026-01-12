@@ -19,6 +19,8 @@ import {
   getSuggestedFeedsUnspeccedSchema,
 } from '../schemas';
 import { getProfiles } from '../utils/profile-builder';
+import { passThroughSearchService } from '../../pass-through-search';
+import { getAuthenticatedDid } from '../utils/auth-helpers';
 
 /**
  * Helper to serialize a feed generator view
@@ -344,6 +346,7 @@ export async function getPopularFeedGenerators(
 ): Promise<void> {
   try {
     const params = getPopularFeedGeneratorsSchema.parse(req.query);
+    const viewerDid = await getAuthenticatedDid(req);
 
     let generators: {
       uri: string;
@@ -356,7 +359,7 @@ export async function getPopularFeedGenerators(
       likeCount: number;
       indexedAt: Date;
     }[];
-    let cursor: string | undefined;
+    let localCursor: string | undefined;
 
     // If query is provided, search for feed generators by name/description
     // Otherwise, return suggested feeds (popular by default)
@@ -368,7 +371,7 @@ export async function getPopularFeedGenerators(
       );
       generators = (searchResults as { feedGenerators: typeof generators })
         .feedGenerators;
-      cursor = (searchResults as { cursor?: string }).cursor;
+      localCursor = (searchResults as { cursor?: string }).cursor;
       console.log(
         `[FEED_GEN] Search for "${params.query}" returned ${generators.length} generators`
       );
@@ -379,27 +382,21 @@ export async function getPopularFeedGenerators(
       );
       generators = (suggestedResults as { generators: typeof generators })
         .generators;
-      cursor = (suggestedResults as { cursor?: string }).cursor;
+      localCursor = (suggestedResults as { cursor?: string }).cursor;
       console.log(
         `[FEED_GEN] getSuggestedFeeds returned ${generators.length} generators`
       );
     }
 
-    if (generators.length === 0) {
-      console.log(`[FEED_GEN] No generators found, returning empty array`);
-      res.json({ cursor, feeds: [] });
-      return;
-    }
-
-    // Batch fetch all creator profiles
+    // Batch fetch all creator profiles for local generators
     const creatorDids = [...new Set(generators.map((g) => g.creatorDid))];
     const creatorProfiles = await getProfiles(creatorDids, req);
 
     // Create map for quick lookup
     const profileMap = new Map(creatorProfiles.map((p: any) => [p.did, p]));
 
-    // Build views with complete creator profiles
-    const feeds = generators
+    // Build views with complete creator profiles for local generators
+    const localFeeds = generators
       .map((generator) => {
         const creatorProfile = profileMap.get(generator.creatorDid);
         if (!creatorProfile) {
@@ -413,7 +410,20 @@ export async function getPopularFeedGenerators(
       })
       .filter(Boolean);
 
-    res.json({ cursor, feeds });
+    // Augment with remote results from main Bluesky network
+    const { feedGenerators: mergedFeeds, cursor: mergedCursor } =
+      await passThroughSearchService.augmentFeedGeneratorSearch(
+        localFeeds,
+        localCursor,
+        {
+          limit: params.limit,
+          cursor: params.cursor,
+          query: params.query,
+        },
+        viewerDid || undefined
+      );
+
+    res.json({ cursor: mergedCursor, feeds: mergedFeeds });
   } catch (error) {
     handleError(res, error, 'getPopularFeedGenerators');
   }
