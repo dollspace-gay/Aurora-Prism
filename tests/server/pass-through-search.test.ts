@@ -446,6 +446,167 @@ describe('Pass-Through Search Service', () => {
     });
   });
 
+  describe('Post search augmentation - Variable page sizes', () => {
+    it('should return merged results without slicing (may exceed limit)', async () => {
+      mockGetSession.mockResolvedValue({ did: 'did:plc:test' } as never);
+
+      // Request limit of 3
+      const localPosts: PostSearchResult[] = [
+        {
+          uri: 'at://did:plc:local/app.bsky.feed.post/1',
+          cid: 'cid1',
+          authorDid: 'did:plc:author1',
+          text: 'Local post 1',
+          embed: null,
+          parentUri: null,
+          rootUri: null,
+          createdAt: new Date('2024-01-01'),
+          indexedAt: new Date('2024-01-01'),
+          searchVector: null,
+          rank: 0.9,
+        },
+        {
+          uri: 'at://did:plc:local/app.bsky.feed.post/2',
+          cid: 'cid2',
+          authorDid: 'did:plc:author2',
+          text: 'Local post 2',
+          embed: null,
+          parentUri: null,
+          rootUri: null,
+          createdAt: new Date('2024-01-02'),
+          indexedAt: new Date('2024-01-02'),
+          searchVector: null,
+          rank: 0.8,
+        },
+        {
+          uri: 'at://did:plc:local/app.bsky.feed.post/3',
+          cid: 'cid3',
+          authorDid: 'did:plc:author3',
+          text: 'Local post 3',
+          embed: null,
+          parentUri: null,
+          rootUri: null,
+          createdAt: new Date('2024-01-03'),
+          indexedAt: new Date('2024-01-03'),
+          searchVector: null,
+          rank: 0.7,
+        },
+      ];
+
+      // Mock remote returns 2 posts (no overfetch)
+      mockSearchPosts.mockResolvedValue({
+        data: {
+          posts: [
+            {
+              uri: 'at://did:plc:remote/app.bsky.feed.post/4',
+              cid: 'cid4',
+              author: { did: 'did:plc:author4' },
+              record: {
+                text: 'Remote post 4',
+                createdAt: '2024-01-04T00:00:00Z',
+              },
+              indexedAt: '2024-01-04T00:00:00Z',
+            },
+            {
+              uri: 'at://did:plc:remote/app.bsky.feed.post/5',
+              cid: 'cid5',
+              author: { did: 'did:plc:author5' },
+              record: {
+                text: 'Remote post 5',
+                createdAt: '2024-01-05T00:00:00Z',
+              },
+              indexedAt: '2024-01-05T00:00:00Z',
+            },
+          ],
+        },
+      } as never);
+
+      const result = await passThroughSearchService.augmentPostSearch(
+        localPosts,
+        'local-cursor',
+        'test query',
+        { limit: 3 },
+        'did:plc:test'
+      );
+
+      // Should return all merged posts (5 total, exceeds limit of 3)
+      expect(result.posts).toHaveLength(5);
+
+      // Verify exact limit was requested (no overfetch)
+      expect(mockSearchPosts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          limit: 3,
+        })
+      );
+    });
+
+    it('should filter blocked/muted posts from remote results', async () => {
+      mockGetSession.mockResolvedValue({ did: 'did:plc:test' } as never);
+
+      // Mock blocks/mutes to filter one of the remote posts
+      mockGetListBlocksForUsers.mockResolvedValue(
+        new Map([['did:plc:blocked', new Set(['did:plc:test'])]])
+      );
+
+      const localPosts: PostSearchResult[] = [
+        {
+          uri: 'at://did:plc:local/app.bsky.feed.post/1',
+          cid: 'cid1',
+          authorDid: 'did:plc:author1',
+          text: 'Local post 1',
+          embed: null,
+          parentUri: null,
+          rootUri: null,
+          createdAt: new Date('2024-01-01'),
+          indexedAt: new Date('2024-01-01'),
+          searchVector: null,
+          rank: 0.9,
+        },
+      ];
+
+      mockSearchPosts.mockResolvedValue({
+        data: {
+          posts: [
+            {
+              uri: 'at://did:plc:remote/app.bsky.feed.post/2',
+              cid: 'cid2',
+              author: { did: 'did:plc:blocked' }, // This will be filtered
+              record: {
+                text: 'Blocked post',
+                createdAt: '2024-01-02T00:00:00Z',
+              },
+              indexedAt: '2024-01-02T00:00:00Z',
+            },
+            {
+              uri: 'at://did:plc:remote/app.bsky.feed.post/3',
+              cid: 'cid3',
+              author: { did: 'did:plc:author3' },
+              record: {
+                text: 'Remote post 3',
+                createdAt: '2024-01-03T00:00:00Z',
+              },
+              indexedAt: '2024-01-03T00:00:00Z',
+            },
+          ],
+        },
+      } as never);
+
+      const result = await passThroughSearchService.augmentPostSearch(
+        localPosts,
+        undefined,
+        'test query',
+        { limit: 25 },
+        'did:plc:test'
+      );
+
+      // Should have 2 posts (1 local + 1 remote, 1 filtered)
+      expect(result.posts).toHaveLength(2);
+      expect(result.posts.some((p) => p.authorDid === 'did:plc:blocked')).toBe(
+        false
+      );
+    });
+  });
+
   describe('Actor search augmentation - Deduplication', () => {
     it('should merge local and remote actors without duplicates', async () => {
       mockGetSession.mockResolvedValue({ did: 'did:plc:test' } as never);
