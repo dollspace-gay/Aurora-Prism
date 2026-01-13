@@ -1,5 +1,7 @@
 # Aurora Prism 🌈✨
+
 ![AI Generated](https://img.shields.io/badge/Code-AI_Generated-blue?style=flat-square&logo=probot&logoColor=white)
+
 **A cyberpunk-themed, self-hostable AT Protocol AppView with aurora-inspired aesthetics**
 
 Aurora Prism is a production-ready AT Protocol "App View" service that indexes real-time data from the Bluesky network and provides a fully Bluesky-compatible XRPC API with a stunning cyberpunk dashboard.
