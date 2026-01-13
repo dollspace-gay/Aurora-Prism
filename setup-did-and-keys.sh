@@ -3,7 +3,7 @@
 # A pure Bash script to generate AT Protocol compatible secp256k1 keys.
 # No Node.js, no npm, no bullshit.
 #
-# Dependencies: openssl, jq, xxd, bs58
+# Dependencies: openssl, jq, xxd, base58
 
 set -e
 
@@ -12,7 +12,7 @@ echo "========================================"
 echo ""
 
 # --- Dependency Check ---
-for cmd in openssl jq xxd bs58; do
+for cmd in openssl jq xxd base58; do
   if ! command -v $cmd &> /dev/null; then
     echo "❌ Missing required dependency: $cmd"
     echo "Please install it and try again."
@@ -46,7 +46,7 @@ RAW_PUBKEY=$(openssl ec -in appview-private.pem -pubout -outform DER | tail -c 6
 PREFIXED_KEY=$(printf '\xe7\x01' && echo -n "$RAW_PUBKEY")
 
 # 4. Encode the result with Base58BTC to create the final multibase string
-PUBLIC_KEY_MULTIBASE=$(echo -n "$PREFIXED_KEY" | bs58)
+PUBLIC_KEY_MULTIBASE=$(echo -n "$PREFIXED_KEY" | base58)
 
 # --- Private Key Formatting for JWK ---
 echo "⚙️  Formatting private key for application use (JWK)..."

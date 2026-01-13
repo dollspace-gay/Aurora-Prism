@@ -62,7 +62,7 @@ cd aurora-prism
 ```
 
 The installer will:
-- ✅ Check dependencies (openssl, jq, xxd, bs58)
+- ✅ Check dependencies (openssl, jq, xxd, base58)
 - ✅ Prompt for your domain and configuration preferences
 - ✅ Generate OAuth keys and AppView signing keys
 - ✅ Create secure `.env` configuration

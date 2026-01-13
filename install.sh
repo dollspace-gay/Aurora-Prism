@@ -4,7 +4,7 @@
 # This script handles all setup: key generation, DID configuration, and Docker deployment
 #
 # Prerequisites: Docker, Docker Compose, and DNS configured
-# Dependencies: openssl, jq, xxd, bs58
+# Dependencies: openssl, jq, xxd, base58
 
 set -e
 
@@ -26,7 +26,7 @@ echo ""
 # --- Dependency Check ---
 echo -e "${BLUE}[1/6] Checking dependencies...${NC}"
 MISSING_DEPS=()
-for cmd in docker docker-compose openssl jq xxd bs58; do
+for cmd in docker docker-compose openssl jq xxd base58; do
   if ! command -v $cmd &> /dev/null; then
     MISSING_DEPS+=("$cmd")
   fi
@@ -36,7 +36,7 @@ if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
   echo -e "${RED}❌ Missing required dependencies: ${MISSING_DEPS[*]}${NC}"
   echo ""
   echo "Install missing dependencies:"
-  echo "  Ubuntu/Debian: sudo apt-get install openssl jq xxd python3-pip && pip3 install base58"
+  echo "  Ubuntu/Debian: sudo apt-get install openssl jq xxd python3-base58"
   echo "  macOS: brew install openssl jq xxd && pip3 install base58"
   echo ""
   exit 1
@@ -157,7 +157,7 @@ openssl ecparam -name secp256k1 -genkey -noout -out appview-private.pem
 # Extract public key for DID document
 RAW_PUBKEY=$(openssl ec -in appview-private.pem -pubout -outform DER 2>/dev/null | tail -c 65)
 PREFIXED_KEY=$(printf '\xe7\x01' && echo -n "$RAW_PUBKEY")
-PUBLIC_KEY_MULTIBASE=$(echo -n "$PREFIXED_KEY" | bs58)
+PUBLIC_KEY_MULTIBASE=$(echo -n "$PREFIXED_KEY" | base58)
 
 # Extract components for JWK
 KEY_COMPONENTS_HEX=$(openssl ec -in appview-private.pem -text -noout 2>/dev/null)
