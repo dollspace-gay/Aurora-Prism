@@ -57,16 +57,27 @@ echo -e "${GREEN}✅ Will use DID: ${APPVIEW_DID}${NC}"
 echo ""
 
 # Docker image choice
-echo -e "${YELLOW}Use pre-built Docker images from GHCR? (faster, recommended)${NC}"
-echo "  1) Yes - Use latest stable release (ghcr.io/dollspace-gay/aurora-prism:latest)"
-echo "  2) No  - Build from source locally"
+echo -e "${YELLOW}Choose Docker image source:${NC}"
+echo "  1) Latest stable release (ghcr.io/dollspace-gay/aurora-prism:latest) - recommended"
+echo "  2) Specific version tag (e.g., v1.0.0)"
+echo "  3) Build from source locally"
 read -p "> " IMAGE_CHOICE
+
 if [[ "$IMAGE_CHOICE" == "1" ]]; then
   USE_PREBUILT=true
+  IMAGE_TAG="latest"
   AURORA_PRISM_IMAGE="ghcr.io/dollspace-gay/aurora-prism:latest"
-  echo -e "${GREEN}✅ Will use pre-built images${NC}"
+  echo -e "${GREEN}✅ Will use latest pre-built images${NC}"
+elif [[ "$IMAGE_CHOICE" == "2" ]]; then
+  USE_PREBUILT=true
+  echo -e "${YELLOW}Enter version tag (e.g., v1.0.0):${NC}"
+  read -p "> " IMAGE_TAG
+  IMAGE_TAG=$(echo "$IMAGE_TAG" | sed 's/^v//')  # Remove leading 'v' if present
+  AURORA_PRISM_IMAGE="ghcr.io/dollspace-gay/aurora-prism:${IMAGE_TAG}"
+  echo -e "${GREEN}✅ Will use version ${IMAGE_TAG} from GHCR${NC}"
 else
   USE_PREBUILT=false
+  IMAGE_TAG="local"
   echo -e "${GREEN}✅ Will build from source${NC}"
 fi
 echo ""
@@ -239,10 +250,10 @@ cat > .env <<EOF
 # Docker Images
 $(if [ "$USE_PREBUILT" = true ]; then
   echo "AURORA_PRISM_IMAGE=${AURORA_PRISM_IMAGE}"
-  echo "PYTHON_FIREHOSE_IMAGE=ghcr.io/dollspace-gay/aurora-prism/python-firehose:latest"
-  echo "PYTHON_WORKER_IMAGE=ghcr.io/dollspace-gay/aurora-prism/python-worker:latest"
-  echo "PYTHON_BACKFILL_WORKER_IMAGE=ghcr.io/dollspace-gay/aurora-prism/python-backfill-worker:latest"
-  echo "CONSTELLATION_BRIDGE_IMAGE=ghcr.io/dollspace-gay/aurora-prism/constellation-bridge:latest"
+  echo "PYTHON_FIREHOSE_IMAGE=ghcr.io/dollspace-gay/aurora-prism/python-firehose:${IMAGE_TAG}"
+  echo "PYTHON_WORKER_IMAGE=ghcr.io/dollspace-gay/aurora-prism/python-worker:${IMAGE_TAG}"
+  echo "PYTHON_BACKFILL_WORKER_IMAGE=ghcr.io/dollspace-gay/aurora-prism/python-backfill-worker:${IMAGE_TAG}"
+  echo "CONSTELLATION_BRIDGE_IMAGE=ghcr.io/dollspace-gay/aurora-prism/constellation-bridge:${IMAGE_TAG}"
 else
   echo "# AURORA_PRISM_IMAGE=aurora-prism:local"
   echo "# PYTHON_FIREHOSE_IMAGE=aurora-prism/python-firehose:local"
@@ -286,12 +297,12 @@ echo -e "${BLUE}[6/6] Starting Aurora Prism with Docker Compose...${NC}"
 echo ""
 
 if [ "$USE_PREBUILT" = true ]; then
-  echo -e "${YELLOW}Pulling pre-built images...${NC}"
+  echo -e "${YELLOW}Pulling pre-built images (tag: ${IMAGE_TAG})...${NC}"
   docker pull "${AURORA_PRISM_IMAGE}"
-  docker pull "ghcr.io/dollspace-gay/aurora-prism/python-firehose:latest"
-  docker pull "ghcr.io/dollspace-gay/aurora-prism/python-worker:latest"
-  docker pull "ghcr.io/dollspace-gay/aurora-prism/python-backfill-worker:latest"
-  docker pull "ghcr.io/dollspace-gay/aurora-prism/constellation-bridge:latest"
+  docker pull "ghcr.io/dollspace-gay/aurora-prism/python-firehose:${IMAGE_TAG}"
+  docker pull "ghcr.io/dollspace-gay/aurora-prism/python-worker:${IMAGE_TAG}"
+  docker pull "ghcr.io/dollspace-gay/aurora-prism/python-backfill-worker:${IMAGE_TAG}"
+  docker pull "ghcr.io/dollspace-gay/aurora-prism/constellation-bridge:${IMAGE_TAG}"
 fi
 
 echo -e "${YELLOW}Starting services...${NC}"
