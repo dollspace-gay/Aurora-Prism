@@ -14,6 +14,30 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        include:
+          - name: app
+            context: .
+            dockerfile: Dockerfile
+            image-suffix: ""
+          - name: python-firehose
+            context: ./python-firehose
+            dockerfile: Dockerfile
+            image-suffix: "/python-firehose"
+          - name: python-worker
+            context: ./python-firehose
+            dockerfile: Dockerfile.worker
+            image-suffix: "/python-worker"
+          - name: python-backfill-worker
+            context: ./python-firehose
+            dockerfile: Dockerfile.unified
+            image-suffix: "/python-backfill-worker"
+          - name: constellation-bridge
+            context: ./microcosm-bridge/constellation-client
+            dockerfile: Dockerfile
+            image-suffix: "/constellation-bridge"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,7 +56,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ghcr.io/${{ github.repository }}${{ matrix.image-suffix }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -40,13 +64,14 @@ jobs:
             type=sha,prefix=sha-
             type=raw,value=latest
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (${{ matrix.name }})
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ${{ matrix.context }}
+          file: ${{ matrix.context }}/${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
           platforms: linux/amd64,linux/arm64

@@ -20,7 +20,8 @@ services:
   # Connects to AT Protocol firehose and pushes events to Redis streams
   # The python-worker service consumes from Redis and writes to PostgreSQL
   python-firehose:
-    build: 
+    image: ${PYTHON_FIREHOSE_IMAGE:-aurora-prism-python-firehose:local}
+    build:
       context: ./python-firehose
       dockerfile: Dockerfile
     environment:
@@ -51,6 +52,7 @@ services:
   # Replaces TypeScript workers for consuming from Redis and writing to PostgreSQL
   # This is the NEW worker that processes events from Redis stream to database
   python-worker:
+    image: ${PYTHON_WORKER_IMAGE:-aurora-prism-python-worker:local}
     build:
       context: ./python-firehose
       dockerfile: Dockerfile.worker
@@ -89,6 +91,7 @@ services:
   # Connects directly to firehose and processes to PostgreSQL with optional historical backfill
   # Set BACKFILL_DAYS environment variable to enable: 0=disabled, -1=all history, >0=specific days
   python-backfill-worker:
+    image: ${PYTHON_BACKFILL_WORKER_IMAGE:-aurora-prism-python-backfill-worker:local}
     build:
       context: ./python-firehose
       dockerfile: Dockerfile.unified
@@ -202,6 +205,7 @@ services:
   # Constellation Bridge - Enhanced interaction statistics
   # Only starts if CONSTELLATION_ENABLED=true in .env
   constellation-bridge:
+    image: ${CONSTELLATION_BRIDGE_IMAGE:-aurora-prism-constellation-bridge:local}
     build: ./microcosm-bridge/constellation-client
     environment:
       - CONSTELLATION_URL=${CONSTELLATION_URL:-https://constellation.microcosm.blue}
