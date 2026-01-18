@@ -73,7 +73,7 @@
     "dataloader": "^2.2.3",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.44.5",
-    "drizzle-zod": "0.7.1",
+    "drizzle-zod": "0.8.3",
     "embla-carousel-react": "^8.6.0",
     "express": "^5.2.1",
     "express-rate-limit": "^8.1.0",
