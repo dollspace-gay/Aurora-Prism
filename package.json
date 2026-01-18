@@ -81,7 +81,7 @@
     "ioredis": "^5.8.0",
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.544.0",
+    "lucide-react": "^0.562.0",
     "multiformats": "^13.4.1",
     "pg": "^8.16.3",
     "react": "^19.2.3",
