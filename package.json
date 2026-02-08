@@ -27,7 +27,7 @@
     "test:mutation": "stryker run"
   },
   "dependencies": {
-    "@atproto/api": "^0.18.13",
+    "@atproto/api": "^0.18.16",
     "@atproto/identity": "^0.4.10",
     "@atproto/oauth-client-node": "^0.3.15",
     "@atproto/repo": "^0.8.12",
