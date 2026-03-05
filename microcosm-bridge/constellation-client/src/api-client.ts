@@ -154,7 +154,7 @@ export class ConstellationAPIClient {
         );
       }
 
-      return await response.json();
+      return (await response.json()) as LinksCounts;
     } catch (error) {
       console.error('[CONSTELLATION] Error fetching all links count:', error);
       throw error;
