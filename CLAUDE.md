@@ -57,76 +57,76 @@ docker-compose up    # Start full stack (Redis + Postgres + App)
 | `FIREHOSE_ENABLED` | Toggle live ingestion |
 | `MAX_CONCURRENT_OPS` | Per-worker processing limit |
 
-## Issue Tracking with Chainlink
+## Issue Tracking with Crosslink
 
-This project uses `chainlink` for issue tracking - a simple, lean issue tracker CLI with dependency support, timers, and milestones.
+This project uses `crosslink` for issue tracking - a simple, lean issue tracker CLI with dependency support, timers, and milestones.
 
 ### Quick Reference
 
 ```bash
 # View issues
-chainlink list             # List all open issues
-chainlink show <id>        # Show issue details
-chainlink ready            # Show issues ready to work on (no open blockers)
-chainlink blocked          # List blocked issues
-chainlink tree             # Show issues as a tree hierarchy
-chainlink next             # Suggest the next issue to work on
+crosslink list             # List all open issues
+crosslink show <id>        # Show issue details
+crosslink ready            # Show issues ready to work on (no open blockers)
+crosslink blocked          # List blocked issues
+crosslink tree             # Show issues as a tree hierarchy
+crosslink next             # Suggest the next issue to work on
 
 # Create and manage
-chainlink create           # Create a new issue
-chainlink subissue <parent> # Create a subissue under a parent
-chainlink update <id>      # Update an issue
-chainlink close <id>       # Close an issue
-chainlink reopen <id>      # Reopen a closed issue
-chainlink delete <id>      # Delete an issue
+crosslink create           # Create a new issue
+crosslink subissue <parent> # Create a subissue under a parent
+crosslink update <id>      # Update an issue
+crosslink close <id>       # Close an issue
+crosslink reopen <id>      # Reopen a closed issue
+crosslink delete <id>      # Delete an issue
 
 # Dependencies
-chainlink block <id> <blocker>   # Mark issue as blocked by another
-chainlink unblock <id> <blocker> # Remove a blocking relationship
+crosslink block <id> <blocker>   # Mark issue as blocked by another
+crosslink unblock <id> <blocker> # Remove a blocking relationship
 
 # Relations
-chainlink relate <id1> <id2>     # Link two related issues
-chainlink unrelate <id1> <id2>   # Remove a relation
-chainlink related <id>           # List related issues
+crosslink relate <id1> <id2>     # Link two related issues
+crosslink unrelate <id1> <id2>   # Remove a relation
+crosslink related <id>           # List related issues
 
 # Labels
-chainlink label <id> <label>     # Add a label to an issue
-chainlink unlabel <id> <label>   # Remove a label from an issue
+crosslink label <id> <label>     # Add a label to an issue
+crosslink unlabel <id> <label>   # Remove a label from an issue
 
 # Comments
-chainlink comment <id>           # Add a comment to an issue
+crosslink comment <id>           # Add a comment to an issue
 
 # Search
-chainlink search "query"         # Search issues by text
+crosslink search "query"         # Search issues by text
 
 # Time tracking
-chainlink start <id>             # Start a timer for an issue
-chainlink stop                   # Stop the current timer
-chainlink timer                  # Show current timer status
+crosslink start <id>             # Start a timer for an issue
+crosslink stop                   # Stop the current timer
+crosslink timer                  # Show current timer status
 
 # Milestones
-chainlink milestone              # Milestone management
+crosslink milestone              # Milestone management
 
 # Import/Export
-chainlink export                 # Export issues to file
-chainlink import                 # Import issues from JSON file
+crosslink export                 # Export issues to file
+crosslink import                 # Import issues from JSON file
 ```
 
 ### Workflow Tips
 
-- Use `chainlink ready` to see what you can work on next (no blockers)
-- Use `chainlink blocked` to identify what's waiting on other work
-- Use `chainlink next` to get a suggestion for what to work on
-- Use `chainlink tree` to visualize issue hierarchy
-- Use `chainlink start <id>` to track time spent on issues
+- Use `crosslink ready` to see what you can work on next (no blockers)
+- Use `crosslink blocked` to identify what's waiting on other work
+- Use `crosslink next` to get a suggestion for what to work on
+- Use `crosslink tree` to visualize issue hierarchy
+- Use `crosslink start <id>` to track time spent on issues
 
 ### When Working on Issues
 
-1. Check `chainlink ready` for available work
-2. Start timer: `chainlink start <id>`
+1. Check `crosslink ready` for available work
+2. Start timer: `crosslink start <id>`
 3. Reference issue ID in commits when relevant
-4. Stop timer when done: `chainlink stop`
-5. Close when complete: `chainlink close <id>`
+4. Stop timer when done: `crosslink stop`
+5. Close when complete: `crosslink close <id>`
 
 ## API Endpoints
 

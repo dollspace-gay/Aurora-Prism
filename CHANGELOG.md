@@ -22,7 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Update safe dependencies (Radix UI, TailwindCSS, ESLint, TanStack) (#47)
 - Comprehensive test suite with 1028 tests covering all major components
 - Test coverage for: routes, storage, event-processor, XRPC services, hydration, serializers, views, security, sanitization, encryption, metrics, rate-limiting, caching, and more
-- Chainlink issue tracking system for development workflow
+- Crosslink issue tracking system for development workflow
 - ESLint flat config with TypeScript, React, and Prettier integration
 - Vitest configuration for unit and integration testing
 - Background jobs system for session cleanup, OAuth cleanup, and pool status logging
@@ -48,6 +48,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Worker process coordination
 
 ### Changed
+- Evaluate drizzle-orm 0.45 and drizzle-zod 0.8 upgrades (#6)
+- Evaluate @atproto/api upgrade from 0.18.x to 0.19.x (#3)
+- Update CLAUDE.md to reference crosslink instead of chainlink (#1)
 - Fix all ESLint warnings for production readiness (#14)
 - Set up fuzzing and mutation testing with GitHub Actions (#44)
 - Implement placeholder data-plane routes (graph, search, notifications, feed-generators) (#43)
@@ -82,6 +85,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Deprecated XRPC monolithic API file
 
 ### Security
+- Fix 10 npm audit vulnerabilities including 8 high severity (#2)
 - Add DNS rebinding protection to SSRF validation (#85)
 - Audit unvalidated req.params/query usage in routes.ts (#82)
 - Fix token prefix leakage exposing JWT structure in logs (#80)
