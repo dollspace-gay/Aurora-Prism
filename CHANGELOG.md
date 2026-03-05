@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-03-04
+
 ### Added
 - Migrate TailwindCSS from v3 to v4 (#55)
 - Migrate Vite from v6 to v7 (#53)
