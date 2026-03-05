@@ -2,9 +2,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies
+# Install all dependencies (need devDependencies for build)
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install
 
 # Copy source and build
 COPY tsconfig.json ./
@@ -12,7 +12,7 @@ COPY src ./src
 RUN npm run build
 
 # Remove dev dependencies and source
-RUN npm prune --production && \
+RUN npm prune --omit=dev && \
     rm -rf src tsconfig.json
 
 # Run as non-root user
