@@ -25,7 +25,6 @@ export class KafkaProducerClient {
     this.producer = this.kafka.producer({
       allowAutoTopicCreation: true,
       transactionTimeout: 30000,
-      compression: CompressionTypes.GZIP,
     });
 
     this.topic = config.topic;
@@ -42,6 +41,14 @@ export class KafkaProducerClient {
     console.log('[KAFKA] Connected successfully');
   }
 
+  /**
+   * Coerce an event property into a valid Kafka message key.
+   * Kafka keys must be string | Buffer | null | undefined; reject anything else.
+   */
+  private static toMessageKey(value: unknown): string | undefined {
+    return typeof value === 'string' ? value : undefined;
+  }
+
   async publishEvent(event: Record<string, unknown>): Promise<void> {
     if (!this.isConnected) {
       throw new Error('Kafka producer not connected');
@@ -53,7 +60,9 @@ export class KafkaProducerClient {
         compression: CompressionTypes.GZIP,
         messages: [
           {
-            key: event.repo || event.did || undefined,
+            key:
+              KafkaProducerClient.toMessageKey(event.repo) ??
+              KafkaProducerClient.toMessageKey(event.did),
             value: JSON.stringify(event),
             timestamp: Date.now().toString(),
           },
@@ -79,7 +88,9 @@ export class KafkaProducerClient {
         topic: this.topic,
         compression: CompressionTypes.GZIP,
         messages: events.map((event) => ({
-          key: event.repo || event.did || undefined,
+          key:
+            KafkaProducerClient.toMessageKey(event.repo) ??
+            KafkaProducerClient.toMessageKey(event.did),
           value: JSON.stringify(event),
           timestamp: Date.now().toString(),
         })),

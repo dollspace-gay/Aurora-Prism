@@ -3,11 +3,6 @@ import WebSocket from 'ws';
 import * as fs from 'fs';
 import { InputAdapter, EventHandler, AdapterEvent } from './base-adapter';
 
-// Make WebSocket available globally for @skyware/firehose in Node.js environment
-if (typeof globalThis.WebSocket === 'undefined') {
-  (global as typeof WebSocket & { prototype: WebSocket }).WebSocket = WebSocket;
-}
-
 export interface FirehoseAdapterConfig {
   url: string;
   cursorFile?: string;
@@ -38,9 +33,15 @@ export class FirehoseAdapter implements InputAdapter {
     // Load saved cursor
     const savedCursor = this.loadCursor();
 
-    // Create firehose client
-    const firehoseOptions: { relay: string; cursor?: string } = {
+    // Create firehose client. Pass the `ws` impl explicitly for environments
+    // where a global WebSocket isn't available (Node <21 / older runtimes).
+    const firehoseOptions: {
+      relay: string;
+      cursor?: string;
+      ws: typeof WebSocket;
+    } = {
       relay: this.config.url,
+      ws: WebSocket,
     };
 
     if (savedCursor) {
@@ -95,12 +96,12 @@ export class FirehoseAdapter implements InputAdapter {
       await eventHandler(event);
     });
 
-    // Handle account events
-    this.firehose.on('handle', async (handle) => {
+    // Handle account events (replaces legacy "handle" event in @skyware/firehose >=0.5)
+    this.firehose.on('account', async (account) => {
       const event: AdapterEvent = {
         type: 'account',
-        did: handle.did,
-        data: handle,
+        did: account.did,
+        data: account,
       };
       await eventHandler(event);
     });
@@ -113,9 +114,16 @@ export class FirehoseAdapter implements InputAdapter {
       console.log(`[${this.getName()}] Disconnected from firehose`);
     });
 
-    this.firehose.on('error', (error: unknown) => {
+    this.firehose.on('error', ({ error }) => {
       console.error(`[${this.getName()}] Firehose error:`, error);
     });
+
+    this.firehose.on('websocketError', ({ error }) => {
+      console.error(`[${this.getName()}] Firehose websocket error:`, error);
+    });
+
+    // @skyware/firehose >=0.5 requires explicit start() after constructing
+    this.firehose.start();
 
     // Start cursor persistence
     if (this.config.cursorFile) {

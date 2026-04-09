@@ -93,12 +93,14 @@ class FirehoseKafkaBridge {
       // Enrich event with metadata
       const enrichedEvent = await this.enricher.enrich({
         type: event.type,
-        data: event.data,
+        data: (event.data ?? undefined) as Record<string, unknown> | undefined,
         seq: event.seq,
       });
 
       // Publish to Kafka
-      await this.kafka.publishEvent(enrichedEvent);
+      await this.kafka.publishEvent(
+        enrichedEvent as unknown as Record<string, unknown>
+      );
 
       this.eventCount++;
       if (this.eventCount % 100 === 0) {

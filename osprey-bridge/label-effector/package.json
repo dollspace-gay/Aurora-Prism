@@ -10,13 +10,13 @@
   },
   "dependencies": {
     "kafkajs": "^2.2.4",
-    "pg": "^8.11.3",
-    "dotenv": "^16.4.5"
+    "pg": "^8.20.0",
+    "dotenv": "^17.4.1"
   },
   "devDependencies": {
-    "@types/node": "^20.11.16",
-    "@types/pg": "^8.11.0",
-    "tsx": "^4.7.1",
-    "typescript": "^5.3.3"
+    "@types/node": "^20.19.39",
+    "@types/pg": "^8.20.0",
+    "tsx": "^4.20.6",
+    "typescript": "^6.0.2"
   }
 }

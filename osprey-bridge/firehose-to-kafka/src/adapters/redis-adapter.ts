@@ -90,13 +90,23 @@ export class RedisAdapter implements InputAdapter {
     // Log pending message count before shutdown
     if (this.redis) {
       try {
-        const pending = await this.redis.xpending(
+        // ioredis returns the XPENDING summary as a tuple:
+        //   [count, smallestId, largestId, [[consumer, count], ...]]
+        const pending = (await this.redis.xpending(
           this.streamKey,
           this.consumerGroup
-        );
-        if (pending && pending[0] > 0) {
+        )) as
+          | [
+              number,
+              string | null,
+              string | null,
+              Array<[string, string]> | null,
+            ]
+          | null;
+        const pendingCount = pending?.[0] ?? 0;
+        if (pendingCount > 0) {
           console.warn(
-            `[${this.getName()}] Shutting down with ${pending[0]} pending messages (will be retried on restart)`
+            `[${this.getName()}] Shutting down with ${pendingCount} pending messages (will be retried on restart)`
           );
         }
       } catch (error) {

@@ -33,6 +33,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Smart console wrapper with log aggregation
 
 ### Fixed
+- Fix TypeScript error in constellation-client api-client.ts (#9)
+- Fix Docker build failure due to npm lockfile version mismatch (#8)
 - Fix tainted format string patterns in console logging across all server files (#64)
 - Event array memory growth in dashboard (unbounded array issue)
 - `pendingOp` variable undefined error in BoundedArrayMap
@@ -50,6 +52,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Worker process coordination
 
 ### Changed
+- Update CLAUDE.md to reference crosslink instead of chainlink (#1)
 - Evaluate drizzle-orm 0.45 and drizzle-zod 0.8 upgrades (#6)
 - Evaluate @atproto/api upgrade from 0.18.x to 0.19.x (#3)
 - Update CLAUDE.md to reference crosslink instead of chainlink (#1)

@@ -10,9 +10,9 @@ import globals from 'globals';
 export default [
   {
     ignores: [
-      'dist/**',
-      'node_modules/**',
-      'build/**',
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/build/**',
       'docs/**',
       'coverage/**',
       '.stryker-tmp/**',

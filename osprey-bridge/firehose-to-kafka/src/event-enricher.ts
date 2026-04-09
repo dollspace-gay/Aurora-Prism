@@ -64,7 +64,7 @@ export class EventEnricher {
   }
 
   async enrich(event: {
-    type: string;
+    type: 'commit' | 'identity' | 'account';
     seq?: string;
     data?: Record<string, unknown>;
   }): Promise<EnrichedEvent> {
@@ -76,8 +76,12 @@ export class EventEnricher {
     };
 
     // Only enrich commit events with repo information
-    if (event.type === 'commit' && event.data?.repo && this.pool) {
-      const authorDid = event.data.repo;
+    if (
+      event.type === 'commit' &&
+      typeof event.data?.repo === 'string' &&
+      this.pool
+    ) {
+      const authorDid: string = event.data.repo;
 
       try {
         // Check cache first

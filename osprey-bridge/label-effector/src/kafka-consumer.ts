@@ -138,15 +138,18 @@ export class LabelConsumer {
     }
   }
 
-  private isValidLabel(data: unknown): boolean {
+  private isValidLabel(data: unknown): data is OspreyLabel {
+    if (data === null || typeof data !== 'object') {
+      return false;
+    }
+    const d = data as Record<string, unknown>;
     return (
-      typeof data === 'object' &&
-      typeof data.ver === 'number' &&
-      typeof data.src === 'string' &&
-      typeof data.uri === 'string' &&
-      typeof data.val === 'string' &&
-      typeof data.cts === 'string' &&
-      (data.neg === undefined || typeof data.neg === 'boolean')
+      typeof d.ver === 'number' &&
+      typeof d.src === 'string' &&
+      typeof d.uri === 'string' &&
+      typeof d.val === 'string' &&
+      typeof d.cts === 'string' &&
+      (d.neg === undefined || typeof d.neg === 'boolean')
     );
   }
 
