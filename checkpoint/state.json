@@ -1,0 +1,24 @@
+{
+  "next_display_id": 1,
+  "next_comment_id": 1,
+  "display_id_map": {},
+  "locks": {
+    "1": {
+      "agent_id": "H9U3",
+      "claimed_at": "2026-04-09T05:49:16.303086502Z"
+    }
+  },
+  "issues": {},
+  "unsigned_event_warnings": [
+    {
+      "agent_id": "H9U3",
+      "agent_seq": 1,
+      "timestamp": "2026-04-09T05:49:16.303086502Z"
+    }
+  ],
+  "watermark": {
+    "timestamp": "2026-04-09T05:49:16.303086502Z",
+    "agent_id": "H9U3",
+    "agent_seq": 1
+  }
+}
