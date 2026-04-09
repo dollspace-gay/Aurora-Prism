@@ -1,0 +1,10 @@
+{
+  "uuid": "ff21257d-0836-450a-97d0-d9d383713de1",
+  "issue_uuid": "964bad05-ef42-47c9-956a-558f8323a73a",
+  "author": "H9U3",
+  "content": "Updated all semver-compatible deps across main and 3 bridges. Also applied compatible major bumps: @atproto/repo 0.8->0.9, @atproto/sync 0.1->0.2, @vitejs/plugin-react 4->6, vite 7->8, esbuild 0.25->0.28, jsdom 27->29, lucide-react 0.544->1.7, tailwind-merge 2->3, globals 16->17, typescript 5.9->6.0 (main + 2 bridges), dotenv 16->17 in osprey bridges, plus replit plugins. Fixed pre-existing TS errors in bridges and migrated firehose-to-kafka to skyware/firehose 0.5.x API. 0 audit vulns. 1206/1206 tests passing. Lint clean. Build clean. Skipped: eslint v10 (no typescript-eslint v10 yet), @types/node 25, express 5, typescript 6 in firehose-to-kafka (would need ESM migration).",
+  "created_at": "2026-04-09T06:07:24.607598705Z",
+  "kind": "note",
+  "signed_by": "SHA256:ccZKtVEMQMbDQVhyFOLGWD9bhcVlV2XGtlEeNCF/ZP8",
+  "signature": "U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgopYvUu0p9YdZ3RWaP4z845dHsnNv/aDHGux6teIO2mAAAAARY3Jvc3NsaW5rLWNvbW1lbnQAAAAAAAAABnNoYTUxMgAAAFMAAAALc3NoLWVkMjU1MTkAAABA6MaRnrqAyFaGEx2QE7XKbE5jMdmpnTbSbGIVupZcLqBhn1A5nHt6ssRDytvsew28tFgehrF5zOSmdivHHogoCw=="
+}
