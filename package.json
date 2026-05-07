@@ -76,7 +76,7 @@
     "drizzle-zod": "^0.8.3",
     "embla-carousel-react": "^8.6.0",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.3.2",
+    "express-rate-limit": "^8.5.1",
     "input-otp": "^1.4.2",
     "ioredis": "^5.10.1",
     "jose": "^6.2.2",
