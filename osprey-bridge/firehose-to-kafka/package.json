@@ -15,7 +15,7 @@
     "dotenv": "^17.4.1",
     "pg": "^8.20.0",
     "ioredis": "^5.10.1",
-    "express": "^4.22.1"
+    "express": "^4.22.2"
   },
   "devDependencies": {
     "@types/node": "^20.19.39",
